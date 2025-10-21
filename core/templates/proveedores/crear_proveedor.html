@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Crear Proveedor - Dulcería Lilis
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .page-title {
+        font-size: 2rem;
+        color: var(--text-dark);
+        font-weight: 700;
+    }
+
+    .steps-container {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 2px 12px var(--shadow);
+        margin-bottom: 2rem;
+    }
+
+    .steps-header {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 2rem;
+        gap: 1rem;
+    }
+
+    .step-indicator {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .step-number {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--border);
+        color: var(--text-gray);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+
+    .step-label {
+        font-size: 0.9rem;
+        color: var(--text-gray);
+        font-weight: 600;
+    }
+
+    .step-divider {
+        width: 60px;
+        height: 2px;
+        background: var(--border);
+        margin: 0 0.5rem;
+    }
+
+    .card-option {
+        background: white;
+        border: 2px solid var(--border);
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 1.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: block;
+    }
+
+    .card-option:hover {
+        border-color: #87CEEB;
+        box-shadow: 0 4px 16px rgba(135, 206, 235, 0.2);
+        transform: translateY(-2px);
+    }
+
+    .card-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .card-icon {
+        font-size: 2.5rem;
+    }
+
+    .card-title {
+        font-size: 1.5rem;
+        color: var(--text-dark);
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .card-description {
+        color: var(--text-gray);
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    .btn-back {
+        background: #f5f5f5;
+        color: var(--text-dark);
+        padding: 0.8rem 1.5rem;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: inline-block;
+    }
+
+    .btn-back:hover {
+        background: #e0e0e0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">🏢 Crear Nuevo Proveedor</h1>
+    <a href="{% url 'core:lista_proveedores' %}" class="btn-back">← Volver</a>
+</div>
+
+<div class="steps-container">
+    <div class="steps-header">
+        <div class="step-indicator">
+            <div class="step-number">1</div>
+            <div class="step-label">Identificación</div>
+        </div>
+        <div class="step-divider"></div>
+        <div class="step-indicator">
+            <div class="step-number">2</div>
+            <div class="step-label">Dirección</div>
+        </div>
+        <div class="step-divider"></div>
+        <div class="step-indicator">
+            <div class="step-number">3</div>
+            <div class="step-label">Relaciones</div>
+        </div>
+    </div>
+
+    <a href="{% url 'core:proveedor_paso1' %}" class="card-option">
+        <div class="card-header">
+            <div class="card-icon">📋</div>
+            <h3 class="card-title">Paso 1: Identificación y contacto</h3>
+        </div>
+        <p class="card-description">
+            Ingresa los datos básicos del proveedor: RUT, razón social, nombre fantasía, email, teléfono y sitio web.
+        </p>
+    </a>
+
+    </a>
+</div>
+{% endblock %}

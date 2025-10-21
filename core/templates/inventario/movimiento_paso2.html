@@ -1,0 +1,213 @@
+{% extends 'base.html' %}
+
+{% block title %}Registrar Movimiento - Paso 2{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        margin-bottom: 2rem;
+    }
+    .page-title {
+        font-size: 2rem;
+        color: var(--text-dark);
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    .breadcrumb {
+        color: var(--text-gray);
+        font-size: 0.95rem;
+    }
+    .breadcrumb a {
+        color: var(--primary);
+        text-decoration: none;
+    }
+    .form-card {
+        background: white;
+        border-radius: 12px;
+        padding: 2.5rem;
+        box-shadow: 0 2px 12px var(--shadow);
+    }
+    .tabs-container {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 2rem;
+        border-bottom: 2px solid var(--border);
+    }
+    .tab {
+        padding: 1rem 2rem;
+        background: transparent;
+        border: none;
+        color: var(--text-gray);
+        font-weight: 600;
+        cursor: pointer;
+        border-bottom: 3px solid transparent;
+        transition: all 0.3s;
+    }
+    .tab.active {
+        background: #2563eb;
+        color: white;
+        border-radius: 8px 8px 0 0;
+    }
+    .tab.completed {
+        color: var(--text-dark);
+    }
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+    .form-group label {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--text-dark);
+    }
+    .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    .checkbox-group input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+    }
+    .checkbox-label {
+        font-size: 0.9rem;
+        color: var(--text-gray);
+    }
+    .form-control {
+        padding: 0.8rem 1rem;
+        border: 2px solid var(--border);
+        border-radius: 8px;
+        font-size: 1rem;
+    }
+    .form-control:focus {
+        outline: none;
+        border-color: #2563eb;
+    }
+    .help-text {
+        font-size: 0.85rem;
+        color: var(--text-gray);
+        margin-top: 1rem;
+    }
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 2rem;
+    }
+    .btn {
+        padding: 0.8rem 2rem;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    .btn-primary {
+        background: #2563eb;
+        color: white;
+    }
+    .btn-primary:hover {
+        background: #1d4ed8;
+    }
+    .btn-secondary {
+        background: white;
+        color: var(--text-dark);
+        border: 2px solid var(--border);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Registrar movimiento</h1>
+    <div class="breadcrumb">
+        <a href="{% url 'core:dashboard' %}">Dashboard</a> / 
+        <a href="{% url 'core:lista_movimientos' %}">Movimientos</a> / 
+        Nuevo
+    </div>
+</div>
+
+<div class="form-card">
+    <div class="tabs-container">
+        <a class="tab completed" href="{% url 'core:movimiento_paso1' %}">1. Datos del movimiento</a>
+        <div class="tab active">2. Control avanzado</div>
+        <div class="tab">3. Referencias/Observaciones</div>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-row">
+            <div class="form-group">
+                <label>manejo por lotes</label>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="manejo_lotes" name="manejo_lotes" value="1" 
+                           {% if data.manejo_lotes == '1' %}checked{% endif %}>
+                    <span class="checkbox-label">0 (no)</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>manejo por series</label>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="manejo_series" name="manejo_series" value="1"
+                           {% if data.manejo_series == '1' %}checked{% endif %}>
+                    <span class="checkbox-label">0 (no)</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>perecible (vencimiento)</label>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="perecible" name="perecible" value="1"
+                           {% if data.perecible == '1' %}checked{% endif %}>
+                    <span class="checkbox-label">0 (no)</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="lote">lote</label>
+                <input type="text" id="lote" name="lote" class="form-control" 
+                       value="{{ data.lote|default:'L-2025-001' }}" placeholder="L-2025-001">
+            </div>
+            <div class="form-group">
+                <label for="serie">serie</label>
+                <input type="text" id="serie" name="serie" class="form-control" 
+                       value="{{ data.serie|default:'SN123456789' }}" placeholder="SN123456789">
+            </div>
+            <div class="form-group">
+                <label for="fecha_vencimiento">fecha_vencimiento</label>
+                <input type="date" id="fecha_vencimiento" name="fecha_vencimiento" class="form-control" 
+                       value="{{ data.fecha_vencimiento }}" placeholder="dd-mm-aaaa">
+            </div>
+        </div>
+
+        <p class="help-text">Las banderas (lote/serie/vencimiento) normalmente vienen desde la ficha del producto; aquí se permiten por demo.</p>
+
+        <div class="form-actions">
+            <a class="btn btn-secondary" href="{% url 'core:lista_movimientos' %}">Limpiar</a>
+            <button type="submit" class="btn btn-primary">Guardar movimiento</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    // Actualizar texto de los checkboxes
+    document.getElementById('manejo_lotes').addEventListener('change', function() {
+        this.nextElementSibling.textContent = this.checked ? '1 (sí)' : '0 (no)';
+    });
+    document.getElementById('manejo_series').addEventListener('change', function() {
+        this.nextElementSibling.textContent = this.checked ? '1 (sí)' : '0 (no)';
+    });
+    document.getElementById('perecible').addEventListener('change', function() {
+        this.nextElementSibling.textContent = this.checked ? '1 (sí)' : '0 (no)';
+    });
+</script>
+{% endblock %}

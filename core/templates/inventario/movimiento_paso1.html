@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+
+{% block title %}Registrar Movimiento - Paso 1{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        margin-bottom: 2rem;
+    }
+    .page-title {
+        font-size: 2rem;
+        color: var(--text-dark);
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    .breadcrumb {
+        color: var(--text-gray);
+        font-size: 0.95rem;
+    }
+    .breadcrumb a {
+        color: var(--primary);
+        text-decoration: none;
+    }
+    .form-card {
+        background: white;
+        border-radius: 12px;
+        padding: 2.5rem;
+        box-shadow: 0 2px 12px var(--shadow);
+    }
+    .tabs-container {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 2rem;
+        border-bottom: 2px solid var(--border);
+    }
+    .tab {
+        padding: 1rem 2rem;
+        background: transparent;
+        border: none;
+        color: var(--text-gray);
+        font-weight: 600;
+        cursor: not-allowed;
+        border-bottom: 3px solid transparent;
+        transition: all 0.3s;
+    }
+    .tab.active {
+        background: #2563eb;
+        color: white;
+        border-radius: 8px 8px 0 0;
+        cursor: default;
+    }
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+    .form-group label {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--text-dark);
+    }
+    .form-control {
+        padding: 0.8rem 1rem;
+        border: 2px solid var(--border);
+        border-radius: 8px;
+        font-size: 1rem;
+    }
+    .form-control:focus {
+        outline: none;
+        border-color: #2563eb;
+    }
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 2rem;
+    }
+    .btn {
+        padding: 0.8rem 2rem;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    .btn-primary {
+        background: #2563eb;
+        color: white;
+    }
+    .btn-primary:hover {
+        background: #1d4ed8;
+    }
+    .btn-secondary {
+        background: white;
+        color: var(--text-dark);
+        border: 2px solid var(--border);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Registrar movimiento</h1>
+    <div class="breadcrumb">
+        <a href="{% url 'core:dashboard' %}">Dashboard</a> / 
+        <a href="{% url 'core:lista_movimientos' %}">Movimientos</a> / 
+        Nuevo
+    </div>
+</div>
+
+<div class="form-card">
+    <div class="tabs-container">
+        <div class="tab active">1. Datos del movimiento</div>
+        <div class="tab">2. Control avanzado</div>
+        <div class="tab">3. Referencias/Observaciones</div>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-row">
+            <div class="form-group">
+                <label for="fecha">fecha</label>
+                <input type="datetime-local" id="fecha" name="fecha" class="form-control" value="{{ data.fecha }}" required>
+            </div>
+            <div class="form-group">
+                <label for="tipo">tipo</label>
+                <select id="tipo" name="tipo" class="form-control" required>
+                    <option value="">Seleccione...</option>
+                    <option value="ingreso" {% if data.tipo == 'ingreso' %}selected{% endif %}>Ingreso</option>
+                    <option value="salida" {% if data.tipo == 'salida' %}selected{% endif %}>Salida</option>
+                    <option value="ajuste" {% if data.tipo == 'ajuste' %}selected{% endif %}>Ajuste</option>
+                    <option value="devolucion" {% if data.tipo == 'devolucion' %}selected{% endif %}>Devolución</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="cantidad">cantidad</label>
+                <input type="number" id="cantidad" name="cantidad" class="form-control" value="{{ data.cantidad }}" step="0.01" required>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="producto">producto</label>
+                <input type="text" id="producto" name="producto" class="form-control" value="{{ data.producto|default:'SKU-0001' }}" placeholder="SKU-0001" required>
+            </div>
+            <div class="form-group">
+                <label for="proveedor">proveedor</label>
+                <input type="text" id="proveedor" name="proveedor" class="form-control" value="{{ data.proveedor }}" placeholder="RUT o razón social">
+            </div>
+            <div class="form-group">
+                <label for="bodega">bodega</label>
+                <input type="text" id="bodega" name="bodega" class="form-control" value="{{ data.bodega|default:'BOD-CENTRAL' }}" placeholder="BOD-CENTRAL" required>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a class="btn btn-secondary" href="{% url 'core:lista_movimientos' %}">Limpiar</a>
+            <button type="submit" class="btn btn-primary">Guardar movimiento</button>
+        </div>
+    </form>
+</div>
+
+<script>
+(function(){
+    const fechaInput = document.getElementById('fecha');
+    if (!fechaInput) return;
+
+    // regex para formato ISO usado por datetime-local: YYYY-MM-DDTHH:MM
+    const isoRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/;
+
+    // Si el valor actual no existe o no cumple el formato ISO, establecer ahora
+    const val = fechaInput.value && fechaInput.value.toString().trim();
+    if (!val || !isoRegex.test(val)) {
+        fechaInput.value = new Date().toISOString().slice(0,16); // YYYY-MM-DDTHH:MM
+    }
+})();
+</script>
+{% endblock %}

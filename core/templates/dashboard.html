@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Dulcería Lilis{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">📊 Dashboard</h1>
+</div>
+
+<!-- Aquí agregamos botones para redirigir a cada sección -->
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Gestionar Datos</h2>
+        </div>
+        <div class="card-body">
+            <div class="dashboard-buttons">
+                <a href="{% url 'core:lista_usuarios' %}" class="btn btn-primary">Usuarios</a>
+                <a href="{% url 'core:lista_productos' %}" class="btn btn-primary">Productos</a>
+                <a href="{% url 'core:lista_proveedores' %}" class="btn btn-primary">Proveedores</a>
+                <a href="{% url 'core:lista_movimientos' %}" class="btn btn-primary">Movimientos</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

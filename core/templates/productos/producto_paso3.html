@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+
+{% block title %}Producto - Paso 3{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        margin-bottom: 2rem;
+    }
+    .page-title {
+        font-size: 2rem;
+        color: var(--text-dark);
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    .breadcrumb {
+        color: var(--text-gray);
+        font-size: 0.95rem;
+    }
+    .breadcrumb a {
+        color: var(--primary);
+        text-decoration: none;
+    }
+    .form-card {
+        background: white;
+        border-radius: 12px;
+        padding: 2.5rem;
+        box-shadow: 0 2px 12px var(--shadow);
+    }
+    .tabs-container {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 2rem;
+        border-bottom: 2px solid var(--border);
+    }
+    .tab {
+        padding: 1rem 2rem;
+        background: transparent;
+        border: none;
+        color: var(--text-gray);
+        font-weight: 600;
+        cursor: pointer;
+        border-bottom: 3px solid transparent;
+        transition: all 0.3s;
+    }
+    .tab.active {
+        background: #2563eb;
+        color: white;
+        border-radius: 8px 8px 0 0;
+    }
+    .tab.completed {
+        color: var(--text-dark);
+    }
+    .section-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin: 2rem 0 1rem 0;
+    }
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+    .form-group label {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--text-dark);
+        font-size: 0.9rem;
+    }
+    .form-control {
+        padding: 0.8rem 1rem;
+        border: 2px solid var(--border);
+        border-radius: 8px;
+        font-size: 1rem;
+    }
+    .form-control:focus {
+        outline: none;
+        border-color: #2563eb;
+    }
+    .info-box {
+        background: #F0F9FF;
+        border: 1px solid #BFDBFE;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-top: 1.5rem;
+        font-size: 0.9rem;
+        color: var(--text-gray);
+    }
+    .info-box strong {
+        color: var(--text-dark);
+    }
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 2rem;
+    }
+    .btn {
+        padding: 0.8rem 2rem;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    .btn-primary {
+        background: #2563eb;
+        color: white;
+    }
+    .btn-primary:hover {
+        background: #1d4ed8;
+    }
+    .btn-secondary {
+        background: white;
+        color: var(--text-dark);
+        border: 2px solid var(--border);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Formulario de Producto</h1>
+    <div class="breadcrumb">
+        <a href="{% url 'core:dashboard' %}">Dashboard</a> / 
+        <a href="{% url 'core:lista_productos' %}">Productos</a> / 
+        Nuevo
+    </div>
+</div>
+
+<div class="form-card">
+    <div class="tabs-container">
+        <a class="tab completed" href="window.location.href='{% url 'core:producto_paso1' %}'">1. Identificación y precios</a>
+        <a class="tab completed" href="window.location.href='{% url 'core:producto_paso2' %}'">2. Stock y control</a>
+        <div class="tab active">3. Relaciones y derivados</div>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        
+        <h3 class="section-title">Relaciones y soporte</h3>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="imagen_url">imagen_url <span style="font-weight: normal; font-size: 0.85rem;">(opcional)</span></label>
+                <input type="url" id="imagen_url" name="imagen_url" class="form-control" value="{{ data.imagen_url|default:'https://.../foto.jpg' }}" placeholder="https://.../foto.jpg">
+            </div>
+            <div class="form-group">
+                <label for="ficha_tecnica_url">ficha_tecnica_url <span style="font-weight: normal; font-size: 0.85rem;">(opcional)</span></label>
+                <input type="url" id="ficha_tecnica_url" name="ficha_tecnica_url" class="form-control" value="{{ data.ficha_tecnica_url|default:'https://.../ficha.pdf' }}" placeholder="https://.../ficha.pdf">
+            </div>
+        </div>
+
+        <h3 class="section-title">Derivados (solo lectura)</h3>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="stock_actual">stock_actual</label>
+                <input type="number" id="stock_actual" name="stock_actual" class="form-control" value="0" readonly style="background: #F3F4F6;">
+            </div>
+            <div class="form-group">
+                <label for="alerta_bajo_stock">alerta_bajo_stock</label>
+                <input type="text" id="alerta_bajo_stock" name="alerta_bajo_stock" class="form-control" value="SÍ" readonly style="background: #F3F4F6;">
+            </div>
+            <div class="form-group">
+                <label for="alerta_por_vencer">alerta_por_vencer</label>
+                <input type="text" id="alerta_por_vencer" name="alerta_por_vencer" class="form-control" value="NO" readonly style="background: #F3F4F6;">
+            </div>
+        </div>
+
+        <div class="info-box">
+            <strong>📌 Nota:</strong> Los campos derivados (stock_actual, alertas) se calculan automáticamente según los movimientos de inventario y no se pueden editar manualmente.
+        </div>
+
+        <div class="form-actions">
+            <a class="btn btn-secondary" href="{% url 'core:lista_productos' %}">Limpiar</a>
+            <button type="submit" class="btn btn-primary">Guardar</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

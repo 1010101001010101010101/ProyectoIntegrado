@@ -1,0 +1,323 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar Usuario - Dulcería Lilis{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        margin-bottom: 2rem;
+    }
+
+    .page-title {
+        font-size: 2rem;
+        color: var(--text-dark);
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .breadcrumb {
+        color: var(--text-gray);
+        font-size: 0.95rem;
+    }
+
+    .breadcrumb a {
+        color: var(--primary);
+        text-decoration: none;
+    }
+
+    .form-card {
+        background: white;
+        border-radius: 12px;
+        padding: 2.5rem;
+        box-shadow: 0 2px 12px var(--shadow);
+    }
+
+    .form-section {
+        margin-bottom: 2.5rem;
+    }
+
+    .section-title {
+        font-size: 1.3rem;
+        color: var(--text-dark);
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.8rem;
+        border-bottom: 2px solid var(--border);
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-group label {
+        margin-bottom: 0.5rem;
+        color: var(--text-dark);
+        font-weight: 500;
+        font-size: 0.95rem;
+    }
+
+    .required {
+        color: var(--danger);
+        margin-left: 0.2rem;
+    }
+
+    .form-control {
+        padding: 0.8rem 1rem;
+        border: 2px solid var(--border);
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        font-family: inherit;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(255, 107, 157, 0.1);
+    }
+
+    .form-control:disabled {
+        background-color: #F5F5F5;
+        cursor: not-allowed;
+    }
+
+    select.form-control {
+        cursor: pointer;
+    }
+
+    textarea.form-control {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        padding: 0.8rem 0;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+    }
+
+    .checkbox-group label {
+        margin: 0;
+        cursor: pointer;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        padding-top: 2rem;
+        border-top: 2px solid var(--border);
+    }
+
+    .btn {
+        padding: 0.9rem 2rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #FF6B9D 0%, #E64A7A 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(255, 107, 157, 0.3);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 107, 157, 0.4);
+    }
+
+    .btn-secondary {
+        background: white;
+        color: var(--text-dark);
+        border: 2px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+        background: var(--bg-light);
+        border-color: var(--text-gray);
+    }
+
+    .help-text {
+        font-size: 0.85rem;
+        color: var(--text-gray);
+        margin-top: 0.3rem;
+    }
+
+    .info-box {
+        background: #E8F5E9;
+        border-left: 4px solid #4CAF50;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+    }
+
+    .info-box p {
+        margin: 0;
+        color: #2E7D32;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">✏️ Editar Usuario</h1>
+    <div class="breadcrumb">
+        <a href="{% url 'core:dashboard' %}">Dashboard</a> / 
+        <a href="{% url 'core:lista_usuarios' %}">Usuarios</a> / 
+        Editar
+    </div>
+</div>
+
+<div class="form-card">
+    <div class="info-box">
+        <p><strong>ℹ️ Editando:</strong> Jorge Cortés Gallardo (jcortes)</p>
+    </div>
+
+    <form method="post">
+        <div class="form-section">
+            <h2 class="section-title">Información de Identificación</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="username">Username <span class="required">*</span></label>
+                    <input type="text" id="username" name="username" class="form-control" value="jcortes" required>
+                    <span class="help-text">Debe ser único en el sistema</span>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email <span class="required">*</span></label>
+                    <input type="email" id="email" name="email" class="form-control" value="jorge.cortes@lilis.cl" required>
+                    <span class="help-text">Se usará para notificaciones</span>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="nombres">Nombres <span class="required">*</span></label>
+                    <input type="text" id="nombres" name="nombres" class="form-control" value="Jorge" required>
+                </div>
+                <div class="form-group">
+                    <label for="apellidos">Apellidos <span class="required">*</span></label>
+                    <input type="text" id="apellidos" name="apellidos" class="form-control" value="Cortés Gallardo" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="telefono">Teléfono</label>
+                    <input type="tel" id="telefono" name="telefono" class="form-control" value="+56 9 8765 4321">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2 class="section-title">Acceso y Seguridad</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="rol">Rol <span class="required">*</span></label>
+                    <select id="rol" name="rol" class="form-control" required>
+                        <option value="">Seleccionar rol...</option>
+                        <option value="admin" selected>Administrador</option>
+                        <option value="vendedor">Vendedor</option>
+                        <option value="almacen">Almacén</option>
+                        <option value="contador">Contador</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="estado">Estado <span class="required">*</span></label>
+                    <select id="estado" name="estado" class="form-control" required>
+                        <option value="ACTIVO" selected>Activo</option>
+                        <option value="BLOQUEADO">Bloqueado</option>
+                        <option value="INACTIVO">Inactivo</option>
+                    </select>
+                </div>
+            </div>
+            <div class="checkbox-group">
+                <input type="checkbox" id="mfa_habilitado" name="mfa_habilitado">
+                <label for="mfa_habilitado">Habilitar autenticación de dos factores (MFA)</label>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="ultimo_acceso">Último Acceso</label>
+                    <input type="text" id="ultimo_acceso" name="ultimo_acceso" class="form-control" value="20/10/2025 09:30" disabled>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2 class="section-title">Cambiar Contraseña (Opcional)</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="nueva_password">Nueva Contraseña</label>
+                    <input type="password" id="nueva_password" name="nueva_password" class="form-control">
+                    <span class="help-text">Dejar en blanco para mantener la actual</span>
+                </div>
+                <div class="form-group">
+                    <label for="confirmar_password">Confirmar Contraseña</label>
+                    <input type="password" id="confirmar_password" name="confirmar_password" class="form-control">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2 class="section-title">Información Adicional</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="area">Área / Unidad</label>
+                    <input type="text" id="area" name="area" class="form-control" value="Administración">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="observaciones">Observaciones</label>
+                    <textarea id="observaciones" name="observaciones" class="form-control">Usuario administrador principal del sistema</textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a href="{% url 'core:lista_usuarios' %}" class="btn btn-secondary">Cancelar</a>
+            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.querySelector('form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const nuevaPass = document.getElementById('nueva_password').value;
+        const confirmarPass = document.getElementById('confirmar_password').value;
+        
+        if (nuevaPass && nuevaPass !== confirmarPass) {
+            alert('Las contraseñas no coinciden');
+            return;
+        }
+        
+        if (nuevaPass && nuevaPass.length < 12) {
+            alert('La contraseña debe tener al menos 12 caracteres');
+            return;
+        }
+        
+        alert('Usuario actualizado exitosamente (simulación)');
+        window.location.href = "{% url 'core:lista_usuarios' %}";
+    });
+</script>
+{% endblock %}

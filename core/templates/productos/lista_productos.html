@@ -1,0 +1,483 @@
+{% extends 'base.html' %}
+
+{% block title %}Productos - Dulcería Lilis{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .page-title {
+        font-size: 2rem;
+        color: var(--text-dark);
+        font-weight: 700;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #FF6B9D 0%, #E64A7A 100%);
+        color: white;
+        padding: 0.8rem 1.5rem;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        box-shadow: 0 4px 12px rgba(255, 107, 157, 0.3);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 107, 157, 0.4);
+    }
+
+    .filters-bar {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 12px var(--shadow);
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .search-input {
+        flex: 1;
+        min-width: 250px;
+        padding: 0.8rem 1rem;
+        border: 2px solid var(--border);
+        border-radius: 8px;
+        font-size: 1rem;
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: var(--primary);
+    }
+
+    .filter-select {
+        padding: 0.8rem 1rem;
+        border: 2px solid var(--border);
+        border-radius: 8px;
+        font-size: 1rem;
+        cursor: pointer;
+    }
+
+    .stats-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .stat-box {
+        background: white;
+        padding: 1.2rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px var(--shadow);
+        text-align: center;
+    }
+
+    .stat-box-value {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--primary);
+    }
+
+    .stat-box-label {
+        font-size: 0.9rem;
+        color: var(--text-gray);
+        margin-top: 0.3rem;
+    }
+
+    .table-container {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 12px var(--shadow);
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    thead {
+        background: linear-gradient(135deg, #FFA07A 0%, #FF7F50 100%);
+        color: white;
+    }
+
+    th {
+        padding: 1.2rem 1rem;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+
+    td {
+        padding: 1rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    tbody tr {
+        transition: background-color 0.2s ease;
+    }
+
+    tbody tr:hover {
+        background-color: #FFF5F7;
+    }
+
+    .product-info {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+    }
+
+    .product-icon {
+        font-size: 1.8rem;
+    }
+
+    .badge {
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+    }
+
+    .badge-success {
+        background: #D4EDDA;
+        color: #155724;
+    }
+
+    .badge-danger {
+        background: #F8D7DA;
+        color: #721C24;
+    }
+
+    .badge-warning {
+        background: #FFF3CD;
+        color: #856404;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .btn-icon {
+        padding: 0.5rem 0.8rem;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 1rem;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-edit {
+        background: #E3F2FD;
+        color: #1976D2;
+    }
+
+    .btn-edit:hover {
+        background: #1976D2;
+        color: white;
+    }
+
+    .btn-delete {
+        background: #FFEBEE;
+        color: #C62828;
+    }
+
+    .btn-delete:hover {
+        background: #C62828;
+        color: white;
+    }
+
+    @media (max-width: 768px) {
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            min-width: 1000px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">🏷️ Gestión de Productos</h1>
+    <a href="{% url 'core:crear_producto' %}" class="btn-primary">
+        <span>➕</span> Nuevo Producto
+    </a>
+</div>
+
+<div class="stats-row">
+    <div class="stat-box">
+        <div class="stat-box-value">150</div>
+        <div class="stat-box-label">Total Productos</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-box-value">12</div>
+        <div class="stat-box-label">Stock Bajo</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-box-value">8</div>
+        <div class="stat-box-label">Por Vencer</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-box-value">$2.5M</div>
+        <div class="stat-box-label">Valor Inventario</div>
+    </div>
+</div>
+
+<div class="filters-bar">
+    <input type="text" class="search-input" placeholder="🔍 Buscar por SKU, nombre o categoría...">
+    <select class="filter-select">
+        <option value="">Todas las categorías</option>
+        <option value="dulces">Dulces</option>
+        <option value="chocolates">Chocolates</option>
+        <option value="chicles">Chicles</option>
+        <option value="caramelos">Caramelos</option>
+        <option value="gomitas">Gomitas</option>
+    </select>
+    <select class="filter-select">
+        <option value="">Estado Stock</option>
+        <option value="optimo">Stock Óptimo</option>
+        <option value="bajo">Stock Bajo</option>
+        <option value="critico">Stock Crítico</option>
+    </select>
+</div>
+
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>Producto</th>
+                <th>SKU</th>
+                <th>Categoría</th>
+                <th>Stock Actual</th>
+                <th>Precio Venta</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>
+                    <div class="product-info">
+                        <span class="product-icon">🍬</span>
+                        <div>
+                            <strong>Caramelos Surtidos</strong>
+                            <div style="font-size: 0.85rem; color: var(--text-gray);">Bolsa 500g</div>
+                        </div>
+                    </div>
+                </td>
+                <td><strong>CAR-001</strong></td>
+                <td>Caramelos</td>
+                <td>250 UN</td>
+                <td>$2.990</td>
+                <td><span class="badge badge-success">Stock OK</span></td>
+                <td>
+                    <div class="action-buttons">
+                        <a href="{% url 'core:editar_producto' 1 %}" class="btn-icon btn-edit" title="Editar">✏️</a>
+                        <button class="btn-icon btn-delete" title="Eliminar" onclick="confirmarEliminacion('Caramelos Surtidos')">🗑️</button>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="product-info">
+                        <span class="product-icon">🍫</span>
+                        <div>
+                            <strong>Chocolate Milka</strong>
+                            <div style="font-size: 0.85rem; color: var(--text-gray);">Tableta 100g</div>
+                        </div>
+                    </div>
+                </td>
+                <td><strong>CHO-025</strong></td>
+                <td>Chocolates</td>
+                <td>100 UN</td>
+                <td>$3.490</td>
+                <td><span class="badge badge-warning">Stock Bajo</span></td>
+                <td>
+                    <div class="action-buttons">
+                        <a href="{% url 'core:editar_producto' 2 %}" class="btn-icon btn-edit" title="Editar">✏️</a>
+                        <button class="btn-icon btn-delete" title="Eliminar" onclick="confirmarEliminacion('Chocolate Milka')">🗑️</button>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="product-info">
+                        <span class="product-icon">🍭</span>
+                        <div>
+                            <strong>Chicles Adams</strong>
+                            <div style="font-size: 0.85rem; color: var(--text-gray);">Paquete 150g</div>
+                        </div>
+                    </div>
+                </td>
+                <td><strong>CHI-077</strong></td>
+                <td>Chicles</td>
+                <td>0 UN</td>
+                <td>$1.990</td>
+                <td><span class="badge badge-danger">Sin Stock</span></td>
+                <td>
+                    <div class="action-buttons">
+                        <a href="{% url 'core:editar_producto' 3 %}" class="btn-icon btn-edit" title="Editar">✏️</a>
+                        <button class="btn-icon btn-delete" title="Eliminar" onclick="confirmarEliminacion('Chicles Adams')">🗑️</button>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="product-info">
+                        <span class="product-icon">🍬</span>
+                        <div>
+                            <strong>Caramelos de Menta</strong>
+                            <div style="font-size: 0.85rem; color: var(--text-gray);">Bolsa 500g</div>
+                        </div>
+                    </div>
+                </td>
+                <td><strong>CAR-002</strong></td>
+                <td>Caramelos</td>
+                <td>50 UN</td>
+                <td>$2.490</td>
+                <td><span class="badge badge-warning">Stock Bajo</span></td>
+                <td>
+                    <div class="action-buttons">
+                        <a href="{% url 'core:editar_producto' 4 %}" class="btn-icon btn-edit" title="Editar">✏️</a>
+                        <button class="btn-icon btn-delete" title="Eliminar" onclick="confirmarEliminacion('Caramelos de Menta')">🗑️</button>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="product-info">
+                        <span class="product-icon">🍫</span>
+                        <div>
+                            <strong>Chocolate amargo 70%</strong>
+                            <div style="font-size: 0.85rem; color: var(--text-gray);">Tableta 100g</div>
+                        </div>
+                    </div>
+                </td>
+                <td><strong>CHO-026</strong></td>
+                <td>Chocolates</td>
+                <td>150 UN</td>
+                <td>$3.990</td>
+                <td><span class="badge badge-success">Stock OK</span></td>
+                <td>
+                    <div class="action-buttons">
+                        <a href="{% url 'core:editar_producto' 5 %}" class="btn-icon btn-edit" title="Editar">✏️</a>
+                        <button class="btn-icon btn-delete" title="Eliminar" onclick="confirmarEliminacion('Chocolate amargo 70%')">🗑️</button>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="product-info">
+                        <span class="product-icon">🍬</span>
+                        <div>
+                            <strong>Caramelos de Frutas</strong>
+                            <div style="font-size: 0.85rem; color: var(--text-gray);">Bolsa 500g</div>
+                        </div>
+                    </div>
+                </td>
+                <td><strong>CAR-003</strong></td>
+                <td>Caramelos</td>
+                <td>300 UN</td>
+                <td>$2.990</td>
+                <td><span class="badge badge-success">Stock OK</span></td>
+                <td>
+                    <div class="action-buttons">
+                        <a href="{% url 'core:editar_producto' 6 %}" class="btn-icon btn-edit" title="Editar">✏️</a>
+                        <button class="btn-icon btn-delete" title="Eliminar" onclick="confirmarEliminacion('Caramelos de Frutas')">🗑️</button>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="product-info">
+                        <span class="product-icon">🍫</span>
+                        <div>
+                            <strong>Chocolate con Almendras</strong>
+                            <div style="font-size: 0.85rem; color: var(--text-gray);">Tableta 100g</div>
+                        </div>
+                    </div>
+                </td>
+                <td><strong>CHO-027</strong></td>
+                <td>Chocolates</td>
+                <td>80 UN</td>
+                <td>$4.490</td>
+                <td><span class="badge badge-warning">Stock Bajo</span></td>
+                <td>
+                    <div class="action-buttons">
+                        <a href="{% url 'core:editar_producto' 7 %}" class="btn-icon btn-edit" title="Editar">✏️</a>
+                        <button class="btn-icon btn-delete" title="Eliminar" onclick="confirmarEliminacion('Chocolate con Almendras')">🗑️</button>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="product-info">
+                        <span class="product-icon">🍬</span>
+                        <div>
+                            <strong>Caramelos de Yogur</strong>
+                            <div style="font-size: 0.85rem; color: var(--text-gray);">Bolsa 500g</div>
+                        </div>
+                    </div>
+                </td>
+                <td><strong>CAR-004</strong></td>
+                <td>Caramelos</td>
+                <td>120 UN</td>
+                <td>$2.990</td>
+                <td><span class="badge badge-success">Stock OK</span></td>
+                <td>
+                    <div class="action-buttons">
+                        <a href="{% url 'core:editar_producto' 8 %}" class="btn-icon btn-edit" title="Editar">✏️</a>
+                        <button class="btn-icon btn-delete" title="Eliminar" onclick="confirmarEliminacion('Caramelos de Yogur')">🗑️</button>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="product-info">
+                        <span class="product-icon">🍫</span>
+                        <div>
+                            <strong>Chocolate Blanco</strong>
+                            <div style="font-size: 0.85rem; color: var(--text-gray);">Tableta 100g</div>
+                        </div>
+                    </div>
+                </td>
+                <td><strong>CHO-028</strong></td>
+                <td>Chocolates</td>
+                <td>90 UN</td>
+                <td>$4.990</td>
+                <td><span class="badge badge-warning">Stock Bajo</span></td>
+                <td>
+                    <div class="action-buttons">
+                        <a href="{% url 'core:editar_producto' 9 %}" class="btn-icon btn-edit" title="Editar">✏️</a>
+                        <button class="btn-icon btn-delete" title="Eliminar" onclick="confirmarEliminacion('Chocolate Blanco')">🗑️</button>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+{% endblock %}

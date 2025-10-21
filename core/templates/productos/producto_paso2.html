@@ -1,0 +1,211 @@
+{% extends 'base.html' %}
+
+{% block title %}Producto - Paso 2{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        margin-bottom: 2rem;
+    }
+    .page-title {
+        font-size: 2rem;
+        color: var(--text-dark);
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    .breadcrumb {
+        color: var(--text-gray);
+        font-size: 0.95rem;
+    }
+    .breadcrumb a {
+        color: var(--primary);
+        text-decoration: none;
+    }
+    .form-card {
+        background: white;
+        border-radius: 12px;
+        padding: 2.5rem;
+        box-shadow: 0 2px 12px var(--shadow);
+    }
+    .tabs-container {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 2rem;
+        border-bottom: 2px solid var(--border);
+    }
+    .tab {
+        padding: 1rem 2rem;
+        background: transparent;
+        border: none;
+        color: var(--text-gray);
+        font-weight: 600;
+        cursor: pointer;
+        border-bottom: 3px solid transparent;
+        transition: all 0.3s;
+    }
+    .tab.active {
+        background: #2563eb;
+        color: white;
+        border-radius: 8px 8px 0 0;
+    }
+    .tab.completed {
+        color: var(--text-dark);
+    }
+    .section-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin: 2rem 0 1rem 0;
+    }
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+    .form-group label {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--text-dark);
+        font-size: 0.9rem;
+    }
+    .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    .checkbox-group input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+    }
+    .checkbox-label {
+        font-size: 0.9rem;
+        color: var(--text-gray);
+    }
+    .form-control {
+        padding: 0.8rem 1rem;
+        border: 2px solid var(--border);
+        border-radius: 8px;
+        font-size: 1rem;
+    }
+    .form-control:focus {
+        outline: none;
+        border-color: #2563eb;
+    }
+    .required {
+        color: var(--danger);
+    }
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 2rem;
+    }
+    .btn {
+        padding: 0.8rem 2rem;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    .btn-primary {
+        background: #2563eb;
+        color: white;
+    }
+    .btn-primary:hover {
+        background: #1d4ed8;
+    }
+    .btn-secondary {
+        background: white;
+        color: var(--text-dark);
+        border: 2px solid var(--border);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Formulario de Producto</h1>
+    <div class="breadcrumb">
+        <a href="{% url 'core:dashboard' %}">Dashboard</a> / 
+        <a href="{% url 'core:lista_productos' %}">Productos</a> / 
+        Nuevo
+    </div>
+</div>
+
+<div class="form-card">
+    <div class="tabs-container">
+        <a class="tab completed" href="{% url 'core:producto_paso1' %}">1. Identificación y precios</a>
+        <div class="tab active">2. Stock y control</div>
+        <div class="tab">3. Relaciones y derivados</div>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        
+        <h3 class="section-title">Stock y control</h3>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="stock_minimo">stock_minimo <span class="required">*</span> <span style="font-weight: normal; font-size: 0.85rem;">(requerido; default 0)</span></label>
+                <input type="number" id="stock_minimo" name="stock_minimo" class="form-control" value="{{ data.stock_minimo|default:'0' }}" step="0.01" required>
+            </div>
+            <div class="form-group">
+                <label for="stock_maximo">stock_maximo <span style="font-weight: normal; font-size: 0.85rem;">(opcional)</span></label>
+                <input type="number" id="stock_maximo" name="stock_maximo" class="form-control" value="{{ data.stock_maximo }}" step="0.01" placeholder="">
+            </div>
+            <div class="form-group">
+                <label for="punto_reorden">punto_reorden <span style="font-weight: normal; font-size: 0.85rem;">(opcional; si no, usar mínimo)</span></label>
+                <input type="number" id="punto_reorden" name="punto_reorden" class="form-control" value="{{ data.punto_reorden }}" step="0.01" placeholder="">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>perishable <span class="required">*</span> <span style="font-weight: normal; font-size: 0.85rem;">(requerido; default 0)</span></label>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="perishable" name="perishable" value="1" {% if data.perishable == '1' %}checked{% endif %}>
+                    <span class="checkbox-label">0 (no perecible)</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>control_por_lote <span class="required">*</span> <span style="font-weight: normal; font-size: 0.85rem;">(requerido; default 0)</span></label>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="control_por_lote" name="control_por_lote" value="1" {% if data.control_por_lote == '1' %}checked{% endif %}>
+                    <span class="checkbox-label">0 (no)</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>control_por_serie <span class="required">*</span> <span style="font-weight: normal; font-size: 0.85rem;">(requerido; default 0)</span></label>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="control_por_serie" name="control_por_serie" value="1" {% if data.control_por_serie == '1' %}checked{% endif %}>
+                    <span class="checkbox-label">0 (no)</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a class="btn btn-secondary" href="{% url 'core:lista_productos' %}">Limpiar</a>
+            <button type="submit" class="btn btn-primary">Guardar</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.getElementById('perishable').addEventListener('change', function() {
+        this.nextElementSibling.textContent = this.checked ? '1 (sí perecible)' : '0 (no perecible)';
+    });
+    document.getElementById('control_por_lote').addEventListener('change', function() {
+        this.nextElementSibling.textContent = this.checked ? '1 (sí)' : '0 (no)';
+    });
+    document.getElementById('control_por_serie').addEventListener('change', function() {
+        this.nextElementSibling.textContent = this.checked ? '1 (sí)' : '0 (no)';
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,243 @@
+{% extends 'base.html' %}
+
+{% block title %}Producto - Paso 1{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        margin-bottom: 2rem;
+    }
+    .page-title {
+        font-size: 2rem;
+        color: var(--text-dark);
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    .breadcrumb {
+        color: var(--text-gray);
+        font-size: 0.95rem;
+    }
+    .breadcrumb a {
+        color: var(--primary);
+        text-decoration: none;
+    }
+    .form-card {
+        background: white;
+        border-radius: 12px;
+        padding: 2.5rem;
+        box-shadow: 0 2px 12px var(--shadow);
+    }
+    .tabs-container {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 2rem;
+        border-bottom: 2px solid var(--border);
+    }
+    .tab {
+        padding: 1rem 2rem;
+        background: transparent;
+        border: none;
+        color: var(--text-gray);
+        font-weight: 600;
+        cursor: not-allowed;
+        border-bottom: 3px solid transparent;
+        transition: all 0.3s;
+        white-space: nowrap;
+    }
+    .tab.active {
+        background: #2563eb;
+        color: white;
+        border-radius: 8px 8px 0 0;
+        cursor: default;
+    }
+    .section-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 1.5rem;
+        margin-top: 2rem;
+    }
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+    .form-group label {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--text-dark);
+        font-size: 0.9rem;
+    }
+    .label-optional {
+        font-weight: normal;
+        color: var(--text-gray);
+    }
+    .form-control {
+        padding: 0.8rem 1rem;
+        border: 2px solid var(--border);
+        border-radius: 8px;
+        font-size: 1rem;
+    }
+    .form-control:focus {
+        outline: none;
+        border-color: #2563eb;
+    }
+    textarea.form-control {
+        min-height: 100px;
+        resize: vertical;
+        font-family: inherit;
+    }
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 2rem;
+    }
+    .btn {
+        padding: 0.8rem 2rem;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    .btn-primary {
+        background: #2563eb;
+        color: white;
+    }
+    .btn-primary:hover {
+        background: #1d4ed8;
+    }
+    .btn-secondary {
+        background: white;
+        color: var(--text-dark);
+        border: 2px solid var(--border);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Formulario de Producto</h1>
+    <div class="breadcrumb">
+        <a href="{% url 'core:dashboard' %}">Dashboard</a> / 
+        <a href="{% url 'core:lista_productos' %}">Productos</a> / 
+        Nuevo
+    </div>
+</div>
+
+<div class="form-card">
+    <div class="tabs-container">
+        <div class="tab active">1. Identificación y precios</div>
+        <div class="tab">2. Stock y control</div>
+        <div class="tab">3. Relaciones y derivados</div>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        
+        <h3 class="section-title">Identificación</h3>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="sku">sku <span style="color: var(--danger);">(requerido, único)</span></label>
+                <input type="text" id="sku" name="sku" class="form-control" value="{{ data.sku|default:'SKU-0001' }}" placeholder="SKU-0001" required>
+            </div>
+            <div class="form-group">
+                <label for="ean_upc">ean_upc <span class="label-optional">(opcional, único si se usa)</span></label>
+                <input type="text" id="ean_upc" name="ean_upc" class="form-control" value="{{ data.ean_upc|default:'7891234567890' }}" placeholder="7891234567890">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group" style="grid-column: 1 / -1;">
+                <label for="nombre">nombre <span style="color: var(--danger);">(requerido)</span></label>
+                <input type="text" id="nombre" name="nombre" class="form-control" value="{{ data.nombre|default:'Silla ergonómica' }}" placeholder="Silla ergonómica" required>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group" style="grid-column: 1 / -1;">
+                <label for="descripcion">descripcion <span class="label-optional">(opcional)</span></label>
+                <textarea id="descripcion" name="descripcion" class="form-control" placeholder="Detalles del producto...">{{ data.descripcion|default:'Detalles del producto...' }}</textarea>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="categoria">categoria <span style="color: var(--danger);">(requerido)</span></label>
+                <select id="categoria" name="categoria" class="form-control" required>
+                    <option value="">Seleccione...</option>
+                    <option value="dulces" {% if data.categoria == 'dulces' %}selected{% endif %}>Dulces</option>
+                    <option value="chocolates" {% if data.categoria == 'chocolates' %}selected{% endif %}>Chocolates</option>
+                    <option value="chicles" {% if data.categoria == 'chicles' %}selected{% endif %}>Chicles</option>
+                    <option value="caramelos" {% if data.categoria == 'caramelos' %}selected{% endif %}>Caramelos</option>
+                    <option value="gomitas" {% if data.categoria == 'gomitas' %}selected{% endif %}>Gomitas</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="marca">marca <span class="label-optional">(opcional)</span></label>
+                <input type="text" id="marca" name="marca" class="form-control" value="{{ data.marca|default:'MarcaX' }}" placeholder="MarcaX">
+            </div>
+            <div class="form-group">
+                <label for="modelo">modelo <span class="label-optional">(opcional)</span></label>
+                <input type="text" id="modelo" name="modelo" class="form-control" value="{{ data.modelo|default:'MX-200' }}" placeholder="MX-200">
+            </div>
+        </div>
+
+        <h3 class="section-title">Unidades y precios</h3>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="uom_compra">uom_compra <span style="color: var(--danger);">(requerido)</span></label>
+                <select id="uom_compra" name="uom_compra" class="form-control" required>
+                    <option value="">Seleccione...</option>
+                    <option value="UN" {% if data.uom_compra == 'UN' %}selected{% endif %}>Unidad (UN)</option>
+                    <option value="CAJA" {% if data.uom_compra == 'CAJA' %}selected{% endif %}>Caja</option>
+                    <option value="KG" {% if data.uom_compra == 'KG' %}selected{% endif %}>Kilogramo (KG)</option>
+                    <option value="LT" {% if data.uom_compra == 'LT' %}selected{% endif %}>Litro (LT)</option>
+                    <option value="PACK" {% if data.uom_compra == 'PACK' %}selected{% endif %}>Pack</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="uom_venta">uom_venta <span style="color: var(--danger);">(requerido)</span></label>
+                <select id="uom_venta" name="uom_venta" class="form-control" required>
+                    <option value="">Seleccione...</option>
+                    <option value="UN" {% if data.uom_venta == 'UN' %}selected{% endif %}>Unidad (UN)</option>
+                    <option value="CAJA" {% if data.uom_venta == 'CAJA' %}selected{% endif %}>Caja</option>
+                    <option value="KG" {% if data.uom_venta == 'KG' %}selected{% endif %}>Kilogramo (KG)</option>
+                    <option value="LT" {% if data.uom_venta == 'LT' %}selected{% endif %}>Litro (LT)</option>
+                    <option value="PACK" {% if data.uom_venta == 'PACK' %}selected{% endif %}>Pack</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="factor_conversion">factor_conversion <span style="color: var(--danger);">(requerido; default 1)</span></label>
+                <input type="number" id="factor_conversion" name="factor_conversion" class="form-control" value="{{ data.factor_conversion|default:'1' }}" step="0.01" required>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="costo_estandar">costo_estandar <span class="label-optional">(opcional)</span></label>
+                <input type="number" id="costo_estandar" name="costo_estandar" class="form-control" value="{{ data.costo_estandar }}" step="0.01" placeholder="0.00">
+            </div>
+            <div class="form-group">
+                <label for="precio_venta">precio_venta <span class="label-optional">(opcional)</span></label>
+                <input type="number" id="precio_venta" name="precio_venta" class="form-control" value="{{ data.precio_venta }}" step="0.01" placeholder="0.00">
+            </div>
+            <div class="form-group">
+                <label for="impuesto_iva">impuesto_iva <span style="color: var(--danger);">(requerido; ej: 19%)</span></label>
+                <input type="number" id="impuesto_iva" name="impuesto_iva" class="form-control" value="{{ data.impuesto_iva|default:'19' }}" step="0.01" required>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a class="btn btn-secondary" href="{% url 'core:lista_productos' %}">Limpiar</a>
+            <button type="submit" class="btn btn-primary">Guardar</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

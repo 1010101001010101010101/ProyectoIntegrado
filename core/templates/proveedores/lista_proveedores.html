@@ -1,0 +1,260 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Proveedores - Dulcería Lilis
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .page-title {
+        font-size: 2rem;
+        color: var(--text-dark);
+        font-weight: 700;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #87CEEB 0%, #4682B4 100%);
+        color: white;
+        padding: 0.8rem 1.5rem;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        box-shadow: 0 4px 12px rgba(135, 206, 235, 0.3);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(135, 206, 235, 0.4);
+    }
+
+    .filters-bar {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 12px var(--shadow);
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .search-input {
+        flex: 1;
+        min-width: 250px;
+        padding: 0.8rem 1rem;
+        border: 2px solid var(--border);
+        border-radius: 8px;
+        font-size: 1rem;
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: #87CEEB;
+    }
+
+    .filter-select {
+        padding: 0.8rem 1rem;
+        border: 2px solid var(--border);
+        border-radius: 8px;
+        font-size: 1rem;
+        cursor: pointer;
+    }
+
+    .table-container {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 12px var(--shadow);
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    thead {
+        background: linear-gradient(135deg, #87CEEB 0%, #4682B4 100%);
+        color: white;
+    }
+
+    th {
+        padding: 1.2rem 1rem;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+
+    td {
+        padding: 1rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    tbody tr {
+        transition: background-color 0.2s ease;
+    }
+
+    tbody tr:hover {
+        background-color: #F0F8FF;
+    }
+
+    .proveedor-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+    }
+
+    .proveedor-nombre {
+        font-weight: 600;
+        color: var(--text-dark);
+    }
+
+    .proveedor-fantasia {
+        font-size: 0.85rem;
+        color: var(--text-gray);
+    }
+
+    .badge {
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+    }
+
+    .badge-success {
+        background: #D4EDDA;
+        color: #155724;
+    }
+
+    .badge-danger {
+        background: #F8D7DA;
+        color: #721C24;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .btn-icon {
+        padding: 0.5rem 0.8rem;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 1rem;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-edit {
+        background: #E3F2FD;
+        color: #1976D2;
+    }
+
+    .btn-edit:hover {
+        background: #1976D2;
+        color: white;
+    }
+
+    .btn-delete {
+        background: #FFEBEE;
+        color: #C62828;
+    }
+
+    .btn-delete:hover {
+        background: #C62828;
+        color: white;
+    }
+
+    @media (max-width: 768px) {
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            min-width: 900px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">🏢 Gestión de Proveedores</h1>
+    <a href="{% url 'core:crear_proveedor' %}" class="btn-primary">
+        <span>➕</span> Nuevo Proveedor
+    </a>
+</div>
+
+<div class="filters-bar">
+    <input type="text" class="search-input" placeholder="🔍 Buscar por RUT, razón social o nombre fantasía...">
+    <select class="filter-select">
+        <option value="">Todos los estados</option>
+        <option value="activo">Activo</option>
+        <option value="bloqueado">Bloqueado</option>
+    </select>
+    <select class="filter-select">
+        <option value="">Todos los países</option>
+        <option value="chile">Chile</option>
+        <option value="argentina">Argentina</option>
+        <option value="brasil">Brasil</option>
+    </select>
+</div>
+
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>Proveedor</th>
+                <th>RUT/NIF</th>
+                <th>Email</th>
+                <th>Teléfono</th>
+                <th>Ciudad/País</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>
+                    <div class="proveedor-info">
+                        <div class="proveedor-nombre">Distribuidora Dulces del Sur S.A.</div>
+                        <div class="proveedor-fantasia">Dulces Sur</div>
+                    </div>
+                </td>
+                <td><strong>76.123.456-7</strong></td>
+                <td>ventas@dulcessur.cl</td>
+                <td>+56 9 8765 4321</td>
+                <td>Santiago, Chile</td>
+                <td><span class="badge badge-success">Activo</span></td>
+                <td>
+                    <div class="action-buttons">
+                        <a href="{% url 'core:editar_proveedor' 1 %}" class="btn-icon btn-edit" title="Editar">✏️</a>
+                        <button class="btn-icon btn-delete" title="Eliminar" onclick="confirmarEliminacion('Dulces del Sur')">🗑️</button>
+                    </div>
+                </td>
+            </tr>
+            <!-- Más filas de proveedores aquí -->
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}
