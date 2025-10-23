@@ -1,5 +1,8 @@
 from django.shortcuts import render, redirect
 
+
+
+
 def login_view(request):
     if request.method == 'POST':
         return redirect('core:dashboard')
@@ -382,3 +385,15 @@ def movimiento_paso3(request):
     
     data = request.session.get('movimiento_data', {})
     return render(request, 'inventario/movimiento_paso3.html', {'data': data})
+
+def editar_movimiento(request, id):
+    return render(request, 'inventario/editar_movimiento.html', {'movimiento_id': id})
+
+def movimiento_editar_paso1(request, id):
+    # Similar a movimiento_paso1 pero para edición
+    if request.method == 'POST':
+        # Lógica de edición
+        pass
+    
+    data = request.session.get('movimiento_data', {})
+    return render(request, 'inventario/movimiento_paso1.html', {'data': data, 'movimiento_id': id, 'es_edicion': True})

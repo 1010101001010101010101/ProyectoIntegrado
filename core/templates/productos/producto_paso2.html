@@ -5,207 +5,1008 @@
 {% block extra_css %}
 <style>
     .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
         margin-bottom: 2rem;
     }
+    
     .page-title {
         font-size: 2rem;
         color: var(--text-dark);
         font-weight: 700;
         margin-bottom: 0.5rem;
     }
+    
     .breadcrumb {
         color: var(--text-gray);
         font-size: 0.95rem;
     }
+    
     .breadcrumb a {
-        color: var(--primary);
+        color: #dc2626;
         text-decoration: none;
+        transition: color 0.3s;
     }
+    
+    .breadcrumb a:hover {
+        color: #991b1b;
+    }
+    
     .form-card {
         background: white;
         border-radius: 12px;
         padding: 2.5rem;
         box-shadow: 0 2px 12px var(--shadow);
     }
-    .tabs-container {
-        display: flex;
-        gap: 0.5rem;
+    
+    .steps-progress {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 12px var(--shadow);
         margin-bottom: 2rem;
-        border-bottom: 2px solid var(--border);
     }
-    .tab {
-        padding: 1rem 2rem;
-        background: transparent;
-        border: none;
+
+    .steps-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+    }
+
+    .step-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        flex: 1;
+        position: relative;
+        z-index: 2;
+    }
+
+    .step-number {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        background: var(--border);
+        color: var(--text-gray);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.2rem;
+        transition: all 0.3s ease;
+    }
+
+    .step-item.completed .step-number {
+        background: #dc2626;
+        color: white;
+    }
+
+    .step-item.active .step-number {
+        background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+        }
+        50% {
+            box-shadow: 0 4px 20px rgba(220, 38, 38, 0.6);
+        }
+    }
+
+    .step-label {
+        font-size: 0.85rem;
         color: var(--text-gray);
         font-weight: 600;
-        cursor: pointer;
-        border-bottom: 3px solid transparent;
-        transition: all 0.3s;
+        text-align: center;
     }
-    .tab.active {
-        background: #2563eb;
-        color: white;
-        border-radius: 8px 8px 0 0;
+
+    .step-item.active .step-label {
+        color: #dc2626;
+        font-weight: 700;
     }
-    .tab.completed {
-        color: var(--text-dark);
+
+    .progress-line {
+        position: absolute;
+        top: 22px;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--border);
+        z-index: 1;
     }
+
+    .progress-line-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #dc2626 0%, #991b1b 100%);
+        width: 50%;
+        transition: width 0.5s ease;
+    }
+    
     .section-title {
-        font-size: 1.2rem;
-        font-weight: 600;
+        font-size: 1.3rem;
         color: var(--text-dark);
-        margin: 2rem 0 1rem 0;
+        font-weight: 700;
+        margin: 2rem 0 1.5rem 0;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--border);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
     }
+    
     .form-row {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
         gap: 1.5rem;
         margin-bottom: 1.5rem;
     }
+    
     .form-group {
         display: flex;
         flex-direction: column;
     }
+    
     .form-group label {
         font-weight: 600;
         margin-bottom: 0.5rem;
         color: var(--text-dark);
-        font-size: 0.9rem;
+        font-size: 0.95rem;
     }
+    
+    .label-required {
+        color: #dc2626;
+    }
+    
+    .label-optional {
+        font-weight: normal;
+        color: var(--text-gray);
+        font-size: 0.85rem;
+    }
+    
+    .checkbox-container {
+        background: #fef2f2;
+        border: 2px solid #fee2e2;
+        border-radius: 8px;
+        padding: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .checkbox-container:hover {
+        background: #fee2e2;
+        border-color: #dc2626;
+    }
+    
+    .checkbox-container.checked {
+        background: #dcfce7;
+        border-color: #4CAF50;
+    }
+    
     .checkbox-group {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
-        margin-bottom: 1rem;
-    }
-    .checkbox-group input[type="checkbox"] {
-        width: 20px;
-        height: 20px;
+        gap: 0.8rem;
         cursor: pointer;
     }
-    .checkbox-label {
-        font-size: 0.9rem;
-        color: var(--text-gray);
+    
+    .checkbox-group input[type="checkbox"] {
+        width: 22px;
+        height: 22px;
+        cursor: pointer;
+        accent-color: #dc2626;
     }
+    
+    .checkbox-label {
+        font-size: 0.95rem;
+        color: var(--text-dark);
+        font-weight: 500;
+        cursor: pointer;
+        user-select: none;
+    }
+    
     .form-control {
-        padding: 0.8rem 1rem;
+        padding: 0.9rem;
         border: 2px solid var(--border);
         border-radius: 8px;
         font-size: 1rem;
+        transition: all 0.3s ease;
     }
+    
     .form-control:focus {
         outline: none;
-        border-color: #2563eb;
+        border-color: #dc2626;
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
     }
-    .required {
-        color: var(--danger);
-    }
+    
     .form-actions {
         display: flex;
-        gap: 1rem;
-        justify-content: flex-end;
+        justify-content: space-between;
         margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 2px solid var(--border);
     }
+    
     .btn {
-        padding: 0.8rem 2rem;
+        padding: 0.9rem 1.8rem;
         border: none;
-        border-radius: 8px;
+        border-radius: 10px;
         font-weight: 600;
         cursor: pointer;
-        transition: all 0.3s;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
     }
+    
     .btn-primary {
-        background: #2563eb;
+        background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
         color: white;
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
     }
+    
     .btn-primary:hover {
-        background: #1d4ed8;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
     }
+    
     .btn-secondary {
-        background: white;
+        background: #f5f5f5;
         color: var(--text-dark);
-        border: 2px solid var(--border);
+    }
+    
+    .btn-secondary:hover {
+        background: #e0e0e0;
+    }
+    
+    .info-box {
+        background: #fef2f2;
+        border-left: 4px solid #dc2626;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+    }
+    
+    .info-box p {
+        margin: 0;
+        color: #991b1b;
+        font-size: 0.95rem;
+    }
+
+    /* Estilos personalizados para SweetAlert2 */
+    .swal2-popup {
+        border-radius: 16px;
+        font-family: inherit;
+    }
+    
+    .swal2-title {
+        color: var(--text-dark);
+        font-size: 1.5rem;
+    }
+    
+    .swal2-html-container {
+        color: var(--text-gray);
+    }
+    
+    .swal2-confirm {
+        background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%) !important;
+        border-radius: 8px;
+        padding: 0.6rem 2rem;
+        font-weight: 600;
+    }
+    
+    .swal2-cancel {
+        background: #f5f5f5 !important;
+        color: var(--text-dark) !important;
+        border-radius: 8px;
+        padding: 0.6rem 2rem;
+        font-weight: 600;
+    }
+
+    @media (max-width: 768px) {
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+        
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
     }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="page-header">
-    <h1 class="page-title">Formulario de Producto</h1>
-    <div class="breadcrumb">
-        <a href="{% url 'core:dashboard' %}">Dashboard</a> / 
-        <a href="{% url 'core:lista_productos' %}">Productos</a> / 
-        Nuevo
+    <div>
+        <h1 class="page-title">Formulario de Producto - Paso 2</h1>
+        <div class="breadcrumb">
+            <a href="{% url 'core:dashboard' %}">Dashboard</a> / 
+            <a href="{% url 'core:lista_productos' %}">Productos</a> / 
+            Nuevo
+        </div>
+    </div>
+    <a href="{% url 'core:lista_productos' %}" class="btn btn-secondary">← Volver</a>
+</div>
+
+<div class="steps-progress">
+    <div class="steps-header">
+        <div class="progress-line">
+            <div class="progress-line-fill"></div>
+        </div>
+        <div class="step-item completed">
+            <div class="step-number">✓</div>
+            <div class="step-label">Identificación y Precios</div>
+        </div>
+        <div class="step-item active">
+            <div class="step-number">2</div>
+            <div class="step-label">Stock y Control</div>
+        </div>
+        <div class="step-item">
+            <div class="step-number">3</div>
+            <div class="step-label">Relaciones</div>
+        </div>
     </div>
 </div>
 
 <div class="form-card">
-    <div class="tabs-container">
-        <a class="tab completed" href="{% url 'core:producto_paso1' %}">1. Identificación y precios</a>
-        <div class="tab active">2. Stock y control</div>
-        <div class="tab">3. Relaciones y derivados</div>
+    <div class="info-box">
+        <p><strong>Información:</strong> Configure los niveles de stock y opciones de control para gestionar el inventario de este producto.</p>
     </div>
 
-    <form method="post">
+    <form method="post" id="productoForm" novalidate>
         {% csrf_token %}
         
-        <h3 class="section-title">Stock y control</h3>
+        <h3 class="section-title">Stock y Control</h3>
         <div class="form-row">
             <div class="form-group">
-                <label for="stock_minimo">stock_minimo <span class="required">*</span> <span style="font-weight: normal; font-size: 0.85rem;">(requerido; default 0)</span></label>
-                <input type="number" id="stock_minimo" name="stock_minimo" class="form-control" value="{{ data.stock_minimo|default:'0' }}" step="0.01" required>
+                <label for="stock_minimo">Stock Mínimo <span class="label-required">*</span></label>
+                <input type="number" id="stock_minimo" name="stock_minimo" class="form-control" value="{{ data.stock_minimo|default:'0' }}" step="0.01" min="0" required>
+                <span class="label-optional">Nivel mínimo antes de alertar</span>
             </div>
             <div class="form-group">
-                <label for="stock_maximo">stock_maximo <span style="font-weight: normal; font-size: 0.85rem;">(opcional)</span></label>
-                <input type="number" id="stock_maximo" name="stock_maximo" class="form-control" value="{{ data.stock_maximo }}" step="0.01" placeholder="">
+                <label for="stock_maximo">Stock Máximo <span class="label-optional"></span></label>
+                <input type="number" id="stock_maximo" name="stock_maximo" class="form-control" value="{{ data.stock_maximo }}" step="0.01" min="0" placeholder="Ej: 1000">
+                <span class="label-optional">Capacidad máxima del almacén</span>
             </div>
             <div class="form-group">
-                <label for="punto_reorden">punto_reorden <span style="font-weight: normal; font-size: 0.85rem;">(opcional; si no, usar mínimo)</span></label>
-                <input type="number" id="punto_reorden" name="punto_reorden" class="form-control" value="{{ data.punto_reorden }}" step="0.01" placeholder="">
+                <label for="punto_reorden">Punto de Reorden <span class="label-optional"></span></label>
+                <input type="number" id="punto_reorden" name="punto_reorden" class="form-control" value="{{ data.punto_reorden }}" step="0.01" min="0" placeholder="Ej: 50">
+                <span class="label-optional">Nivel para ordenar reabastecimiento</span>
             </div>
         </div>
 
+        <h3 class="section-title">Opciones de Control</h3>
         <div class="form-row">
             <div class="form-group">
-                <label>perishable <span class="required">*</span> <span style="font-weight: normal; font-size: 0.85rem;">(requerido; default 0)</span></label>
-                <div class="checkbox-group">
-                    <input type="checkbox" id="perishable" name="perishable" value="1" {% if data.perishable == '1' %}checked{% endif %}>
-                    <span class="checkbox-label">0 (no perecible)</span>
+                <label>Producto Perecedero <span class="label-required">*</span></label>
+                <div class="checkbox-container" id="perishable-container">
+                    <div class="checkbox-group" onclick="toggleCheckbox('perishable')">
+                        <input type="checkbox" id="perishable" name="perishable" value="1" {% if data.perishable == '1' %}checked{% endif %}>
+                        <span class="checkbox-label" id="perishable-label">No perecedero</span>
+                    </div>
                 </div>
             </div>
             <div class="form-group">
-                <label>control_por_lote <span class="required">*</span> <span style="font-weight: normal; font-size: 0.85rem;">(requerido; default 0)</span></label>
-                <div class="checkbox-group">
-                    <input type="checkbox" id="control_por_lote" name="control_por_lote" value="1" {% if data.control_por_lote == '1' %}checked{% endif %}>
-                    <span class="checkbox-label">0 (no)</span>
+                <label>Control por Lote <span class="label-required">*</span></label>
+                <div class="checkbox-container" id="lote-container">
+                    <div class="checkbox-group" onclick="toggleCheckbox('control_por_lote')">
+                        <input type="checkbox" id="control_por_lote" name="control_por_lote" value="1" {% if data.control_por_lote == '1' %}checked{% endif %}>
+                        <span class="checkbox-label" id="lote-label">Sin control por lote</span>
+                    </div>
                 </div>
             </div>
             <div class="form-group">
-                <label>control_por_serie <span class="required">*</span> <span style="font-weight: normal; font-size: 0.85rem;">(requerido; default 0)</span></label>
-                <div class="checkbox-group">
-                    <input type="checkbox" id="control_por_serie" name="control_por_serie" value="1" {% if data.control_por_serie == '1' %}checked{% endif %}>
-                    <span class="checkbox-label">0 (no)</span>
+                <label>Control por Serie <span class="label-required">*</span></label>
+                <div class="checkbox-container" id="serie-container">
+                    <div class="checkbox-group" onclick="toggleCheckbox('control_por_serie')">
+                        <input type="checkbox" id="control_por_serie" name="control_por_serie" value="1" {% if data.control_por_serie == '1' %}checked{% endif %}>
+                        <span class="checkbox-label" id="serie-label">Sin control por serie</span>
+                    </div>
                 </div>
             </div>
         </div>
 
         <div class="form-actions">
-            <a class="btn btn-secondary" href="{% url 'core:lista_productos' %}">Limpiar</a>
-            <button type="submit" class="btn btn-primary">Guardar</button>
+            <a class="btn btn-secondary" href="{% url 'core:producto_paso1' %}">← Anterior</a>
+            <button type="submit" class="btn btn-primary">
+                <span>→</span> Guardar y Continuar
+            </button>
         </div>
     </form>
 </div>
+{% endblock %}
 
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    document.getElementById('perishable').addEventListener('change', function() {
-        this.nextElementSibling.textContent = this.checked ? '1 (sí perecible)' : '0 (no perecible)';
+   
+
+    // ============================================
+// INICIALIZACIÓN DE CHECKBOXES
+// ============================================
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar estados de los checkboxes al cargar
+    updateCheckboxLabel('perishable');
+    updateCheckboxLabel('control_por_lote');
+    updateCheckboxLabel('control_por_serie');
+    updateCheckboxContainer('perishable');
+    updateCheckboxContainer('control_por_lote');
+    updateCheckboxContainer('control_por_serie');
+});
+
+// Función para alternar checkbox
+function toggleCheckbox(id) {
+    const checkbox = document.getElementById(id);
+    checkbox.checked = !checkbox.checked;
+    updateCheckboxLabel(id);
+    updateCheckboxContainer(id);
+    
+    // Mostrar feedback visual
+    mostrarFeedbackCheckbox(id, checkbox.checked);
+    
+    event.stopPropagation();
+}
+
+// Actualizar etiqueta del checkbox
+function updateCheckboxLabel(id) {
+    const checkbox = document.getElementById(id);
+    const label = document.getElementById(id + '-label');
+    
+    switch(id) {
+        case 'perishable':
+            label.textContent = checkbox.checked ? 'Producto perecedero' : 'No perecedero';
+            break;
+        case 'control_por_lote':
+            label.textContent = checkbox.checked ? 'Con control por lote' : 'Sin control por lote';
+            break;
+        case 'control_por_serie':
+            label.textContent = checkbox.checked ? 'Con control por serie' : 'Sin control por serie';
+            break;
+    }
+}
+
+// Actualizar contenedor del checkbox
+function updateCheckboxContainer(id) {
+    const checkbox = document.getElementById(id);
+    const container = document.getElementById(id + '-container');
+    
+    if (checkbox.checked) {
+        container.classList.add('checked');
+    } else {
+        container.classList.remove('checked');
+    }
+}
+
+// Mostrar feedback al cambiar checkbox
+function mostrarFeedbackCheckbox(id, checked) {
+    let mensaje = '';
+    let icono = checked ? 'success' : 'info';
+    
+    switch(id) {
+        case 'perishable':
+            mensaje = checked ? 'Producto marcado como perecedero' : 'Producto no perecedero';
+            break;
+        case 'control_por_lote':
+            mensaje = checked ? 'Control por lote activado' : 'Control por lote desactivado';
+            break;
+        case 'control_por_serie':
+            mensaje = checked ? 'Control por serie activado' : 'Control por serie desactivado';
+            break;
+    }
+    
+    Swal.fire({
+        icon: icono,
+        title: mensaje,
+        timer: 1500,
+        showConfirmButton: false,
+        toast: true,
+        position: 'top-end'
     });
-    document.getElementById('control_por_lote').addEventListener('change', function() {
-        this.nextElementSibling.textContent = this.checked ? '1 (sí)' : '0 (no)';
+}
+
+// ============================================
+// VALIDACIÓN DEL FORMULARIO PASO 2
+// ============================================
+document.getElementById('productoForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Obtener valores
+    const stockMinimo = document.getElementById('stock_minimo').value.trim();
+    const stockMaximo = document.getElementById('stock_maximo').value.trim();
+    const puntoReorden = document.getElementById('punto_reorden').value.trim();
+    
+    // ============================================
+    // VALIDACIÓN 1: STOCK MÍNIMO (OBLIGATORIO)
+    // ============================================
+    if (!stockMinimo && stockMinimo !== '0') {
+        Swal.fire({
+            icon: 'error',
+            title: 'Campo obligatorio',
+            text: 'El stock mínimo es obligatorio',
+            confirmButtonText: 'Entendido',
+            customClass: {
+                confirmButton: 'swal2-confirm'
+            }
+        });
+        document.getElementById('stock_minimo').focus();
+        return;
+    }
+    
+    const stockMinimoNum = parseFloat(stockMinimo);
+    
+    if (isNaN(stockMinimoNum)) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Valor inválido',
+            text: 'El stock mínimo debe ser un número válido',
+            confirmButtonText: 'Corregir',
+            customClass: {
+                confirmButton: 'swal2-confirm'
+            }
+        });
+        document.getElementById('stock_minimo').focus();
+        return;
+    }
+    
+    if (stockMinimoNum < 0) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Stock inválido',
+            text: 'El stock mínimo no puede ser negativo',
+            confirmButtonText: 'Corregir',
+            customClass: {
+                confirmButton: 'swal2-confirm'
+            }
+        });
+        document.getElementById('stock_minimo').focus();
+        return;
+    }
+    
+    if (stockMinimoNum > 1000000) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Stock muy alto',
+            text: 'El stock mínimo parece excesivamente alto. ¿Es correcto?',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, continuar',
+            cancelButtonText: 'Revisar',
+            customClass: {
+                confirmButton: 'swal2-confirm',
+                cancelButton: 'swal2-cancel'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                continuarValidacionStockMaximo();
+            }
+        });
+        return;
+    }
+    
+    continuarValidacionStockMaximo();
+});
+
+function continuarValidacionStockMaximo() {
+    const stockMinimo = parseFloat(document.getElementById('stock_minimo').value.trim());
+    const stockMaximo = document.getElementById('stock_maximo').value.trim();
+    const puntoReorden = document.getElementById('punto_reorden').value.trim();
+    
+    // ============================================
+    // VALIDACIÓN 2: STOCK MÁXIMO (OPCIONAL)
+    // ============================================
+    if (stockMaximo) {
+        const stockMaximoNum = parseFloat(stockMaximo);
+        
+        if (isNaN(stockMaximoNum)) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Valor inválido',
+                text: 'El stock máximo debe ser un número válido',
+                confirmButtonText: 'Corregir',
+                customClass: {
+                    confirmButton: 'swal2-confirm'
+                }
+            });
+            document.getElementById('stock_maximo').focus();
+            return;
+        }
+        
+        if (stockMaximoNum < 0) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Stock inválido',
+                text: 'El stock máximo no puede ser negativo',
+                confirmButtonText: 'Corregir',
+                customClass: {
+                    confirmButton: 'swal2-confirm'
+                }
+            });
+            document.getElementById('stock_maximo').focus();
+            return;
+        }
+        
+        // Validar que stock máximo sea mayor que mínimo
+        if (stockMaximoNum < stockMinimo) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Inconsistencia en stocks',
+                html: `<p>El stock máximo (<strong>${stockMaximoNum}</strong>) debe ser mayor o igual al stock mínimo (<strong>${stockMinimo}</strong>)</p>`,
+                confirmButtonText: 'Corregir',
+                customClass: {
+                    confirmButton: 'swal2-confirm'
+                }
+            });
+            document.getElementById('stock_maximo').focus();
+            return;
+        }
+        
+        // Advertencia si el rango es muy pequeño
+        const rango = stockMaximoNum - stockMinimo;
+        if (rango < 10 && rango > 0) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Rango muy estrecho',
+                html: `<p>El rango entre stock mínimo y máximo es muy pequeño (<strong>${rango}</strong> unidades).</p><p>Esto podría generar alertas frecuentes. ¿Desea continuar?</p>`,
+                showCancelButton: true,
+                confirmButtonText: 'Sí, continuar',
+                cancelButtonText: 'Ajustar',
+                customClass: {
+                    confirmButton: 'swal2-confirm',
+                    cancelButton: 'swal2-cancel'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    continuarValidacionPuntoReorden();
+                }
+            });
+            return;
+        }
+        
+        if (stockMaximoNum > 1000000) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Stock muy alto',
+                text: 'El stock máximo parece excesivamente alto. ¿Es correcto?',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, continuar',
+                cancelButtonText: 'Revisar',
+                customClass: {
+                    confirmButton: 'swal2-confirm',
+                    cancelButton: 'swal2-cancel'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    continuarValidacionPuntoReorden();
+                }
+            });
+            return;
+        }
+    }
+    
+    continuarValidacionPuntoReorden();
+}
+
+function continuarValidacionPuntoReorden() {
+    const stockMinimo = parseFloat(document.getElementById('stock_minimo').value.trim());
+    const stockMaximo = document.getElementById('stock_maximo').value.trim();
+    const puntoReorden = document.getElementById('punto_reorden').value.trim();
+    
+    // ============================================
+    // VALIDACIÓN 3: PUNTO DE REORDEN (OPCIONAL)
+    // ============================================
+    if (puntoReorden) {
+        const puntoReordenNum = parseFloat(puntoReorden);
+        
+        if (isNaN(puntoReordenNum)) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Valor inválido',
+                text: 'El punto de reorden debe ser un número válido',
+                confirmButtonText: 'Corregir',
+                customClass: {
+                    confirmButton: 'swal2-confirm'
+                }
+            });
+            document.getElementById('punto_reorden').focus();
+            return;
+        }
+        
+        if (puntoReordenNum < 0) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Punto de reorden inválido',
+                text: 'El punto de reorden no puede ser negativo',
+                confirmButtonText: 'Corregir',
+                customClass: {
+                    confirmButton: 'swal2-confirm'
+                }
+            });
+            document.getElementById('punto_reorden').focus();
+            return;
+        }
+        
+        // Advertencia si punto de reorden es mayor al stock máximo
+        if (stockMaximo && puntoReordenNum > parseFloat(stockMaximo)) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Advertencia',
+                html: `<p>El punto de reorden (<strong>${puntoReordenNum}</strong>) es mayor al stock máximo (<strong>${stockMaximo}</strong>).</p><p>Esto significa que siempre estarás en modo de reorden. ¿Desea continuar?</p>`,
+                showCancelButton: true,
+                confirmButtonText: 'Sí, continuar',
+                cancelButtonText: 'Revisar',
+                customClass: {
+                    confirmButton: 'swal2-confirm',
+                    cancelButton: 'swal2-cancel'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    validarLogicaNegocio();
+                }
+            });
+            return;
+        }
+        
+        // Advertencia si punto de reorden es menor al stock mínimo
+        if (puntoReordenNum < stockMinimo) {
+            Swal.fire({
+                icon: 'info',
+                title: 'Recomendación',
+                html: `<p>El punto de reorden (<strong>${puntoReordenNum}</strong>) es menor al stock mínimo (<strong>${stockMinimo}</strong>).</p><p>Se recomienda que sea igual o mayor al mínimo para evitar desabastecimiento.</p>`,
+                showCancelButton: true,
+                confirmButtonText: 'Continuar de todas formas',
+                cancelButtonText: 'Ajustar',
+                customClass: {
+                    confirmButton: 'swal2-confirm',
+                    cancelButton: 'swal2-cancel'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    validarLogicaNegocio();
+                }
+            });
+            return;
+        }
+        
+        // Sugerencia: punto de reorden óptimo
+        const puntoOptimo = stockMinimo * 1.5;
+        if (Math.abs(puntoReordenNum - puntoOptimo) > puntoOptimo * 0.5) {
+            Swal.fire({
+                icon: 'info',
+                title: 'Sugerencia',
+                html: `<p>El punto de reorden recomendado sería aproximadamente <strong>${puntoOptimo.toFixed(2)}</strong> unidades (1.5 veces el stock mínimo).</p><p>Tu valor actual: <strong>${puntoReordenNum}</strong></p><p>¿Deseas continuar con el valor ingresado?</p>`,
+                showCancelButton: true,
+                confirmButtonText: 'Sí, usar mi valor',
+                cancelButtonText: 'Ajustar',
+                customClass: {
+                    confirmButton: 'swal2-confirm',
+                    cancelButton: 'swal2-cancel'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    validarLogicaNegocio();
+                }
+            });
+            return;
+        }
+    }
+    
+    validarLogicaNegocio();
+}
+
+function validarLogicaNegocio() {
+    const perecedero = document.getElementById('perishable').checked;
+    const controlLote = document.getElementById('control_por_lote').checked;
+    const controlSerie = document.getElementById('control_por_serie').checked;
+    
+    // ============================================
+    // VALIDACIÓN 4: LÓGICA DE NEGOCIO
+    // ============================================
+    
+    // Advertencia: Producto perecedero sin control de lote
+    if (perecedero && !controlLote) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Recomendación importante',
+            html: '<p>Has marcado el producto como <strong>perecedero</strong> pero <strong>sin control por lote</strong>.</p><p>Se recomienda activar el control por lote para productos perecederos para rastrear fechas de vencimiento.</p>',
+            showCancelButton: true,
+            confirmButtonText: 'Activar control por lote',
+            cancelButtonText: 'Continuar sin control',
+            customClass: {
+                confirmButton: 'swal2-confirm',
+                cancelButton: 'swal2-cancel'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('control_por_lote').checked = true;
+                updateCheckboxLabel('control_por_lote');
+                updateCheckboxContainer('control_por_lote');
+                mostrarConfirmacion();
+            } else {
+                mostrarConfirmacion();
+            }
+        });
+        return;
+    }
+    
+    // Advertencia: Control por lote Y serie simultáneamente
+    if (controlLote && controlSerie) {
+        Swal.fire({
+            icon: 'info',
+            title: 'Controles múltiples',
+            html: '<p>Has activado tanto <strong>control por lote</strong> como <strong>control por serie</strong>.</p><p>Esto es poco común y puede complicar la gestión del inventario.</p><p>¿Es realmente necesario?</p>',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, necesito ambos',
+            cancelButtonText: 'Revisar',
+            customClass: {
+                confirmButton: 'swal2-confirm',
+                cancelButton: 'swal2-cancel'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                mostrarConfirmacion();
+            }
+        });
+        return;
+    }
+    
+    // Si pasa todas las validaciones
+    mostrarConfirmacion();
+}
+
+function mostrarConfirmacion() {
+    const stockMinimo = parseFloat(document.getElementById('stock_minimo').value);
+    const stockMaximo = document.getElementById('stock_maximo').value;
+    const puntoReorden = document.getElementById('punto_reorden').value;
+    const perecedero = document.getElementById('perishable').checked;
+    const controlLote = document.getElementById('control_por_lote').checked;
+    const controlSerie = document.getElementById('control_por_serie').checked;
+    
+    let controles = [];
+    if (perecedero) controles.push('Perecedero');
+    if (controlLote) controles.push('Control por Lote');
+    if (controlSerie) controles.push('Control por Serie');
+    
+    const textoControles = controles.length > 0 
+        ? controles.join(', ') 
+        : 'Sin controles especiales';
+    
+    let htmlContent = `
+        <div style="text-align: left; margin-top: 1rem; font-size: 0.95rem;">
+            <p><strong>Stock mínimo:</strong> ${stockMinimo}</p>
+    `;
+    
+    if (stockMaximo) {
+        const stockMaximoNum = parseFloat(stockMaximo);
+        const capacidad = stockMaximoNum - stockMinimo;
+        htmlContent += `<p><strong>Stock máximo:</strong> ${stockMaximo}</p>`;
+        htmlContent += `<p><strong>Capacidad:</strong> ${capacidad.toFixed(2)} unidades</p>`;
+    }
+    
+    if (puntoReorden) {
+        htmlContent += `<p><strong>Punto de reorden:</strong> ${puntoReorden}</p>`;
+    }
+    
+    htmlContent += `<p><strong>Controles activos:</strong> ${textoControles}</p>`;
+    htmlContent += '</div>';
+    
+    Swal.fire({
+        icon: 'question',
+        title: '¿Confirmar configuración del Paso 2?',
+        html: htmlContent,
+        showCancelButton: true,
+        confirmButtonText: 'Sí, continuar al Paso 3',
+        cancelButtonText: 'Revisar datos',
+        customClass: {
+            confirmButton: 'swal2-confirm',
+            cancelButton: 'swal2-cancel'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            guardarProducto();
+        }
     });
-    document.getElementById('control_por_serie').addEventListener('change', function() {
-        this.nextElementSibling.textContent = this.checked ? '1 (sí)' : '0 (no)';
+}
+
+function guardarProducto() {
+    Swal.fire({
+        icon: 'success',
+        title: 'Paso 2 completado',
+        html: '<p>Guardando configuración...</p><p style="font-size: 0.9rem; color: var(--text-gray);">Avanzando al Paso 3</p>',
+        timer: 2000,
+        showConfirmButton: false,
+        timerProgressBar: true,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        willClose: () => {
+            document.getElementById('productoForm').submit();
+        }
     });
+}
+
+// ============================================
+// VALIDACIONES EN TIEMPO REAL
+// ============================================
+
+// Stock mínimo - Solo positivos
+document.getElementById('stock_minimo').addEventListener('input', function(e) {
+    let valor = parseFloat(e.target.value);
+    if (valor < 0) {
+        e.target.value = 0;
+    }
+});
+
+// Stock máximo - Solo positivos
+document.getElementById('stock_maximo').addEventListener('input', function(e) {
+    let valor = parseFloat(e.target.value);
+    if (valor < 0) {
+        e.target.value = '';
+    }
+});
+
+// Punto de reorden - Solo positivos
+document.getElementById('punto_reorden').addEventListener('input', function(e) {
+    let valor = parseFloat(e.target.value);
+    if (valor < 0) {
+        e.target.value = '';
+    }
+});
+
+// Validación al salir del campo de stock máximo
+document.getElementById('stock_maximo').addEventListener('blur', function(e) {
+    const stockMinimo = parseFloat(document.getElementById('stock_minimo').value);
+    const stockMaximo = parseFloat(e.target.value);
+    
+    if (stockMaximo && stockMaximo < stockMinimo) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Stock máximo menor que mínimo',
+            text: `El stock máximo (${stockMaximo}) no puede ser menor que el mínimo (${stockMinimo})`,
+            timer: 3000,
+            showConfirmButton: false,
+            toast: true,
+            position: 'top-end'
+        });
+        e.target.style.borderColor = '#dc2626';
+    } else {
+        e.target.style.borderColor = '';
+    }
+});
+
+// Sugerencia al salir del punto de reorden
+document.getElementById('punto_reorden').addEventListener('blur', function(e) {
+    const stockMinimo = parseFloat(document.getElementById('stock_minimo').value);
+    const puntoReorden = parseFloat(e.target.value);
+    
+    if (puntoReorden && stockMinimo) {
+        if (puntoReorden < stockMinimo) {
+            Swal.fire({
+                icon: 'info',
+                title: 'Punto de reorden bajo',
+                text: 'Se recomienda que sea igual o mayor al stock mínimo',
+                timer: 3000,
+                showConfirmButton: false,
+                toast: true,
+                position: 'top-end'
+            });
+        }
+    }
+});
 </script>
 {% endblock %}

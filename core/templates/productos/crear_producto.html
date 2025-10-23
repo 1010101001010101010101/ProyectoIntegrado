@@ -5,6 +5,9 @@
 {% block extra_css %}
 <style>
     .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
         margin-bottom: 2rem;
     }
 
@@ -12,17 +15,23 @@
         font-size: 2rem;
         color: var(--text-dark);
         font-weight: 700;
-        margin-bottom: 0.5rem;
     }
 
-    .breadcrumb {
-        color: var(--text-gray);
-        font-size: 0.95rem;
-    }
-
-    .breadcrumb a {
-        color: var(--primary);
+    .btn-back {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: white;
+        padding: 0.8rem 1.5rem;
+        border-radius: 10px;
         text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: inline-block;
+        box-shadow: 0 4px 15px rgba(243, 4, 4, 0.3);
+    }
+
+    .btn-back:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 25px rgba(207, 4, 4, 0.5);
     }
 
     .options-card {
@@ -116,25 +125,13 @@
         transform: translateX(5px);
     }
 
-    .back-button {
-        display: inline-block;
-        margin-top: 2rem;
-        padding: 0.8rem 1.5rem;
-        background: white;
-        color: var(--text-dark);
-        border: 2px solid var(--border);
-        border-radius: 8px;
-        text-decoration: none;
-        font-weight: 600;
-        transition: all 0.3s ease;
-    }
-
-    .back-button:hover {
-        background: var(--bg-light);
-        border-color: var(--primary);
-    }
-
     @media (max-width: 768px) {
+        .page-header {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
         .options-card {
             padding: 2rem;
         }
@@ -158,18 +155,12 @@
 
 {% block content %}
 <div class="page-header">
-    <h1 class="page-title">🏷️ Crear Nuevo Producto</h1>
-    <div class="breadcrumb">
-        <a href="{% url 'core:dashboard' %}">Dashboard</a> / 
-        <a href="{% url 'core:lista_productos' %}">Productos</a> / 
-        Nuevo
-    </div>
+    <h1 class="page-title">➕ Crear Nuevo Producto</h1>
+    <a href="{% url 'core:lista_productos' %}" class="btn-back">← Volver a la lista</a>
 </div>
 
 <div class="options-card">
-    <div class="alert-info">
-        <p><strong>ℹ️ Información:</strong> Seleccione el paso del formulario que desea completar. Complete los 3 pasos para registrar el producto.</p>
-    </div>
+    
 
     <h2 class="options-title">Formulario de Producto</h2>
 
@@ -183,6 +174,7 @@
             <div class="step-arrow">→</div>
         </a>
 
-  
+
+    </div>
 </div>
 {% endblock %}

@@ -18,7 +18,7 @@
     }
 
     .btn-primary {
-        background: linear-gradient(135deg, #FF6B9D 0%, #E64A7A 100%);
+        background: linear-gradient(135deg, #f80000 0%, #ff0000 100%);
         color: white;
         padding: 0.8rem 1.5rem;
         border-radius: 10px;
@@ -73,7 +73,7 @@
     }
 
     thead {
-        background: linear-gradient(135deg, #FF6B9D 0%, #E64A7A 100%);
+        background: linear-gradient(135deg, #ff0000 0%, #ff0000 100%);
         color: white;
     }
 
@@ -176,14 +176,14 @@
 
 {% block content %}
 <div class="page-header">
-    <h1 class="page-title">👥 Gestión de Usuarios</h1>
+    <h1 class="page-title">Gestión de Usuarios</h1>
     <a href="{% url 'core:crear_usuario' %}" class="btn-primary">
         <span>➕</span> Nuevo Usuario
     </a>
 </div>
 
 <div class="filters-bar">
-    <input type="text" class="search-input" placeholder="🔍 Buscar por nombre, email o username...">
+    <input type="text" class="search-input" placeholder="Buscar por nombre, email o username...">
     <select class="filter-select">
         <option value="">Todos los roles</option>
         <option value="admin">Administrador</option>
@@ -213,16 +213,16 @@
         </thead>
         <tbody>
             <tr>
-                <td><strong>jcortes</strong></td>
-                <td>Jorge Cortés Gallardo</td>
-                <td>jorge.cortes@lilis.cl</td>
+                <td><strong>kfigueroa</strong></td>
+                <td>Keyla Figueroa Morales</Fieldset></td>
+                <td>keyla.figueroa@lilis.cl</td>
                 <td>Administrador</td>
                 <td><span class="badge badge-success">Activo</span></td>
                 <td>20/10/2025 09:30</td>
                 <td>
                     <div class="action-buttons">
                         <a href="{% url 'core:editar_usuario' 1 %}" class="btn-icon btn-edit" title="Editar">✏️</a>
-                        <button class="btn-icon btn-delete" title="Eliminar" onclick="confirmarEliminacion('Jorge Cortés')">🗑️</button>
+                        <button class="btn-icon btn-delete" title="Eliminar" onclick="confirmarEliminacion('keyla')">🗑️</button>
                     </div>
                 </td>
             </tr>
@@ -286,20 +286,40 @@
     </table>
 </div>
 
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    function confirmarEliminacion(nombre) {
-        if (confirm(`¿Estás seguro de eliminar al usuario ${nombre}?`)) {
-            alert('Usuario eliminado exitosamente (simulación PENKA)');
-        }
+    function confirmarEliminacion(id, nombre) {
+        Swal.fire({
+            title: '¿Estás seguro?',
+            html: `¿Deseas eliminar el producto <strong>${nombre}</strong>?<br><small style="color: #6c757d;">Esta acción no se puede deshacer</small>`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar',
+            reverseButtons: true,
+            customClass: {
+                confirmButton: 'swal2-confirm',
+                cancelButton: 'swal2-cancel'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Aquí harías la petición para eliminar el producto
+                // Por ejemplo: window.location.href = `/productos/eliminar/${id}/`;
+                
+                Swal.fire({
+                    title: '¡Eliminado!',
+                    text: `El producto ${nombre} ha sido eliminado correctamente`,
+                    icon: 'success',
+                    confirmButtonText: 'Aceptar',
+                    customClass: {
+                        confirmButton: 'swal2-confirm'
+                    }
+                });
+            }
+        });
     }
 </script>
-{% endblock %}input {
-        flex: 1;
-        min-width: 250px;
-        padding: 0.8rem 1rem;
-        border: 2px solid var(--border);
-        border-radius: 8px;
-        font-size: 1rem;
-    }
-
-    .search-
+{% endblock %}

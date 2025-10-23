@@ -20,7 +20,7 @@
     }
 
     .btn-primary {
-        background: linear-gradient(135deg, #87CEEB 0%, #4682B4 100%);
+        background: linear-gradient(135deg, #ff0000 0%, #ff0000 100%);
         color: white;
         padding: 0.8rem 1.5rem;
         border-radius: 10px;
@@ -84,7 +84,7 @@
     }
 
     thead {
-        background: linear-gradient(135deg, #87CEEB 0%, #4682B4 100%);
+        background: linear-gradient(135deg, #ff0000 0%, #ff0000 100%);
         color: white;
     }
 
@@ -160,11 +160,11 @@
 
     .btn-edit {
         background: #E3F2FD;
-        color: #1976D2;
+        color: #f16901;
     }
 
     .btn-edit:hover {
-        background: #1976D2;
+        background: #ff9900;
         color: white;
     }
 
@@ -198,14 +198,14 @@
 
 {% block content %}
 <div class="page-header">
-    <h1 class="page-title">🏢 Gestión de Proveedores</h1>
+    <h1 class="page-title">Gestión de Proveedores</h1>
     <a href="{% url 'core:crear_proveedor' %}" class="btn-primary">
         <span>➕</span> Nuevo Proveedor
     </a>
 </div>
 
 <div class="filters-bar">
-    <input type="text" class="search-input" placeholder="🔍 Buscar por RUT, razón social o nombre fantasía...">
+    <input type="text" class="search-input" placeholder="Buscar por RUT, razón social o nombre fantasía...">
     <select class="filter-select">
         <option value="">Todos los estados</option>
         <option value="activo">Activo</option>
@@ -248,13 +248,48 @@
                 <td>
                     <div class="action-buttons">
                         <a href="{% url 'core:editar_proveedor' 1 %}" class="btn-icon btn-edit" title="Editar">✏️</a>
-                        <button class="btn-icon btn-delete" title="Eliminar" onclick="confirmarEliminacion('Dulces del Sur')">🗑️</button>
+                       <button class="btn-icon btn-delete" title="Eliminar" onclick="confirmarEliminacion(9, 'Chocolate Blanco')">🗑️</button>
                     </div>
                 </td>
             </tr>
-            <!-- Más filas de proveedores aquí -->
+            
         </tbody>
     </table>
 </div>
+{% endblock %}
 
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function confirmarEliminacion(id, nombre) {
+        Swal.fire({
+            title: '¿Estás seguro?',
+            html: `¿Deseas eliminar el producto <strong>${nombre}</strong>?<br><small style="color: #6c757d;">Esta acción no se puede deshacer</small>`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar',
+            reverseButtons: true,
+            customClass: {
+                confirmButton: 'swal2-confirm',
+                cancelButton: 'swal2-cancel'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Aquí harías la petición para eliminar el producto
+                // Por ejemplo: window.location.href = `/productos/eliminar/${id}/`;
+                
+                Swal.fire({
+                    title: '¡Eliminado!',
+                    text: `El producto ${nombre} ha sido eliminado correctamente`,
+                    icon: 'success',
+                    confirmButtonText: 'Aceptar',
+                    customClass: {
+                        confirmButton: 'swal2-confirm'
+                    }
+                });
+            }
+        });
+    }
+</script>
 {% endblock %}

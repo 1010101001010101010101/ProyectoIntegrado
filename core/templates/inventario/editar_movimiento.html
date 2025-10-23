@@ -1,0 +1,292 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar Movimiento - Dulcería Lilis{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .page-title {
+        font-size: 2rem;
+        color: var(--text-dark);
+        font-weight: 700;
+    }
+
+    .btn-back {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: white;
+        padding: 0.8rem 1.5rem;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: inline-block;
+        box-shadow: 0 4px 15px rgba(243, 4, 4, 0.3);
+    }
+
+    .btn-back:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 25px rgba(207, 4, 4, 0.5);
+    }
+
+    .options-card {
+        background: white;
+        border-radius: 12px;
+        padding: 3rem;
+        box-shadow: 0 2px 12px var(--shadow);
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .movimiento-info {
+        background: linear-gradient(135deg, rgba(255, 217, 0, 0.1) 0%, rgba(211, 39, 39, 0.1) 100%);
+        border-left: 4px solid var(--primary-dark);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .movimiento-info h3 {
+        color: var(--text-dark);
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin-bottom: 0.8rem;
+    }
+
+    .movimiento-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+    }
+
+    .detail-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+    }
+
+    .detail-label {
+        color: var(--text-gray);
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .detail-value {
+        color: var(--text-dark);
+        font-size: 1rem;
+        font-weight: 600;
+    }
+
+    .alert-info {
+        background: #E8F5E9;
+        border-left: 4px solid #4CAF50;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+    }
+
+    .options-title {
+        font-size: 1.5rem;
+        color: var(--text-dark);
+        font-weight: 600;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+    .steps-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .steps-header {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 2rem;
+        gap: 1rem;
+    }
+
+    .step-indicator {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .step-number-header {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--border);
+        color: var(--text-gray);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+
+    .step-label {
+        font-size: 0.9rem;
+        color: var(--text-gray);
+        font-weight: 600;
+    }
+
+    .step-divider {
+        width: 60px;
+        height: 2px;
+        background: var(--border);
+        margin: 0 0.5rem;
+    }
+
+    .step-card {
+        background: white;
+        border: 2px solid var(--border);
+        border-radius: 12px;
+        padding: 2rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        text-decoration: none;
+        color: var(--text-dark);
+        display: block;
+    }
+
+    .step-card:hover {
+        border-color: #ff1900;
+        box-shadow: 0 4px 16px rgba(255, 25, 0, 0.3);
+        transform: translateY(-2px);
+        background: linear-gradient(135deg, rgba(255, 217, 0, 0.05) 0%, rgba(211, 39, 39, 0.05) 100%);
+    }
+
+    .card-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .card-title {
+        font-size: 1.5rem;
+        color: var(--text-dark);
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .card-description {
+        color: var(--text-gray);
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    .back-button {
+        display: inline-block;
+        margin-top: 2rem;
+        padding: 0.8rem 1.5rem;
+        background: white;
+        color: var(--text-dark);
+        border: 2px solid var(--border);
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .back-button:hover {
+        background: var(--bg-light);
+        border-color: var(--primary);
+    }
+
+    @media (max-width: 768px) {
+        .page-header {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
+        .options-card {
+            padding: 2rem;
+        }
+
+        .steps-header {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .step-divider {
+            width: 2px;
+            height: 40px;
+            margin: 0.5rem 0;
+        }
+
+        .movimiento-details {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">✏️ Editar Movimiento de Inventario</h1>
+    <a href="{% url 'core:lista_movimientos' %}" class="btn-back">← Volver a la lista</a>
+</div>
+
+<div class="movimiento-info">
+    <h3>Información Actual del Movimiento</h3>
+    <div class="movimiento-details">
+        <div class="detail-item">
+            <span class="detail-label">Fecha</span>
+            <span class="detail-value">2025-09-10 09:30</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Tipo</span>
+            <span class="detail-value">Ingreso</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">SKU</span>
+            <span class="detail-value">SKU-0001</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Cantidad</span>
+            <span class="detail-value">+10 UN</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Bodega</span>
+            <span class="detail-value">BOD-CENTRAL</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Doc Ref</span>
+            <span class="detail-value">OC-101</span>
+        </div>
+    </div>
+</div>
+
+<div class="options-card">
+    <div class="alert-info">
+        <p><strong>ℹ️ Información:</strong> Seleccione el paso del formulario que desea editar. Los cambios se guardarán al finalizar cada paso.</p>
+    </div>
+
+    <h2 class="options-title">Seleccione un paso para editar el movimiento</h2>
+
+    <div class="steps-container">
+        <a href="{% url 'core:movimiento_editar_paso1' %}" class="step-card">
+            <div class="step-number">1</div>
+            <div class="step-content">
+                <div class="step-title">Datos del movimiento</div>
+                <div class="step-description">Edite la fecha, tipo de movimiento, cantidad, producto, proveedor y bodega</div>
+            </div>
+            <div class="step-arrow">→</div>
+        </a>
+    </div>
+
+    <div style="text-align: center;">
+        <a href="{% url 'core:lista_movimientos' %}" class="back-button">← Volver a Movimientos</a>
+    </div>
+</div>
+{% endblock %}

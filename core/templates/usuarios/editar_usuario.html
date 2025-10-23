@@ -137,7 +137,7 @@
     }
 
     .btn-primary {
-        background: linear-gradient(135deg, #FF6B9D 0%, #E64A7A 100%);
+        background: linear-gradient(135deg, #ff0000 0%, #ff0000 100%);
         color: white;
         box-shadow: 0 4px 12px rgba(255, 107, 157, 0.3);
     }
@@ -181,7 +181,7 @@
 
 {% block content %}
 <div class="page-header">
-    <h1 class="page-title">✏️ Editar Usuario</h1>
+    <h1 class="page-title">Editar Usuario</h1>
     <div class="breadcrumb">
         <a href="{% url 'core:dashboard' %}">Dashboard</a> / 
         <a href="{% url 'core:lista_usuarios' %}">Usuarios</a> / 
@@ -191,7 +191,7 @@
 
 <div class="form-card">
     <div class="info-box">
-        <p><strong>ℹ️ Editando:</strong> Jorge Cortés Gallardo (jcortes)</p>
+        <p><strong>ℹ️ Editando:</strong> Keyla Figueroa Morales (kfigueroa)</p>
     </div>
 
     <form method="post">
@@ -200,29 +200,29 @@
             <div class="form-row">
                 <div class="form-group">
                     <label for="username">Username <span class="required">*</span></label>
-                    <input type="text" id="username" name="username" class="form-control" value="jcortes" required>
+                    <input type="text" id="username" name="username" class="form-control" value="kfigueroa" required>
                     <span class="help-text">Debe ser único en el sistema</span>
                 </div>
                 <div class="form-group">
                     <label for="email">Email <span class="required">*</span></label>
-                    <input type="email" id="email" name="email" class="form-control" value="jorge.cortes@lilis.cl" required>
+                    <input type="email" id="email" name="email" class="form-control" value="keyla.figueroa@lilis.cl" required>
                     <span class="help-text">Se usará para notificaciones</span>
                 </div>
             </div>
             <div class="form-row">
                 <div class="form-group">
                     <label for="nombres">Nombres <span class="required">*</span></label>
-                    <input type="text" id="nombres" name="nombres" class="form-control" value="Jorge" required>
+                    <input type="text" id="nombres" name="nombres" class="form-control" value="Keyla" required>
                 </div>
                 <div class="form-group">
                     <label for="apellidos">Apellidos <span class="required">*</span></label>
-                    <input type="text" id="apellidos" name="apellidos" class="form-control" value="Cortés Gallardo" required>
+                    <input type="text" id="apellidos" name="apellidos" class="form-control" value="Figueroa Morales" required>
                 </div>
             </div>
             <div class="form-row">
                 <div class="form-group">
                     <label for="telefono">Teléfono</label>
-                    <input type="tel" id="telefono" name="telefono" class="form-control" value="+56 9 8765 4321">
+                    <input type="tel" id="telefono" name="telefono" class="form-control" value="+56 9 8765 8596">
                 </div>
             </div>
         </div>

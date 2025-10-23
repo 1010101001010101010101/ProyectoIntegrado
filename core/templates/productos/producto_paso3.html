@@ -5,181 +5,557 @@
 {% block extra_css %}
 <style>
     .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
         margin-bottom: 2rem;
     }
+    
     .page-title {
         font-size: 2rem;
         color: var(--text-dark);
         font-weight: 700;
         margin-bottom: 0.5rem;
     }
+    
     .breadcrumb {
         color: var(--text-gray);
         font-size: 0.95rem;
     }
+    
     .breadcrumb a {
-        color: var(--primary);
+        color: #dc2626;
         text-decoration: none;
+        transition: all 0.3s ease;
     }
+    
+    .breadcrumb a:hover {
+        color: #991b1b;
+    }
+    
     .form-card {
         background: white;
         border-radius: 12px;
         padding: 2.5rem;
         box-shadow: 0 2px 12px var(--shadow);
     }
-    .tabs-container {
-        display: flex;
-        gap: 0.5rem;
+    
+    .steps-progress {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 12px var(--shadow);
         margin-bottom: 2rem;
-        border-bottom: 2px solid var(--border);
     }
-    .tab {
-        padding: 1rem 2rem;
-        background: transparent;
-        border: none;
+
+    .steps-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+    }
+
+    .step-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        flex: 1;
+        position: relative;
+        z-index: 2;
+    }
+
+    .step-number {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        background: var(--border);
+        color: var(--text-gray);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.2rem;
+        transition: all 0.3s ease;
+    }
+
+    .step-item.completed .step-number {
+        background: #dc2626;
+        color: white;
+    }
+
+    .step-item.active .step-number {
+        background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+        }
+        50% {
+            box-shadow: 0 4px 20px rgba(220, 38, 38, 0.6);
+        }
+    }
+
+    .step-label {
+        font-size: 0.85rem;
         color: var(--text-gray);
         font-weight: 600;
-        cursor: pointer;
-        border-bottom: 3px solid transparent;
-        transition: all 0.3s;
+        text-align: center;
     }
-    .tab.active {
-        background: #2563eb;
-        color: white;
-        border-radius: 8px 8px 0 0;
+
+    .step-item.active .step-label {
+        color: #dc2626;
+        font-weight: 700;
     }
-    .tab.completed {
-        color: var(--text-dark);
+
+    .progress-line {
+        position: absolute;
+        top: 22px;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--border);
+        z-index: 1;
     }
+
+    .progress-line-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #dc2626 0%, #991b1b 100%);
+        width: 100%;
+        transition: width 0.5s ease;
+    }
+    
     .section-title {
-        font-size: 1.2rem;
-        font-weight: 600;
+        font-size: 1.3rem;
         color: var(--text-dark);
-        margin: 2rem 0 1rem 0;
+        font-weight: 700;
+        margin: 2rem 0 1.5rem 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
     }
+    
     .form-row {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
         gap: 1.5rem;
         margin-bottom: 1.5rem;
     }
+    
     .form-group {
         display: flex;
         flex-direction: column;
+        gap: 0.5rem;
     }
+    
     .form-group label {
         font-weight: 600;
-        margin-bottom: 0.5rem;
         color: var(--text-dark);
-        font-size: 0.9rem;
+        font-size: 0.95rem;
     }
+    
+    .optional {
+        color: var(--text-gray);
+        font-weight: 400;
+        font-size: 0.85rem;
+        margin-left: 0.3rem;
+    }
+    
     .form-control {
-        padding: 0.8rem 1rem;
+        padding: 0.9rem;
         border: 2px solid var(--border);
         border-radius: 8px;
         font-size: 1rem;
+        transition: all 0.3s ease;
     }
+    
     .form-control:focus {
         outline: none;
-        border-color: #2563eb;
+        border-color: #dc2626;
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
     }
-    .info-box {
-        background: #F0F9FF;
-        border: 1px solid #BFDBFE;
-        border-radius: 8px;
-        padding: 1rem;
-        margin-top: 1.5rem;
-        font-size: 0.9rem;
+    
+    .form-control[readonly] {
+        background: #F3F4F6;
+        cursor: not-allowed;
         color: var(--text-gray);
     }
-    .info-box strong {
-        color: var(--text-dark);
+    
+    .info-box {
+        background: #fef2f2;
+        border-left: 4px solid #dc2626;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
     }
+    
+    .info-box p {
+        margin: 0;
+        color: #991b1b;
+        font-size: 0.95rem;
+    }
+    
+    .info-box strong {
+        color: #7f1d1d;
+    }
+    
+    .alert-info {
+        background: #fef2f2;
+        border-left: 4px solid #dc2626;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        font-size: 0.95rem;
+        color: #991b1b;
+    }
+    
+    .readonly-section {
+        background: #FAFAFA;
+        border: 2px dashed var(--border);
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-top: 1rem;
+    }
+    
     .form-actions {
         display: flex;
-        gap: 1rem;
-        justify-content: flex-end;
+        justify-content: space-between;
         margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 2px solid var(--border);
     }
+    
     .btn {
-        padding: 0.8rem 2rem;
+        padding: 0.9rem 1.8rem;
         border: none;
-        border-radius: 8px;
+        border-radius: 10px;
         font-weight: 600;
         cursor: pointer;
-        transition: all 0.3s;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
     }
+    
     .btn-primary {
-        background: #2563eb;
+        background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
         color: white;
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
     }
+    
     .btn-primary:hover {
-        background: #1d4ed8;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
     }
+    
     .btn-secondary {
-        background: white;
+        background: #f5f5f5;
         color: var(--text-dark);
-        border: 2px solid var(--border);
+    }
+    
+    .btn-secondary:hover {
+        background: #e0e0e0;
+    }
+
+    /* Estilos personalizados para SweetAlert2 */
+    .swal2-popup {
+        border-radius: 16px;
+        font-family: inherit;
+    }
+    
+    .swal2-title {
+        color: var(--text-dark);
+        font-size: 1.5rem;
+    }
+    
+    .swal2-html-container {
+        color: var(--text-gray);
+    }
+    
+    .swal2-confirm {
+        background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%) !important;
+        border-radius: 8px;
+        padding: 0.6rem 2rem;
+        font-weight: 600;
+    }
+    
+    .swal2-cancel {
+        background: #f5f5f5 !important;
+        color: var(--text-dark) !important;
+        border-radius: 8px;
+        padding: 0.6rem 2rem;
+        font-weight: 600;
+    }
+
+    @media (max-width: 768px) {
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+        
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
     }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="page-header">
-    <h1 class="page-title">Formulario de Producto</h1>
-    <div class="breadcrumb">
-        <a href="{% url 'core:dashboard' %}">Dashboard</a> / 
-        <a href="{% url 'core:lista_productos' %}">Productos</a> / 
-        Nuevo
+    <div>
+        <h1 class="page-title">Formulario de Producto - Paso 3</h1>
+        <div class="breadcrumb">
+            <a href="{% url 'core:dashboard' %}">Dashboard</a> / 
+            <a href="{% url 'core:lista_productos' %}">Productos</a> / 
+            Nuevo
+        </div>
+    </div>
+    <a href="{% url 'core:lista_productos' %}" class="btn btn-secondary">← Volver</a>
+</div>
+
+<div class="steps-progress">
+    <div class="steps-header">
+        <div class="progress-line">
+            <div class="progress-line-fill"></div>
+        </div>
+        <div class="step-item completed">
+            <div class="step-number">✓</div>
+            <div class="step-label">Identificación y Precios</div>
+        </div>
+        <div class="step-item completed">
+            <div class="step-number">✓</div>
+            <div class="step-label">Stock y Control</div>
+        </div>
+        <div class="step-item active">
+            <div class="step-number">3</div>
+            <div class="step-label">Relaciones</div>
+        </div>
     </div>
 </div>
 
 <div class="form-card">
-    <div class="tabs-container">
-        <a class="tab completed" href="window.location.href='{% url 'core:producto_paso1' %}'">1. Identificación y precios</a>
-        <a class="tab completed" href="window.location.href='{% url 'core:producto_paso2' %}'">2. Stock y control</a>
-        <div class="tab active">3. Relaciones y derivados</div>
+    <div class="alert-info">
+        <p><strong>Último paso:</strong> Complete la información adicional del producto. Los campos marcados como solo lectura se calcularán automáticamente.</p>
     </div>
 
-    <form method="post">
+    <form method="post" id="productoForm" novalidate>
         {% csrf_token %}
         
-        <h3 class="section-title">Relaciones y soporte</h3>
+        <h3 class="section-title">🔗 Relaciones y soporte</h3>
         <div class="form-row">
             <div class="form-group">
-                <label for="imagen_url">imagen_url <span style="font-weight: normal; font-size: 0.85rem;">(opcional)</span></label>
-                <input type="url" id="imagen_url" name="imagen_url" class="form-control" value="{{ data.imagen_url|default:'https://.../foto.jpg' }}" placeholder="https://.../foto.jpg">
+                <label for="imagen_url">URL de Imagen <span class="optional"></span></label>
+                <input type="url" id="imagen_url" name="imagen_url" class="form-control" value="{{ data.imagen_url }}" placeholder="https://ejemplo.com/imagen.jpg">
             </div>
             <div class="form-group">
-                <label for="ficha_tecnica_url">ficha_tecnica_url <span style="font-weight: normal; font-size: 0.85rem;">(opcional)</span></label>
-                <input type="url" id="ficha_tecnica_url" name="ficha_tecnica_url" class="form-control" value="{{ data.ficha_tecnica_url|default:'https://.../ficha.pdf' }}" placeholder="https://.../ficha.pdf">
+                <label for="ficha_tecnica_url">URL de Ficha Técnica <span class="optional"></span></label>
+                <input type="url" id="ficha_tecnica_url" name="ficha_tecnica_url" class="form-control" value="{{ data.ficha_tecnica_url }}" placeholder="https://ejemplo.com/ficha.pdf">
             </div>
         </div>
 
-        <h3 class="section-title">Derivados (solo lectura)</h3>
-        <div class="form-row">
-            <div class="form-group">
-                <label for="stock_actual">stock_actual</label>
-                <input type="number" id="stock_actual" name="stock_actual" class="form-control" value="0" readonly style="background: #F3F4F6;">
-            </div>
-            <div class="form-group">
-                <label for="alerta_bajo_stock">alerta_bajo_stock</label>
-                <input type="text" id="alerta_bajo_stock" name="alerta_bajo_stock" class="form-control" value="SÍ" readonly style="background: #F3F4F6;">
-            </div>
-            <div class="form-group">
-                <label for="alerta_por_vencer">alerta_por_vencer</label>
-                <input type="text" id="alerta_por_vencer" name="alerta_por_vencer" class="form-control" value="NO" readonly style="background: #F3F4F6;">
+        <h3 class="section-title">📊 Campos derivados</h3>
+        <div class="readonly-section">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="stock_actual">Stock Actual</label>
+                    <input type="number" id="stock_actual" name="stock_actual" class="form-control" value="0" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="alerta_bajo_stock">Alerta Bajo Stock</label>
+                    <input type="text" id="alerta_bajo_stock" name="alerta_bajo_stock" class="form-control" value="SÍ" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="alerta_por_vencer">Alerta Por Vencer</label>
+                    <input type="text" id="alerta_por_vencer" name="alerta_por_vencer" class="form-control" value="NO" readonly>
+                </div>
             </div>
         </div>
 
         <div class="info-box">
-            <strong>📌 Nota:</strong> Los campos derivados (stock_actual, alertas) se calculan automáticamente según los movimientos de inventario y no se pueden editar manualmente.
+            <p><strong>Información:</strong> Los campos derivados (stock actual, alertas) se calculan automáticamente según los movimientos de inventario y no se pueden editar manualmente.</p>
         </div>
 
         <div class="form-actions">
-            <a class="btn btn-secondary" href="{% url 'core:lista_productos' %}">Limpiar</a>
-            <button type="submit" class="btn btn-primary">Guardar</button>
+            <a class="btn btn-secondary" href="{% url 'core:producto_paso2' %}">← Anterior</a>
+            <button type="submit" class="btn btn-primary">
+                <span>✓</span> Guardar Producto
+            </button>
         </div>
     </form>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.getElementById('productoForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Obtener valores
+        const imagenUrl = document.getElementById('imagen_url').value.trim();
+        const fichaTecnicaUrl = document.getElementById('ficha_tecnica_url').value.trim();
+        
+        // Validar URL de imagen si está presente
+        if (imagenUrl && !validarURL(imagenUrl)) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'URL de imagen inválida',
+                text: 'Por favor ingrese una URL válida para la imagen',
+                confirmButtonText: 'Corregir',
+                customClass: {
+                    confirmButton: 'swal2-confirm'
+                }
+            });
+            document.getElementById('imagen_url').focus();
+            return;
+        }
+        
+        // Validar URL de ficha técnica si está presente
+        if (fichaTecnicaUrl && !validarURL(fichaTecnicaUrl)) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'URL de ficha técnica inválida',
+                text: 'Por favor ingrese una URL válida para la ficha técnica',
+                confirmButtonText: 'Corregir',
+                customClass: {
+                    confirmButton: 'swal2-confirm'
+                }
+            });
+            document.getElementById('ficha_tecnica_url').focus();
+            return;
+        }
+        
+        // Preparar resumen
+        let resumenHTML = '<div style="text-align: left; margin-top: 1rem;">';
+        
+        if (imagenUrl) {
+            resumenHTML += `<p><strong>🖼️ Imagen:</strong> Configurada</p>`;
+        }
+        
+        if (fichaTecnicaUrl) {
+            resumenHTML += `<p><strong>📄 Ficha técnica:</strong> Configurada</p>`;
+        }
+        
+        if (!imagenUrl && !fichaTecnicaUrl) {
+            resumenHTML += '<p style="color: var(--text-gray);">Sin documentos adicionales</p>';
+        }
+        
+        resumenHTML += '</div>';
+        
+        // Confirmación final antes de guardar
+        Swal.fire({
+            icon: 'question',
+            title: '¿Guardar producto?',
+            html: `
+                <p>Estás a punto de crear un nuevo producto con toda la información ingresada.</p>
+                ${resumenHTML}
+            `,
+            showCancelButton: true,
+            confirmButtonText: '✓ Sí, guardar',
+            cancelButtonText: 'Revisar datos',
+            customClass: {
+                confirmButton: 'swal2-confirm',
+                cancelButton: 'swal2-cancel'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                guardarProducto();
+            }
+        });
+    });
+    
+    function guardarProducto() {
+        Swal.fire({
+            icon: 'success',
+            title: '¡Producto creado exitosamente!',
+            html: 'El producto ha sido guardado correctamente en el sistema',
+            timer: 2000,
+            showConfirmButton: false,
+            timerProgressBar: true,
+            willClose: () => {
+                document.getElementById('productoForm').submit();
+            }
+        });
+    }
+    
+    // Función para validar URLs
+    function validarURL(url) {
+        try {
+            const urlObj = new URL(url);
+            return urlObj.protocol === 'http:' || urlObj.protocol === 'https:';
+        } catch (e) {
+            return false;
+        }
+    }
+    
+    // Validación en tiempo real de URL de imagen
+    document.getElementById('imagen_url').addEventListener('blur', function(e) {
+        const url = e.target.value.trim();
+        if (url && !validarURL(url)) {
+            e.target.style.borderColor = '#dc2626';
+            Swal.fire({
+                icon: 'warning',
+                title: 'URL inválida',
+                text: 'La URL de imagen no es válida',
+                toast: true,
+                position: 'top-end',
+                timer: 3000,
+                showConfirmButton: false
+            });
+        } else {
+            e.target.style.borderColor = '';
+        }
+    });
+    
+    // Validación en tiempo real de URL de ficha técnica
+    document.getElementById('ficha_tecnica_url').addEventListener('blur', function(e) {
+        const url = e.target.value.trim();
+        if (url && !validarURL(url)) {
+            e.target.style.borderColor = '#dc2626';
+            Swal.fire({
+                icon: 'warning',
+                title: 'URL inválida',
+                text: 'La URL de ficha técnica no es válida',
+                toast: true,
+                position: 'top-end',
+                timer: 3000,
+                showConfirmButton: false
+            });
+        } else {
+            e.target.style.borderColor = '';
+        }
+    });
+    
+    // Prevenir edición de campos readonly con un mensaje
+    const readonlyFields = document.querySelectorAll('input[readonly]');
+    readonlyFields.forEach(field => {
+        field.addEventListener('click', function() {
+            Swal.fire({
+                icon: 'info',
+                title: 'Campo de solo lectura',
+                text: 'Este campo se calcula automáticamente y no puede ser editado manualmente',
+                toast: true,
+                position: 'top-end',
+                timer: 2500,
+                showConfirmButton: false
+            });
+        });
+    });
+</script>
 {% endblock %}

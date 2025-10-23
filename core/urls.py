@@ -38,6 +38,8 @@ urlpatterns = [
     path('inventario/crear/paso1/', views.movimiento_paso1, name='movimiento_paso1'),
     path('inventario/crear/paso2/', views.movimiento_paso2, name='movimiento_paso2'),
     path('inventario/crear/paso3/', views.movimiento_paso3, name='movimiento_paso3'),
+    path('inventario/editar/<int:id>/', views.editar_movimiento, name='editar_movimiento'),
+    
 
     # Agregar estas rutas al archivo urls.py existente, dentro de urlpatterns
 
@@ -47,5 +49,6 @@ path('proveedores/crear/', views.crear_proveedor, name='crear_proveedor'),
 path('proveedores/crear/paso1/', views.proveedor_paso1, name='proveedor_paso1'),
 path('proveedores/crear/paso2/', views.proveedor_paso2, name='proveedor_paso2'),
 path('proveedores/crear/paso3/', views.proveedor_paso3, name='proveedor_paso3'),
+
 path('proveedores/editar/<int:id>/', views.editar_proveedor, name='editar_proveedor'),
 ]

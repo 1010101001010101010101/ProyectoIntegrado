@@ -18,7 +18,7 @@
     }
 
     .btn-primary {
-        background: linear-gradient(135deg, #FF6B9D 0%, #E64A7A 100%);
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
         color: white;
         padding: 0.8rem 1.5rem;
         border-radius: 10px;
@@ -28,12 +28,12 @@
         display: inline-flex;
         align-items: center;
         gap: 0.5rem;
-        box-shadow: 0 4px 12px rgba(255, 107, 157, 0.3);
+        box-shadow: 0 4px 15px rgba(243, 4, 4, 0.3);
     }
 
     .btn-primary:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(255, 107, 157, 0.4);
+        box-shadow: 0 6px 25px rgba(207, 4, 4, 0.5);
     }
 
     .filters-bar {
@@ -87,7 +87,10 @@
     .stat-box-value {
         font-size: 1.8rem;
         font-weight: 700;
-        color: var(--primary);
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
     }
 
     .stat-box-label {
@@ -109,7 +112,7 @@
     }
 
     thead {
-        background: linear-gradient(135deg, #FFA07A 0%, #FF7F50 100%);
+        background: linear-gradient(135deg, #ff0000 0%, #ff0000b8 100%);
         color: white;
     }
 
@@ -130,7 +133,7 @@
     }
 
     tbody tr:hover {
-        background-color: #FFF5F7;
+        background: linear-gradient(135deg, rgba(255, 217, 0, 0.05) 0%, rgba(211, 39, 39, 0.05) 100%);
     }
 
     .product-info {
@@ -190,6 +193,7 @@
     .btn-edit:hover {
         background: #1976D2;
         color: white;
+        transform: scale(1.1);
     }
 
     .btn-delete {
@@ -200,6 +204,7 @@
     .btn-delete:hover {
         background: #C62828;
         color: white;
+        transform: scale(1.1);
     }
 
     @media (max-width: 768px) {
@@ -217,12 +222,31 @@
             min-width: 1000px;
         }
     }
+
+    /* Estilos personalizados para SweetAlert2 */
+    .swal2-popup {
+        border-radius: 16px;
+    }
+
+    .swal2-confirm {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%) !important;
+        border-radius: 8px;
+        padding: 0.6rem 2rem;
+        font-weight: 600;
+    }
+
+    .swal2-cancel {
+        background: #6c757d !important;
+        border-radius: 8px;
+        padding: 0.6rem 2rem;
+        font-weight: 600;
+    }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="page-header">
-    <h1 class="page-title">🏷️ Gestión de Productos</h1>
+    <h1 class="page-title">Gestión de Productos</h1>
     <a href="{% url 'core:crear_producto' %}" class="btn-primary">
         <span>➕</span> Nuevo Producto
     </a>
@@ -248,7 +272,7 @@
 </div>
 
 <div class="filters-bar">
-    <input type="text" class="search-input" placeholder="🔍 Buscar por SKU, nombre o categoría...">
+    <input type="text" class="search-input" placeholder="Buscar por SKU, nombre o categoría...">
     <select class="filter-select">
         <option value="">Todas las categorías</option>
         <option value="dulces">Dulces</option>
@@ -282,7 +306,6 @@
             <tr>
                 <td>
                     <div class="product-info">
-                        <span class="product-icon">🍬</span>
                         <div>
                             <strong>Caramelos Surtidos</strong>
                             <div style="font-size: 0.85rem; color: var(--text-gray);">Bolsa 500g</div>
@@ -297,15 +320,13 @@
                 <td>
                     <div class="action-buttons">
                         <a href="{% url 'core:editar_producto' 1 %}" class="btn-icon btn-edit" title="Editar">✏️</a>
-                        <button class="btn-icon btn-delete" title="Eliminar" onclick="confirmarEliminacion('Caramelos Surtidos')">🗑️</button>
+                        <button class="btn-icon btn-delete" title="Eliminar" onclick="confirmarEliminacion(1, 'Caramelos Surtidos')">🗑️</button>
                     </div>
                 </td>
             </tr>
             <tr>
                 <td>
                     <div class="product-info">
-                        <span class="product-icon">🍫</span>
-                        <div>
                             <strong>Chocolate Milka</strong>
                             <div style="font-size: 0.85rem; color: var(--text-gray);">Tableta 100g</div>
                         </div>
@@ -319,14 +340,13 @@
                 <td>
                     <div class="action-buttons">
                         <a href="{% url 'core:editar_producto' 2 %}" class="btn-icon btn-edit" title="Editar">✏️</a>
-                        <button class="btn-icon btn-delete" title="Eliminar" onclick="confirmarEliminacion('Chocolate Milka')">🗑️</button>
+                        <button class="btn-icon btn-delete" title="Eliminar" onclick="confirmarEliminacion(2, 'Chocolate Milka')">🗑️</button>
                     </div>
                 </td>
             </tr>
             <tr>
                 <td>
                     <div class="product-info">
-                        <span class="product-icon">🍭</span>
                         <div>
                             <strong>Chicles Adams</strong>
                             <div style="font-size: 0.85rem; color: var(--text-gray);">Paquete 150g</div>
@@ -341,14 +361,13 @@
                 <td>
                     <div class="action-buttons">
                         <a href="{% url 'core:editar_producto' 3 %}" class="btn-icon btn-edit" title="Editar">✏️</a>
-                        <button class="btn-icon btn-delete" title="Eliminar" onclick="confirmarEliminacion('Chicles Adams')">🗑️</button>
+                        <button class="btn-icon btn-delete" title="Eliminar" onclick="confirmarEliminacion(3, 'Chicles Adams')">🗑️</button>
                     </div>
                 </td>
             </tr>
             <tr>
                 <td>
                     <div class="product-info">
-                        <span class="product-icon">🍬</span>
                         <div>
                             <strong>Caramelos de Menta</strong>
                             <div style="font-size: 0.85rem; color: var(--text-gray);">Bolsa 500g</div>
@@ -363,14 +382,13 @@
                 <td>
                     <div class="action-buttons">
                         <a href="{% url 'core:editar_producto' 4 %}" class="btn-icon btn-edit" title="Editar">✏️</a>
-                        <button class="btn-icon btn-delete" title="Eliminar" onclick="confirmarEliminacion('Caramelos de Menta')">🗑️</button>
+                        <button class="btn-icon btn-delete" title="Eliminar" onclick="confirmarEliminacion(4, 'Caramelos de Menta')">🗑️</button>
                     </div>
                 </td>
             </tr>
             <tr>
                 <td>
                     <div class="product-info">
-                        <span class="product-icon">🍫</span>
                         <div>
                             <strong>Chocolate amargo 70%</strong>
                             <div style="font-size: 0.85rem; color: var(--text-gray);">Tableta 100g</div>
@@ -385,14 +403,13 @@
                 <td>
                     <div class="action-buttons">
                         <a href="{% url 'core:editar_producto' 5 %}" class="btn-icon btn-edit" title="Editar">✏️</a>
-                        <button class="btn-icon btn-delete" title="Eliminar" onclick="confirmarEliminacion('Chocolate amargo 70%')">🗑️</button>
+                        <button class="btn-icon btn-delete" title="Eliminar" onclick="confirmarEliminacion(5, 'Chocolate amargo 70%')">🗑️</button>
                     </div>
                 </td>
             </tr>
             <tr>
                 <td>
                     <div class="product-info">
-                        <span class="product-icon">🍬</span>
                         <div>
                             <strong>Caramelos de Frutas</strong>
                             <div style="font-size: 0.85rem; color: var(--text-gray);">Bolsa 500g</div>
@@ -407,14 +424,13 @@
                 <td>
                     <div class="action-buttons">
                         <a href="{% url 'core:editar_producto' 6 %}" class="btn-icon btn-edit" title="Editar">✏️</a>
-                        <button class="btn-icon btn-delete" title="Eliminar" onclick="confirmarEliminacion('Caramelos de Frutas')">🗑️</button>
+                        <button class="btn-icon btn-delete" title="Eliminar" onclick="confirmarEliminacion(6, 'Caramelos de Frutas')">🗑️</button>
                     </div>
                 </td>
             </tr>
             <tr>
                 <td>
                     <div class="product-info">
-                        <span class="product-icon">🍫</span>
                         <div>
                             <strong>Chocolate con Almendras</strong>
                             <div style="font-size: 0.85rem; color: var(--text-gray);">Tableta 100g</div>
@@ -429,14 +445,13 @@
                 <td>
                     <div class="action-buttons">
                         <a href="{% url 'core:editar_producto' 7 %}" class="btn-icon btn-edit" title="Editar">✏️</a>
-                        <button class="btn-icon btn-delete" title="Eliminar" onclick="confirmarEliminacion('Chocolate con Almendras')">🗑️</button>
+                        <button class="btn-icon btn-delete" title="Eliminar" onclick="confirmarEliminacion(7, 'Chocolate con Almendras')">🗑️</button>
                     </div>
                 </td>
             </tr>
             <tr>
                 <td>
                     <div class="product-info">
-                        <span class="product-icon">🍬</span>
                         <div>
                             <strong>Caramelos de Yogur</strong>
                             <div style="font-size: 0.85rem; color: var(--text-gray);">Bolsa 500g</div>
@@ -451,14 +466,13 @@
                 <td>
                     <div class="action-buttons">
                         <a href="{% url 'core:editar_producto' 8 %}" class="btn-icon btn-edit" title="Editar">✏️</a>
-                        <button class="btn-icon btn-delete" title="Eliminar" onclick="confirmarEliminacion('Caramelos de Yogur')">🗑️</button>
+                        <button class="btn-icon btn-delete" title="Eliminar" onclick="confirmarEliminacion(8, 'Caramelos de Yogur')">🗑️</button>
                     </div>
                 </td>
             </tr>
             <tr>
                 <td>
                     <div class="product-info">
-                        <span class="product-icon">🍫</span>
                         <div>
                             <strong>Chocolate Blanco</strong>
                             <div style="font-size: 0.85rem; color: var(--text-gray);">Tableta 100g</div>
@@ -473,11 +487,47 @@
                 <td>
                     <div class="action-buttons">
                         <a href="{% url 'core:editar_producto' 9 %}" class="btn-icon btn-edit" title="Editar">✏️</a>
-                        <button class="btn-icon btn-delete" title="Eliminar" onclick="confirmarEliminacion('Chocolate Blanco')">🗑️</button>
+                        <button class="btn-icon btn-delete" title="Eliminar" onclick="confirmarEliminacion(9, 'Chocolate Blanco')">🗑️</button>
                     </div>
                 </td>
             </tr>
         </tbody>
     </table>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function confirmarEliminacion(id, nombre) {
+        Swal.fire({
+            title: '¿Estás seguro?',
+            html: `¿Deseas eliminar el producto <strong>${nombre}</strong>?<br><small style="color: #6c757d;">Esta acción no se puede deshacer</small>`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar',
+            reverseButtons: true,
+            customClass: {
+                confirmButton: 'swal2-confirm',
+                cancelButton: 'swal2-cancel'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Aquí harías la petición para eliminar el producto
+                // Por ejemplo: window.location.href = `/productos/eliminar/${id}/`;
+                
+                Swal.fire({
+                    title: '¡Eliminado!',
+                    text: `El producto ${nombre} ha sido eliminado correctamente`,
+                    icon: 'success',
+                    confirmButtonText: 'Aceptar',
+                    customClass: {
+                        confirmButton: 'swal2-confirm'
+                    }
+                });
+            }
+        });
+    }
+</script>
 {% endblock %}

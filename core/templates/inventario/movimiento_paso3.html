@@ -5,160 +5,477 @@
 {% block extra_css %}
 <style>
     .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
         margin-bottom: 2rem;
     }
+    
     .page-title {
         font-size: 2rem;
         color: var(--text-dark);
         font-weight: 700;
         margin-bottom: 0.5rem;
     }
+    
     .breadcrumb {
         color: var(--text-gray);
         font-size: 0.95rem;
     }
+    
     .breadcrumb a {
-        color: var(--primary);
+        color: #dc2626;
         text-decoration: none;
+        transition: all 0.3s ease;
     }
+    
+    .breadcrumb a:hover {
+        color: #991b1b;
+    }
+    
     .form-card {
         background: white;
         border-radius: 12px;
         padding: 2.5rem;
         box-shadow: 0 2px 12px var(--shadow);
     }
-    .tabs-container {
-        display: flex;
-        gap: 0.5rem;
+    
+    .steps-progress {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 12px var(--shadow);
         margin-bottom: 2rem;
-        border-bottom: 2px solid var(--border);
     }
-    .tab {
-        padding: 1rem 2rem;
-        background: transparent;
-        border: none;
+
+    .steps-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+    }
+
+    .step-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        flex: 1;
+        position: relative;
+        z-index: 2;
+    }
+
+    .step-number {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        background: var(--border);
+        color: var(--text-gray);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.2rem;
+        transition: all 0.3s ease;
+    }
+
+    .step-item.completed .step-number {
+        background: #dc2626;
+        color: white;
+    }
+
+    .step-item.active .step-number {
+        background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+        }
+        50% {
+            box-shadow: 0 4px 20px rgba(220, 38, 38, 0.6);
+        }
+    }
+
+    .step-label {
+        font-size: 0.85rem;
         color: var(--text-gray);
         font-weight: 600;
-        cursor: pointer;
-        border-bottom: 3px solid transparent;
-        transition: all 0.3s;
+        text-align: center;
     }
-    .tab.active {
-        background: #2563eb;
-        color: white;
-        border-radius: 8px 8px 0 0;
+
+    .step-item.active .step-label {
+        color: #dc2626;
+        font-weight: 700;
     }
-    .tab.completed {
+
+    .progress-line {
+        position: absolute;
+        top: 22px;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--border);
+        z-index: 1;
+    }
+
+    .progress-line-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #dc2626 0%, #991b1b 100%);
+        width: 100%;
+        transition: width 0.5s ease;
+    }
+    
+    .form-section {
+        margin-bottom: 2rem;
+    }
+    
+    .section-title {
+        font-size: 1.3rem;
         color: var(--text-dark);
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
     }
+    
     .form-row {
         display: grid;
         grid-template-columns: 1fr;
         gap: 1.5rem;
         margin-bottom: 1.5rem;
     }
+    
     .form-group {
         display: flex;
         flex-direction: column;
+        gap: 0.5rem;
     }
+    
     .form-group label {
         font-weight: 600;
-        margin-bottom: 0.5rem;
         color: var(--text-dark);
+        font-size: 0.95rem;
     }
+    
+    .optional {
+        color: var(--text-gray);
+        font-weight: 400;
+        font-size: 0.85rem;
+        margin-left: 0.3rem;
+    }
+    
     .form-control {
-        padding: 0.8rem 1rem;
+        padding: 0.9rem;
         border: 2px solid var(--border);
         border-radius: 8px;
         font-size: 1rem;
+        transition: all 0.3s ease;
     }
+    
     .form-control:focus {
         outline: none;
-        border-color: #2563eb;
+        border-color: #dc2626;
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
     }
+    
     textarea.form-control {
         min-height: 120px;
         resize: vertical;
         font-family: inherit;
     }
+    
+    .info-box {
+        background: #fef2f2;
+        border-left: 4px solid #dc2626;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+    }
+
+    .info-box p {
+        margin: 0;
+        color: #991b1b;
+        font-size: 0.95rem;
+    }
+    
     .form-actions {
         display: flex;
-        gap: 1rem;
-        justify-content: flex-end;
+        justify-content: space-between;
         margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 2px solid var(--border);
     }
+    
     .btn {
-        padding: 0.8rem 2rem;
+        padding: 0.9rem 1.8rem;
         border: none;
-        border-radius: 8px;
+        border-radius: 10px;
         font-weight: 600;
         cursor: pointer;
-        transition: all 0.3s;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
     }
+    
     .btn-primary {
-        background: #2563eb;
+        background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
         color: white;
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
     }
+    
     .btn-primary:hover {
-        background: #1d4ed8;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
     }
+    
     .btn-secondary {
-        background: white;
+        background: #f5f5f5;
         color: var(--text-dark);
-        border: 2px solid var(--border);
+    }
+    
+    .btn-secondary:hover {
+        background: #e0e0e0;
+    }
+    
+    /* Estilos personalizados para SweetAlert2 */
+    .swal2-popup {
+        border-radius: 16px;
+        font-family: inherit;
+    }
+
+    .swal2-title {
+        color: var(--text-dark);
+        font-size: 1.5rem;
+    }
+
+    .swal2-html-container {
+        color: var(--text-gray);
+    }
+
+    .swal2-confirm {
+        background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%) !important;
+        border-radius: 8px;
+        padding: 0.6rem 2rem;
+        font-weight: 600;
+    }
+
+    .swal2-cancel {
+        background: #f5f5f5 !important;
+        color: var(--text-dark) !important;
+        border-radius: 8px;
+        padding: 0.6rem 2rem;
+        font-weight: 600;
+    }
+    
+    @media (max-width: 768px) {
+        .form-actions {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
     }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="page-header">
-    <h1 class="page-title">Registrar movimiento</h1>
-    <div class="breadcrumb">
-        <a href="{% url 'core:dashboard' %}">Dashboard</a> / 
-        <a href="{% url 'core:lista_movimientos' %}">Movimientos</a> / 
-        Nuevo
+    <div>
+        <h1 class="page-title">Registrar Movimiento - Paso 3</h1>
+        <div class="breadcrumb">
+            <a href="{% url 'core:dashboard' %}">Dashboard</a> / 
+            <a href="{% url 'core:lista_movimientos' %}">Movimientos</a> / 
+            Nuevo
+        </div>
+    </div>
+    <a href="{% url 'core:lista_movimientos' %}" class="btn btn-secondary">← Volver</a>
+</div>
+
+<div class="steps-progress">
+    <div class="steps-header">
+        <div class="progress-line">
+            <div class="progress-line-fill"></div>
+        </div>
+        <div class="step-item completed">
+            <div class="step-number">✓</div>
+            <div class="step-label">Datos del Movimiento</div>
+        </div>
+        <div class="step-item completed">
+            <div class="step-number">✓</div>
+            <div class="step-label">Control Avanzado</div>
+        </div>
+        <div class="step-item active">
+            <div class="step-number">3</div>
+            <div class="step-label">Referencias</div>
+        </div>
     </div>
 </div>
 
 <div class="form-card">
-    <div class="tabs-container">
-        <a class="tab completed" href="{% url 'core:movimiento_paso1' %}">1. Datos del movimiento</a>
-        <a class="tab completed" href="{% url 'core:movimiento_paso2' %}">2. Control avanzado</a>
-         <div class="tab active">3. Referencias/Observaciones</div>
-    </div>
-
-    <form method="post">
+    <form method="post" id="movimientoForm" novalidate>
         {% csrf_token %}
-        <div class="form-row">
-            <div class="form-group">
-                <label for="doc_referencia">doc_referencia</label>
-                <input type="text" id="doc_referencia" name="doc_referencia" class="form-control" 
-                       value="{{ data.doc_referencia|default:'OC-123 / FAC-456 / GUIA-789' }}" 
-                       placeholder="OC-123 / FAC-456 / GUIA-789">
+        
+        <div class="form-section">
+            <h2 class="section-title">Referencias y Documentos</h2>
+            
+            <div class="info-box">
+                <p><strong>Información:</strong> Asocia documentos de referencia relacionados con este movimiento (órdenes de compra, facturas, guías, etc.)</p>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="doc_referencia">Documento de Referencia <span class="optional">(opcional)</span></label>
+                    <input type="text" id="doc_referencia" name="doc_referencia" class="form-control" 
+                           value="{{ data.doc_referencia }}" 
+                           placeholder="Ej: OC-123 / FAC-456 / GUIA-789">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="motivo">Motivo <span class="optional">(opcional)</span></label>
+                    <input type="text" id="motivo" name="motivo" class="form-control" 
+                           value="{{ data.motivo }}" 
+                           placeholder="Ej: Diferencia inventario, devolución cliente, ajuste por merma, etc.">
+                </div>
             </div>
         </div>
 
-        <div class="form-row">
-            <div class="form-group">
-                <label for="motivo">motivo (ajustes/devoluciones)</label>
-                <input type="text" id="motivo" name="motivo" class="form-control" 
-                       value="{{ data.motivo|default:'Diferencia inventario, devolución cliente, etc.' }}" 
-                       placeholder="Diferencia inventario, devolución cliente, etc.">
-            </div>
-        </div>
-
-        <div class="form-row">
-            <div class="form-group">
-                <label for="observaciones">observaciones</label>
-                <textarea id="observaciones" name="observaciones" class="form-control" 
-                          placeholder="Notas de operación, recibo, daño, etc.">{{ data.observaciones|default:'Notas de operación, recibo, daño, etc.' }}</textarea>
+        <div class="form-section">
+            <h2 class="section-title">Observaciones</h2>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="observaciones">Observaciones Generales <span class="optional">(opcional)</span></label>
+                    <textarea id="observaciones" name="observaciones" class="form-control" 
+                              placeholder="Notas adicionales sobre el movimiento: condiciones de recibo, daños, observaciones de calidad, etc.">{{ data.observaciones }}</textarea>
+                </div>
             </div>
         </div>
 
         <div class="form-actions">
-            <a class="btn btn-secondary" href="{% url 'core:lista_movimientos' %}">Limpiar</a>
-             <button type="submit" class="btn btn-primary">Guardar movimiento</button>
+            <a class="btn btn-secondary" href="{% url 'core:movimiento_paso2' %}">← Anterior</a>
+            <button type="submit" class="btn btn-primary">
+                <span>✓</span> Guardar Movimiento
+            </button>
         </div>
     </form>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    // Validación y confirmación del formulario
+    document.getElementById('movimientoForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Obtener valores
+        const docReferencia = document.getElementById('doc_referencia').value.trim();
+        const motivo = document.getElementById('motivo').value.trim();
+        const observaciones = document.getElementById('observaciones').value.trim();
+        
+        // Preparar resumen
+        let resumenHTML = '<div style="text-align: left; margin-top: 1rem;">';
+        
+        if (docReferencia) {
+            resumenHTML += `<p><strong>Documento:</strong> ${docReferencia}</p>`;
+        }
+        
+        if (motivo) {
+            resumenHTML += `<p><strong>Motivo:</strong> ${motivo}</p>`;
+        }
+        
+        if (observaciones) {
+            const obsCorta = observaciones.length > 60 
+                ? observaciones.substring(0, 60) + '...' 
+                : observaciones;
+            resumenHTML += `<p><strong>Observaciones:</strong> ${obsCorta}</p>`;
+        }
+        
+        if (!docReferencia && !motivo && !observaciones) {
+            resumenHTML += '<p style="color: var(--text-gray);">Sin información adicional registrada</p>';
+        }
+        
+        resumenHTML += '</div>';
+        
+        // Confirmación final antes de guardar
+        Swal.fire({
+            icon: 'question',
+            title: '¿Guardar movimiento?',
+            html: `
+                <p>Estás a punto de completar el registro del movimiento.</p>
+                ${resumenHTML}
+            `,
+            showCancelButton: true,
+            confirmButtonText: '✓ Sí, guardar',
+            cancelButtonText: 'Cancelar',
+            customClass: {
+                confirmButton: 'swal2-confirm',
+                cancelButton: 'swal2-cancel'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Mostrar mensaje de éxito con progreso
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Movimiento registrado exitosamente!',
+                    html: 'Los datos han sido guardados correctamente',
+                    timer: 2000,
+                    showConfirmButton: false,
+                    timerProgressBar: true,
+                    willClose: () => {
+                        // Enviar el formulario
+                        document.getElementById('movimientoForm').submit();
+                    }
+                });
+            }
+        });
+    });
+    
+    // Validación en tiempo real para campos de texto
+    const inputs = ['doc_referencia', 'motivo'];
+    inputs.forEach(inputId => {
+        const input = document.getElementById(inputId);
+        if (input) {
+            input.addEventListener('input', function(e) {
+                // Eliminar espacios múltiples
+                e.target.value = e.target.value.replace(/\s+/g, ' ');
+            });
+        }
+    });
+    
+    // Contador de caracteres para observaciones
+    const observaciones = document.getElementById('observaciones');
+    if (observaciones) {
+        observaciones.addEventListener('input', function(e) {
+            const length = e.target.value.length;
+            const maxLength = 500; // Límite sugerido
+            
+            if (length > maxLength) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Texto muy largo',
+                    text: `Las observaciones son muy extensas (${length} caracteres). Considera resumir la información.`,
+                    timer: 2000,
+                    showConfirmButton: false,
+                    toast: true,
+                    position: 'top-end'
+                });
+            }
+        });
+    }
+    
+
+</script>
 {% endblock %}

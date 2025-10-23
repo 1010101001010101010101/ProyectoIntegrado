@@ -64,9 +64,19 @@
     }
 
     .step-item.active .step-number {
-        background: linear-gradient(135deg, #87CEEB 0%, #4682B4 100%);
+        background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
         color: white;
-        box-shadow: 0 4px 12px rgba(135, 206, 235, 0.4);
+        box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+        }
+        50% {
+            box-shadow: 0 4px 20px rgba(76, 175, 80, 0.6);
+        }
     }
 
     .step-label {
@@ -77,7 +87,7 @@
     }
 
     .step-item.active .step-label {
-        color: #4682B4;
+        color: #4CAF50;
         font-weight: 700;
     }
 
@@ -93,8 +103,8 @@
 
     .progress-line-fill {
         height: 100%;
-        background: linear-gradient(90deg, #87CEEB 0%, #4682B4 100%);
-        width: 66%;
+        background: linear-gradient(90deg, #4CAF50 0%, #45a049 100%);
+        width: 100%;
         transition: width 0.5s ease;
     }
 
@@ -164,8 +174,8 @@
     select:focus,
     textarea:focus {
         outline: none;
-        border-color: #87CEEB;
-        box-shadow: 0 0 0 3px rgba(135, 206, 235, 0.1);
+        border-color: #4CAF50;
+        box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
     }
 
     .checkbox-group {
@@ -173,20 +183,23 @@
         align-items: center;
         gap: 0.8rem;
         padding: 1rem;
-        background: #F0F8FF;
+        background: #E8F5E9;
         border-radius: 8px;
         cursor: pointer;
         transition: all 0.2s ease;
+        border: 2px solid transparent;
     }
 
     .checkbox-group:hover {
-        background: #E3F2FD;
+        background: #C8E6C9;
+        border-color: #4CAF50;
     }
 
     .checkbox-group input[type="checkbox"] {
         width: 20px;
         height: 20px;
         cursor: pointer;
+        accent-color: #4CAF50;
     }
 
     .checkbox-group label {
@@ -196,8 +209,8 @@
     }
 
     .info-box {
-        background: #FFF9E6;
-        border-left: 4px solid #FFC107;
+        background: #E8F5E9;
+        border-left: 4px solid #4CAF50;
         padding: 1rem;
         border-radius: 8px;
         margin-bottom: 1.5rem;
@@ -205,7 +218,7 @@
 
     .info-box p {
         margin: 0;
-        color: #856404;
+        color: #2E7D32;
         font-size: 0.95rem;
     }
 
@@ -243,10 +256,10 @@
     }
 
     .btn-add {
-        background: #E3F2FD;
-        color: #1976D2;
+        background: #E8F5E9;
+        color: #2E7D32;
         padding: 0.8rem 1.5rem;
-        border: 2px dashed #1976D2;
+        border: 2px dashed #4CAF50;
         border-radius: 8px;
         font-weight: 600;
         cursor: pointer;
@@ -258,7 +271,7 @@
     }
 
     .btn-add:hover {
-        background: #1976D2;
+        background: #4CAF50;
         color: white;
         border-style: solid;
     }
@@ -308,6 +321,36 @@
         box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
     }
 
+    /* Estilos personalizados para SweetAlert2 */
+    .swal2-popup {
+        border-radius: 16px;
+        font-family: inherit;
+    }
+
+    .swal2-title {
+        color: var(--text-dark);
+        font-size: 1.5rem;
+    }
+
+    .swal2-html-container {
+        color: var(--text-gray);
+    }
+
+    .swal2-confirm {
+        background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%) !important;
+        border-radius: 8px;
+        padding: 0.6rem 2rem;
+        font-weight: 600;
+    }
+
+    .swal2-cancel {
+        background: #f5f5f5 !important;
+        color: var(--text-dark) !important;
+        border-radius: 8px;
+        padding: 0.6rem 2rem;
+        font-weight: 600;
+    }
+
     @media (max-width: 768px) {
         .form-row {
             grid-template-columns: 1fr;
@@ -322,7 +365,7 @@
 
 {% block content %}
 <div class="page-header">
-    <h1 class="page-title">🏢 Crear Proveedor - Paso 3</h1>
+    <h1 class="page-title">Crear Proveedor - Paso 3</h1>
     <a href="{% url 'core:crear_proveedor' %}" class="btn-secondary">← Volver</a>
 </div>
 
@@ -346,52 +389,42 @@
     </div>
 </div>
 
-<form method="POST" class="form-container">
+<form method="POST" class="form-container" id="proveedorForm" novalidate>
     {% csrf_token %}
     
     <div class="form-section">
-        <h2 class="section-title">🔗 Relación con productos</h2>
+        <h2 class="section-title">Relación con productos</h2>
         
         <div class="info-box">
-            <p>💡 <strong>Información:</strong> Puedes definir qué productos son suministrados por este proveedor, así como condiciones específicas de costo y tiempo de entrega.</p>
+            <p><strong>Información:</strong> Puedes definir qué productos son suministrados por este proveedor, así como condiciones específicas de costo y tiempo de entrega.</p>
         </div>
 
         <div class="form-row">
             <div class="form-group">
                 <div class="checkbox-group">
                     <input type="checkbox" id="es_proveedor_preferente" name="es_proveedor_preferente" value="1" {% if data.es_proveedor_preferente == '1' %}checked{% endif %}>
-                    <label for="es_proveedor_preferente">⭐ Marcar como proveedor preferente</label>
+                    <label for="es_proveedor_preferente">Marcar como proveedor preferente</label>
                 </div>
             </div>
         </div>
 
         <div class="form-row">
             <div class="form-group">
-                <label for="lead_time">Lead Time (días) <span class="optional">(opcional)</span></label>
+                <label for="lead_time">Lead Time (días) <span class="optional"></span></label>
                 <input type="number" id="lead_time" name="lead_time" placeholder="7" min="0" value="{{ data.lead_time }}">
             </div>
             
             <div class="form-group">
-                <label for="pedido_minimo">Pedido Mínimo <span class="optional">(opcional)</span></label>
+                <label for="pedido_minimo">Pedido Mínimo <span class="optional"></span></label>
                 <input type="number" id="pedido_minimo" name="pedido_minimo" placeholder="10000" min="0" step="0.01" value="{{ data.pedido_minimo }}">
             </div>
             
-            <div class="form-group">
-                <label for="calificacion">Calificación <span class="optional">(opcional)</span></label>
-                <select id="calificacion" name="calificacion">
-                    <option value="">Sin calificación</option>
-                    <option value="5" {% if data.calificacion == '5' %}selected{% endif %}>⭐⭐⭐⭐⭐ Excelente</option>
-                    <option value="4" {% if data.calificacion == '4' %}selected{% endif %}>⭐⭐⭐⭐ Muy bueno</option>
-                    <option value="3" {% if data.calificacion == '3' %}selected{% endif %}>⭐⭐⭐ Bueno</option>
-                    <option value="2" {% if data.calificacion == '2' %}selected{% endif %}>⭐⭐ Regular</option>
-                    <option value="1" {% if data.calificacion == '1' %}selected{% endif %}>⭐ Deficiente</option>
-                </select>
-            </div>
+            
         </div>
     </div>
 
     <div class="form-section">
-        <h2 class="section-title">📦 Productos asociados</h2>
+        <h2 class="section-title">Productos asociados</h2>
         
         <div class="productos-table">
             <table>
@@ -414,32 +447,32 @@
             </table>
         </div>
         
-        <button type="button" class="btn-add">
+        <button type="button" class="btn-add" onclick="agregarProducto()">
             <span>➕</span> Agregar producto
         </button>
     </div>
 
     <div class="form-section">
-        <h2 class="section-title">📝 Observaciones</h2>
+        <h2 class="section-title">Observaciones</h2>
         
         <div class="form-row">
             <div class="form-group full-width">
-                <label for="observaciones">Observaciones generales <span class="optional">(opcional)</span></label>
+                <label for="observaciones">Observaciones generales <span class="optional"></span></label>
                 <textarea id="observaciones" name="observaciones" rows="5" placeholder="Notas adicionales sobre el proveedor, acuerdos especiales, historial, etc.">{{ data.observaciones }}</textarea>
             </div>
         </div>
     </div>
 
     <div class="form-section">
-        <h2 class="section-title">⚙️ Estado del proveedor</h2>
+        <h2 class="section-title">Estado del proveedor</h2>
         
         <div class="form-row">
             <div class="form-group">
                 <label for="estado">Estado</label>
                 <select id="estado" name="estado">
-                    <option value="activo" {% if data.estado == 'activo' or not data.estado %}selected{% endif %}>✅ Activo</option>
-                    <option value="bloqueado" {% if data.estado == 'bloqueado' %}selected{% endif %}>🚫 Bloqueado</option>
-                    <option value="inactivo" {% if data.estado == 'inactivo' %}selected{% endif %}>⏸️ Inactivo</option>
+                    <option value="activo" {% if data.estado == 'activo' or not data.estado %}selected{% endif %}>Activo</option>
+                    <option value="bloqueado" {% if data.estado == 'bloqueado' %}selected{% endif %}>Bloqueado</option>
+                    <option value="inactivo" {% if data.estado == 'inactivo' %}selected{% endif %}>Inactivo</option>
                 </select>
             </div>
         </div>
@@ -452,4 +485,126 @@
         </button>
     </div>
 </form>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    // Función para agregar producto (puedes expandir esta funcionalidad)
+    function agregarProducto() {
+        Swal.fire({
+            icon: 'info',
+            title: 'Funcionalidad en desarrollo',
+            html: 'La asociación de productos estará disponible próximamente.<br><br>Por ahora puedes continuar guardando el proveedor.',
+            confirmButtonText: 'Entendido',
+            customClass: {
+                confirmButton: 'swal2-confirm'
+            }
+        });
+    }
+
+    // Validación del formulario
+    document.getElementById('proveedorForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Obtener valores
+        const leadTime = document.getElementById('lead_time').value.trim();
+        const pedidoMinimo = document.getElementById('pedido_minimo').value.trim();
+        const estado = document.getElementById('estado').value;
+        
+        // Validar Lead Time si está presente
+        if (leadTime && parseFloat(leadTime) < 0) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Lead Time inválido',
+                text: 'El Lead Time no puede ser negativo',
+                confirmButtonText: 'Corregir',
+                customClass: {
+                    confirmButton: 'swal2-confirm'
+                }
+            });
+            document.getElementById('lead_time').focus();
+            return;
+        }
+        
+        // Validar Pedido Mínimo si está presente
+        if (pedidoMinimo && parseFloat(pedidoMinimo) < 0) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Pedido Mínimo inválido',
+                text: 'El pedido mínimo no puede ser negativo',
+                confirmButtonText: 'Corregir',
+                customClass: {
+                    confirmButton: 'swal2-confirm'
+                }
+            });
+            document.getElementById('pedido_minimo').focus();
+            return;
+        }
+        
+        // Confirmación final antes de guardar
+        Swal.fire({
+            icon: 'question',
+            title: '¿Guardar proveedor?',
+            html: `
+                <p>Estás a punto de crear un nuevo proveedor.</p>
+                <p><strong>Estado:</strong> ${estado === 'activo' ? '✅ Activo' : estado === 'bloqueado' ? '🚫 Bloqueado' : '⏸️ Inactivo'}</p>
+            `,
+            showCancelButton: true,
+            confirmButtonText: '✓ Sí, guardar',
+            cancelButtonText: 'Cancelar',
+            customClass: {
+                confirmButton: 'swal2-confirm',
+                cancelButton: 'swal2-cancel'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Mostrar mensaje de éxito con progreso
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Proveedor creado exitosamente!',
+                    html: 'Todos los datos han sido guardados correctamente',
+                    timer: 2000,
+                    showConfirmButton: false,
+                    timerProgressBar: true,
+                    willClose: () => {
+                        // Enviar el formulario
+                        document.getElementById('proveedorForm').submit();
+                    }
+                });
+            }
+        });
+    });
+
+    // Validación en tiempo real para Lead Time
+    document.getElementById('lead_time').addEventListener('input', function(e) {
+        const valor = parseFloat(e.target.value);
+        if (valor < 0) {
+            e.target.value = 0;
+        }
+    });
+
+    // Validación en tiempo real para Pedido Mínimo
+    document.getElementById('pedido_minimo').addEventListener('input', function(e) {
+        const valor = parseFloat(e.target.value);
+        if (valor < 0) {
+            e.target.value = 0;
+        }
+    });
+
+    // Animación de confeti al marcar como preferente
+    document.getElementById('es_proveedor_preferente').addEventListener('change', function(e) {
+        if (e.target.checked) {
+            Swal.fire({
+                icon: 'success',
+                title: '⭐ Proveedor Preferente',
+                text: 'Este proveedor ha sido marcado como preferente',
+                timer: 1500,
+                showConfirmButton: false,
+                toast: true,
+                position: 'top-end'
+            });
+        }
+    });
+</script>
 {% endblock %}

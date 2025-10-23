@@ -5,209 +5,670 @@
 {% block extra_css %}
 <style>
     .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
         margin-bottom: 2rem;
     }
+    
     .page-title {
         font-size: 2rem;
         color: var(--text-dark);
         font-weight: 700;
         margin-bottom: 0.5rem;
     }
+    
     .breadcrumb {
         color: var(--text-gray);
         font-size: 0.95rem;
     }
+    
     .breadcrumb a {
-        color: var(--primary);
+        color: #dc2626;
         text-decoration: none;
+        transition: color 0.3s;
     }
+    
+    .breadcrumb a:hover {
+        color: #991b1b;
+    }
+    
     .form-card {
         background: white;
         border-radius: 12px;
         padding: 2.5rem;
         box-shadow: 0 2px 12px var(--shadow);
     }
-    .tabs-container {
-        display: flex;
-        gap: 0.5rem;
+    
+    .steps-progress {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 12px var(--shadow);
         margin-bottom: 2rem;
-        border-bottom: 2px solid var(--border);
     }
-    .tab {
-        padding: 1rem 2rem;
-        background: transparent;
-        border: none;
+
+    .steps-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+    }
+
+    .step-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        flex: 1;
+        position: relative;
+        z-index: 2;
+    }
+
+    .step-number {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        background: var(--border);
+        color: var(--text-gray);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.2rem;
+        transition: all 0.3s ease;
+    }
+
+    .step-item.completed .step-number {
+        background: #dc2626;
+        color: white;
+    }
+
+    .step-item.active .step-number {
+        background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+        }
+        50% {
+            box-shadow: 0 4px 20px rgba(220, 38, 38, 0.6);
+        }
+    }
+
+    .step-label {
+        font-size: 0.85rem;
         color: var(--text-gray);
         font-weight: 600;
-        cursor: pointer;
-        border-bottom: 3px solid transparent;
-        transition: all 0.3s;
+        text-align: center;
     }
-    .tab.active {
-        background: #2563eb;
-        color: white;
-        border-radius: 8px 8px 0 0;
+
+    .step-item.active .step-label {
+        color: #dc2626;
+        font-weight: 700;
     }
-    .tab.completed {
+
+    .progress-line {
+        position: absolute;
+        top: 22px;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--border);
+        z-index: 1;
+    }
+
+    .progress-line-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #dc2626 0%, #991b1b 100%);
+        width: 50%;
+        transition: width 0.5s ease;
+    }
+    
+    .section-title {
+        font-size: 1.3rem;
         color: var(--text-dark);
+        font-weight: 700;
+        margin: 2rem 0 1.5rem 0;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--border);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
     }
+    
     .form-row {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
         gap: 1.5rem;
         margin-bottom: 1.5rem;
     }
+    
     .form-group {
         display: flex;
         flex-direction: column;
     }
+    
     .form-group label {
         font-weight: 600;
         margin-bottom: 0.5rem;
         color: var(--text-dark);
+        font-size: 0.95rem;
     }
+    
+    .label-optional {
+        font-weight: normal;
+        color: var(--text-gray);
+        font-size: 0.85rem;
+    }
+    
+    .checkbox-container {
+        background: #fef2f2;
+        border: 2px solid #fee2e2;
+        border-radius: 8px;
+        padding: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .checkbox-container:hover {
+        background: #fee2e2;
+        border-color: #dc2626;
+    }
+    
+    .checkbox-container.checked {
+        background: #dcfce7;
+        border-color: #4CAF50;
+    }
+    
     .checkbox-group {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
-        margin-bottom: 1rem;
-    }
-    .checkbox-group input[type="checkbox"] {
-        width: 20px;
-        height: 20px;
+        gap: 0.8rem;
         cursor: pointer;
     }
-    .checkbox-label {
-        font-size: 0.9rem;
-        color: var(--text-gray);
+    
+    .checkbox-group input[type="checkbox"] {
+        width: 22px;
+        height: 22px;
+        cursor: pointer;
+        accent-color: #dc2626;
     }
+    
+    .checkbox-label {
+        font-size: 0.95rem;
+        color: var(--text-dark);
+        font-weight: 500;
+        cursor: pointer;
+        user-select: none;
+    }
+    
     .form-control {
-        padding: 0.8rem 1rem;
+        padding: 0.9rem;
         border: 2px solid var(--border);
         border-radius: 8px;
         font-size: 1rem;
+        transition: all 0.3s ease;
     }
+    
     .form-control:focus {
         outline: none;
-        border-color: #2563eb;
+        border-color: #dc2626;
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
     }
+    
+    .form-control:disabled {
+        background: #F3F4F6;
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+    
+    .info-box {
+        background: #fef2f2;
+        border-left: 4px solid #dc2626;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+    }
+    
+    .info-box p {
+        margin: 0;
+        color: #991b1b;
+        font-size: 0.95rem;
+    }
+    
     .help-text {
-        font-size: 0.85rem;
-        color: var(--text-gray);
-        margin-top: 1rem;
+        background: #fef2f2;
+        border-left: 4px solid #dc2626;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-top: 1.5rem;
+        color: #991b1b;
+        font-size: 0.9rem;
     }
+    
     .form-actions {
         display: flex;
-        gap: 1rem;
-        justify-content: flex-end;
+        justify-content: space-between;
         margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 2px solid var(--border);
     }
+    
     .btn {
-        padding: 0.8rem 2rem;
+        padding: 0.9rem 1.8rem;
         border: none;
-        border-radius: 8px;
+        border-radius: 10px;
         font-weight: 600;
         cursor: pointer;
-        transition: all 0.3s;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
     }
+    
     .btn-primary {
-        background: #2563eb;
+        background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
         color: white;
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
     }
+    
     .btn-primary:hover {
-        background: #1d4ed8;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
     }
+    
     .btn-secondary {
-        background: white;
+        background: #f5f5f5;
         color: var(--text-dark);
-        border: 2px solid var(--border);
+    }
+    
+    .btn-secondary:hover {
+        background: #e0e0e0;
+    }
+
+    /* Estilos personalizados para SweetAlert2 */
+    .swal2-popup {
+        border-radius: 16px;
+        font-family: inherit;
+    }
+    
+    .swal2-title {
+        color: var(--text-dark);
+        font-size: 1.5rem;
+    }
+    
+    .swal2-html-container {
+        color: var(--text-gray);
+    }
+    
+    .swal2-confirm {
+        background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%) !important;
+        border-radius: 8px;
+        padding: 0.6rem 2rem;
+        font-weight: 600;
+    }
+    
+    .swal2-cancel {
+        background: #f5f5f5 !important;
+        color: var(--text-dark) !important;
+        border-radius: 8px;
+        padding: 0.6rem 2rem;
+        font-weight: 600;
+    }
+
+    @media (max-width: 768px) {
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+        
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
     }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="page-header">
-    <h1 class="page-title">Registrar movimiento</h1>
-    <div class="breadcrumb">
-        <a href="{% url 'core:dashboard' %}">Dashboard</a> / 
-        <a href="{% url 'core:lista_movimientos' %}">Movimientos</a> / 
-        Nuevo
+    <div>
+        <h1 class="page-title">Registrar Movimiento - Paso 2</h1>
+        <div class="breadcrumb">
+            <a href="{% url 'core:dashboard' %}">Dashboard</a> / 
+            <a href="{% url 'core:lista_movimientos' %}">Movimientos</a> / 
+            Nuevo
+        </div>
+    </div>
+    <a href="{% url 'core:lista_movimientos' %}" class="btn btn-secondary">← Volver</a>
+</div>
+
+<div class="steps-progress">
+    <div class="steps-header">
+        <div class="progress-line">
+            <div class="progress-line-fill"></div>
+        </div>
+        <div class="step-item completed">
+            <div class="step-number">✓</div>
+            <div class="step-label">Datos del Movimiento</div>
+        </div>
+        <div class="step-item active">
+            <div class="step-number">2</div>
+            <div class="step-label">Control Avanzado</div>
+        </div>
+        <div class="step-item">
+            <div class="step-number">3</div>
+            <div class="step-label">Referencias</div>
+        </div>
     </div>
 </div>
 
 <div class="form-card">
-    <div class="tabs-container">
-        <a class="tab completed" href="{% url 'core:movimiento_paso1' %}">1. Datos del movimiento</a>
-        <div class="tab active">2. Control avanzado</div>
-        <div class="tab">3. Referencias/Observaciones</div>
+    <div class="info-box">
+        <p><strong> Control avanzado:</strong> Configure opciones adicionales para el control de inventario como lotes, series y fechas de vencimiento.</p>
     </div>
 
-    <form method="post">
+    <form method="post" id="movimientoForm" novalidate>
         {% csrf_token %}
+        
+        <h3 class="section-title">⚙️ Opciones de Control</h3>
         <div class="form-row">
             <div class="form-group">
-                <label>manejo por lotes</label>
-                <div class="checkbox-group">
-                    <input type="checkbox" id="manejo_lotes" name="manejo_lotes" value="1" 
-                           {% if data.manejo_lotes == '1' %}checked{% endif %}>
-                    <span class="checkbox-label">0 (no)</span>
+                <label>Manejo por Lotes <span class="label-optional">(opcional)</span></label>
+                <div class="checkbox-container" id="lotes-container">
+                    <div class="checkbox-group" onclick="toggleCheckbox('manejo_lotes')">
+                        <input type="checkbox" id="manejo_lotes" name="manejo_lotes" value="1" 
+                               {% if data.manejo_lotes == '1' %}checked{% endif %}>
+                        <span class="checkbox-label" id="lotes-label">Sin manejo por lotes</span>
+                    </div>
                 </div>
             </div>
             <div class="form-group">
-                <label>manejo por series</label>
-                <div class="checkbox-group">
-                    <input type="checkbox" id="manejo_series" name="manejo_series" value="1"
-                           {% if data.manejo_series == '1' %}checked{% endif %}>
-                    <span class="checkbox-label">0 (no)</span>
+                <label>Manejo por Series <span class="label-optional">(opcional)</span></label>
+                <div class="checkbox-container" id="series-container">
+                    <div class="checkbox-group" onclick="toggleCheckbox('manejo_series')">
+                        <input type="checkbox" id="manejo_series" name="manejo_series" value="1"
+                               {% if data.manejo_series == '1' %}checked{% endif %}>
+                        <span class="checkbox-label" id="series-label">Sin manejo por series</span>
+                    </div>
                 </div>
             </div>
             <div class="form-group">
-                <label>perecible (vencimiento)</label>
-                <div class="checkbox-group">
-                    <input type="checkbox" id="perecible" name="perecible" value="1"
-                           {% if data.perecible == '1' %}checked{% endif %}>
-                    <span class="checkbox-label">0 (no)</span>
+                <label>Producto Perecedero <span class="label-optional">(opcional)</span></label>
+                <div class="checkbox-container" id="perecible-container">
+                    <div class="checkbox-group" onclick="toggleCheckbox('perecible')">
+                        <input type="checkbox" id="perecible" name="perecible" value="1"
+                               {% if data.perecible == '1' %}checked{% endif %}>
+                        <span class="checkbox-label" id="perecible-label">No perecedero</span>
+                    </div>
                 </div>
             </div>
         </div>
 
+        <h3 class="section-title">Datos Específicos</h3>
         <div class="form-row">
             <div class="form-group">
-                <label for="lote">lote</label>
+                <label for="lote">Número de Lote <span class="label-optional">(opcional)</span></label>
                 <input type="text" id="lote" name="lote" class="form-control" 
-                       value="{{ data.lote|default:'L-2025-001' }}" placeholder="L-2025-001">
+                       value="{{ data.lote }}" placeholder="Ej: L-2025-001">
             </div>
             <div class="form-group">
-                <label for="serie">serie</label>
+                <label for="serie">Número de Serie <span class="label-optional">(opcional)</span></label>
                 <input type="text" id="serie" name="serie" class="form-control" 
-                       value="{{ data.serie|default:'SN123456789' }}" placeholder="SN123456789">
+                       value="{{ data.serie }}" placeholder="Ej: SN123456789">
             </div>
             <div class="form-group">
-                <label for="fecha_vencimiento">fecha_vencimiento</label>
+                <label for="fecha_vencimiento">Fecha de Vencimiento <span class="label-optional">(opcional)</span></label>
                 <input type="date" id="fecha_vencimiento" name="fecha_vencimiento" class="form-control" 
-                       value="{{ data.fecha_vencimiento }}" placeholder="dd-mm-aaaa">
+                       value="{{ data.fecha_vencimiento }}">
             </div>
         </div>
 
-        <p class="help-text">Las banderas (lote/serie/vencimiento) normalmente vienen desde la ficha del producto; aquí se permiten por demo.</p>
+        <p class="help-text"><strong>Nota:</strong> Las opciones de control (lote/serie/vencimiento) normalmente se heredan de la configuración del producto. Aquí se permiten modificar para propósitos de demostración.</p>
 
         <div class="form-actions">
-            <a class="btn btn-secondary" href="{% url 'core:lista_movimientos' %}">Limpiar</a>
-            <button type="submit" class="btn btn-primary">Guardar movimiento</button>
+            <a class="btn btn-secondary" href="{% url 'core:movimiento_paso1' %}">← Anterior</a>
+            <button type="submit" class="btn btn-primary">
+                <span>→</span> Guardar y Continuar
+            </button>
         </div>
     </form>
 </div>
+{% endblock %}
 
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    // Actualizar texto de los checkboxes
-    document.getElementById('manejo_lotes').addEventListener('change', function() {
-        this.nextElementSibling.textContent = this.checked ? '1 (sí)' : '0 (no)';
+    // Función para alternar checkbox
+    function toggleCheckbox(id) {
+        const checkbox = document.getElementById(id);
+        checkbox.checked = !checkbox.checked;
+        updateCheckboxLabel(id);
+        updateCheckboxContainer(id);
+        habilitarCamposRelacionados();
+        event.stopPropagation();
+    }
+
+    // Actualizar etiqueta del checkbox
+    function updateCheckboxLabel(id) {
+        const checkbox = document.getElementById(id);
+        const label = document.getElementById(id + '-label');
+        
+        switch(id) {
+            case 'manejo_lotes':
+                label.textContent = checkbox.checked ? '✓ Con manejo por lotes' : 'Sin manejo por lotes';
+                break;
+            case 'manejo_series':
+                label.textContent = checkbox.checked ? '✓ Con manejo por series' : 'Sin manejo por series';
+                break;
+            case 'perecible':
+                label.textContent = checkbox.checked ? 'Producto perecedero' : 'No perecedero';
+                break;
+        }
+    }
+
+    // Actualizar contenedor del checkbox
+    function updateCheckboxContainer(id) {
+        const checkbox = document.getElementById(id);
+        const container = document.getElementById(id + '-container');
+        
+        if (checkbox.checked) {
+            container.classList.add('checked');
+        } else {
+            container.classList.remove('checked');
+        }
+    }
+
+    // Habilitar/deshabilitar campos relacionados
+    function habilitarCamposRelacionados() {
+        const manejoLotes = document.getElementById('manejo_lotes').checked;
+        const manejoSeries = document.getElementById('manejo_series').checked;
+        const perecible = document.getElementById('perecible').checked;
+        
+        // Campo Lote
+        const loteInput = document.getElementById('lote');
+        loteInput.disabled = !manejoLotes;
+        if (!manejoLotes) loteInput.value = '';
+        
+        // Campo Serie
+        const serieInput = document.getElementById('serie');
+        serieInput.disabled = !manejoSeries;
+        if (!manejoSeries) serieInput.value = '';
+        
+        // Campo Fecha Vencimiento
+        const vencimientoInput = document.getElementById('fecha_vencimiento');
+        vencimientoInput.disabled = !perecible;
+        if (!perecible) vencimientoInput.value = '';
+    }
+
+    // Inicializar estados al cargar
+    document.addEventListener('DOMContentLoaded', function() {
+        updateCheckboxLabel('manejo_lotes');
+        updateCheckboxLabel('manejo_series');
+        updateCheckboxLabel('perecible');
+        updateCheckboxContainer('manejo_lotes');
+        updateCheckboxContainer('manejo_series');
+        updateCheckboxContainer('perecible');
+        habilitarCamposRelacionados();
+        
+        
+        
     });
-    document.getElementById('manejo_series').addEventListener('change', function() {
-        this.nextElementSibling.textContent = this.checked ? '1 (sí)' : '0 (no)';
+
+    // Validación del formulario
+    document.getElementById('movimientoForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Obtener valores
+        const manejoLotes = document.getElementById('manejo_lotes').checked;
+        const manejoSeries = document.getElementById('manejo_series').checked;
+        const perecible = document.getElementById('perecible').checked;
+        const lote = document.getElementById('lote').value.trim();
+        const serie = document.getElementById('serie').value.trim();
+        const fechaVencimiento = document.getElementById('fecha_vencimiento').value.trim();
+        
+        // Validar Lote si está habilitado
+        if (manejoLotes && !lote) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Lote requerido',
+                text: 'Si habilita el manejo por lotes, debe ingresar el número de lote',
+                confirmButtonText: 'Entendido',
+                customClass: {
+                    confirmButton: 'swal2-confirm'
+                }
+            });
+            document.getElementById('lote').focus();
+            return;
+        }
+        
+        // Validar Serie si está habilitado
+        if (manejoSeries && !serie) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Serie requerida',
+                text: 'Si habilita el manejo por series, debe ingresar el número de serie',
+                confirmButtonText: 'Entendido',
+                customClass: {
+                    confirmButton: 'swal2-confirm'
+                }
+            });
+            document.getElementById('serie').focus();
+            return;
+        }
+        
+        // Validar Fecha de Vencimiento si está habilitado
+        if (perecible && !fechaVencimiento) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Fecha de vencimiento requerida',
+                text: 'Si marca el producto como perecedero, debe ingresar la fecha de vencimiento',
+                confirmButtonText: 'Entendido',
+                customClass: {
+                    confirmButton: 'swal2-confirm'
+                }
+            });
+            document.getElementById('fecha_vencimiento').focus();
+            return;
+        }
+        
+        // Validar que la fecha de vencimiento no sea pasada
+        if (fechaVencimiento) {
+            const fechaVenc = new Date(fechaVencimiento);
+            const fechaActual = new Date();
+            fechaActual.setHours(0, 0, 0, 0);
+            
+            if (fechaVenc < fechaActual) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Fecha de vencimiento inválida',
+                    text: 'La fecha de vencimiento no puede ser anterior a hoy',
+                    confirmButtonText: 'Corregir',
+                    customClass: {
+                        confirmButton: 'swal2-confirm'
+                    }
+                });
+                document.getElementById('fecha_vencimiento').focus();
+                return;
+            }
+            
+            // Advertencia si vence pronto (menos de 30 días)
+            const diasRestantes = Math.ceil((fechaVenc - fechaActual) / (1000 * 60 * 60 * 24));
+            if (diasRestantes <= 30) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: ' Producto próximo a vencer',
+                    html: `El producto vence en <strong>${diasRestantes}</strong> día${diasRestantes !== 1 ? 's' : ''}.<br><br>¿Desea continuar?`,
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí, continuar',
+                    cancelButtonText: 'Revisar',
+                    customClass: {
+                        confirmButton: 'swal2-confirm',
+                        cancelButton: 'swal2-cancel'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        guardarMovimiento();
+                    }
+                });
+                return;
+            }
+        }
+        
+        // Si pasa todas las validaciones, guardar
+        guardarMovimiento();
     });
-    document.getElementById('perecible').addEventListener('change', function() {
-        this.nextElementSibling.textContent = this.checked ? '1 (sí)' : '0 (no)';
+    
+    function guardarMovimiento() {
+        // Preparar resumen de configuración
+        const manejoLotes = document.getElementById('manejo_lotes').checked;
+        const manejoSeries = document.getElementById('manejo_series').checked;
+        const perecible = document.getElementById('perecible').checked;
+        
+        let configuracion = [];
+        if (manejoLotes) configuracion.push('Lotes');
+        if (manejoSeries) configuracion.push('Series');
+        if (perecible) configuracion.push('Perecedero');
+        
+        const textoConfig = configuracion.length > 0 
+            ? configuracion.join(', ') 
+            : 'Sin controles adicionales';
+        
+        Swal.fire({
+            icon: 'success',
+            title: '✓ Paso 2 completado',
+            html: `<p>Control configurado: <strong>${textoConfig}</strong></p><p>Avanzando al último paso...</p>`,
+            timer: 2000,
+            showConfirmButton: false,
+            timerProgressBar: true,
+            willClose: () => {
+                document.getElementById('movimientoForm').submit();
+            }
+        });
+    }
+    
+    // Validación en tiempo real para campos de texto
+    document.getElementById('lote').addEventListener('input', function(e) {
+        e.target.value = e.target.value.toUpperCase().replace(/\s+/g, '-');
+    });
+    
+    document.getElementById('serie').addEventListener('input', function(e) {
+        e.target.value = e.target.value.toUpperCase().replace(/\s+/g, '');
     });
 </script>
 {% endblock %}

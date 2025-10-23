@@ -5,6 +5,9 @@
 {% block extra_css %}
 <style>
     .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
         margin-bottom: 2rem;
     }
 
@@ -21,8 +24,13 @@
     }
 
     .breadcrumb a {
-        color: var(--primary);
+        color: #dc2626;
         text-decoration: none;
+        transition: color 0.3s;
+    }
+
+    .breadcrumb a:hover {
+        color: #991b1b;
     }
 
     .form-card {
@@ -39,10 +47,13 @@
     .section-title {
         font-size: 1.3rem;
         color: var(--text-dark);
-        font-weight: 600;
+        font-weight: 700;
         margin-bottom: 1.5rem;
         padding-bottom: 0.8rem;
         border-bottom: 2px solid var(--border);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
     }
 
     .form-row {
@@ -60,17 +71,17 @@
     .form-group label {
         margin-bottom: 0.5rem;
         color: var(--text-dark);
-        font-weight: 500;
+        font-weight: 600;
         font-size: 0.95rem;
     }
 
     .required {
-        color: var(--danger);
+        color: #dc2626;
         margin-left: 0.2rem;
     }
 
     .form-control {
-        padding: 0.8rem 1rem;
+        padding: 0.9rem;
         border: 2px solid var(--border);
         border-radius: 8px;
         font-size: 1rem;
@@ -80,13 +91,14 @@
 
     .form-control:focus {
         outline: none;
-        border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(255, 107, 157, 0.1);
+        border-color: #dc2626;
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
     }
 
     .form-control:disabled {
         background-color: #F5F5F5;
         cursor: not-allowed;
+        opacity: 0.6;
     }
 
     select.form-control {
@@ -98,64 +110,84 @@
         min-height: 100px;
     }
 
+    .checkbox-container {
+        background: #fef2f2;
+        border: 2px solid #fee2e2;
+        border-radius: 8px;
+        padding: 1rem;
+        transition: all 0.3s ease;
+        margin-bottom: 1rem;
+    }
+
+    .checkbox-container:hover {
+        background: #fee2e2;
+        border-color: #dc2626;
+    }
+
+    .checkbox-container.checked {
+        background: #dcfce7;
+        border-color: #4CAF50;
+    }
+
     .checkbox-group {
         display: flex;
         align-items: center;
         gap: 0.8rem;
-        padding: 0.8rem 0;
+        cursor: pointer;
     }
 
     .checkbox-group input[type="checkbox"] {
-        width: 20px;
-        height: 20px;
+        width: 22px;
+        height: 22px;
         cursor: pointer;
+        accent-color: #dc2626;
     }
 
     .checkbox-group label {
         margin: 0;
         cursor: pointer;
+        font-weight: 500;
     }
 
     .form-actions {
         display: flex;
-        gap: 1rem;
-        justify-content: flex-end;
+        justify-content: space-between;
         padding-top: 2rem;
         border-top: 2px solid var(--border);
     }
 
     .btn {
-        padding: 0.9rem 2rem;
+        padding: 0.9rem 1.8rem;
         border: none;
-        border-radius: 8px;
+        border-radius: 10px;
         font-size: 1rem;
         font-weight: 600;
         cursor: pointer;
         transition: all 0.3s ease;
         text-decoration: none;
-        display: inline-block;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
     }
 
     .btn-primary {
-        background: linear-gradient(135deg, #FF6B9D 0%, #E64A7A 100%);
+        background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
         color: white;
-        box-shadow: 0 4px 12px rgba(255, 107, 157, 0.3);
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
     }
 
     .btn-primary:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(255, 107, 157, 0.4);
+        box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
     }
 
     .btn-secondary {
-        background: white;
+        background: #f5f5f5;
         color: var(--text-dark);
-        border: 2px solid var(--border);
     }
 
     .btn-secondary:hover {
-        background: var(--bg-light);
-        border-color: var(--text-gray);
+        background: #e0e0e0;
     }
 
     .help-text {
@@ -165,8 +197,8 @@
     }
 
     .info-box {
-        background: #E8F5E9;
-        border-left: 4px solid #4CAF50;
+        background: #fef2f2;
+        border-left: 4px solid #dc2626;
         padding: 1rem;
         border-radius: 8px;
         margin-bottom: 2rem;
@@ -174,31 +206,148 @@
 
     .info-box p {
         margin: 0;
-        color: #2E7D32;
+        color: #991b1b;
+        font-size: 0.95rem;
+    }
+
+    .password-strength {
+        margin-top: 0.5rem;
+        height: 4px;
+        border-radius: 2px;
+        background: var(--border);
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .password-strength-bar {
+        height: 100%;
+        width: 0%;
+        transition: all 0.3s ease;
+    }
+
+    .strength-weak {
+        background: #dc2626;
+        width: 33%;
+    }
+
+    .strength-medium {
+        background: #f59e0b;
+        width: 66%;
+    }
+
+    .strength-strong {
+        background: #16a34a;
+        width: 100%;
+    }
+
+    .password-requirements {
+        font-size: 0.85rem;
+        color: var(--text-gray);
+        margin-top: 0.5rem;
+        display: none;
+    }
+
+    .password-requirements.show {
+        display: block;
+    }
+
+    .requirement {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        margin: 0.3rem 0;
+    }
+
+    .requirement.met {
+        color: #16a34a;
+    }
+
+    .requirement.unmet {
+        color: #dc2626;
+    }
+
+    /* Estilos personalizados para SweetAlert2 */
+    .swal2-popup {
+        border-radius: 16px;
+        font-family: inherit;
+    }
+
+    .swal2-title {
+        color: var(--text-dark);
+        font-size: 1.5rem;
+    }
+
+    .swal2-html-container {
+        color: var(--text-gray);
+    }
+
+    .swal2-confirm {
+        background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%) !important;
+        border-radius: 8px;
+        padding: 0.6rem 2rem;
+        font-weight: 600;
+    }
+
+    .swal2-cancel {
+        background: #f5f5f5 !important;
+        color: var(--text-dark) !important;
+        border-radius: 8px;
+        padding: 0.6rem 2rem;
+        font-weight: 600;
+    }
+
+    @media (max-width: 768px) {
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+
+        .form-actions {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
     }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="page-header">
-    <h1 class="page-title">➕ Crear Nuevo Usuario</h1>
-    <div class="breadcrumb">
-        <a href="{% url 'core:dashboard' %}">Dashboard</a> / 
-        <a href="{% url 'core:lista_usuarios' %}">Usuarios</a> / 
-        Crear
+    <div>
+        <h1 class="page-title">➕ Crear Nuevo Usuario</h1>
+        <div class="breadcrumb">
+            <a href="{% url 'core:dashboard' %}">Dashboard</a> / 
+            <a href="{% url 'core:lista_usuarios' %}">Usuarios</a> / 
+            Crear
+        </div>
     </div>
+    <a href="{% url 'core:lista_usuarios' %}" class="btn btn-secondary">← Volver</a>
 </div>
 
 <div class="form-card">
-    <form id="create-user-form" method="post">
+    <div class="info-box">
+        <p><strong>Información:</strong> Complete todos los campos obligatorios marcados con asterisco (*). El usuario recibirá un email de bienvenida con sus credenciales.</p>
+    </div>
+
+    <form id="create-user-form" method="post" novalidate>
         {% csrf_token %}
+        
         <div class="form-section">
-            <h2 class="section-title">Información de Identificación</h2>
+            <h2 class="section-title"> Información de Identificación</h2>
             <div class="form-row">
                 <div class="form-group">
                     <label for="username">Username <span class="required">*</span></label>
                     <input type="text" id="username" name="username" class="form-control" required>
-                    <span class="help-text">Debe ser único en el sistema</span>
+                    <span class="help-text">Debe ser único en el sistema (sin espacios)</span>
                 </div>
                 <div class="form-group">
                     <label for="email">Email <span class="required">*</span></label>
@@ -218,8 +367,8 @@
             </div>
             <div class="form-row">
                 <div class="form-group">
-                    <label for="telefono">Teléfono</label>
-                    <input type="tel" id="telefono" name="telefono" class="form-control">
+                    <label for="telefono">Teléfono <span style="color: var(--text-gray); font-weight: normal;">(opcional)</span></label>
+                    <input type="tel" id="telefono" name="telefono" class="form-control" placeholder="+56 9 1234 5678">
                 </div>
             </div>
         </div>
@@ -246,9 +395,11 @@
                     </select>
                 </div>
             </div>
-            <div class="checkbox-group">
-                <input type="checkbox" id="mfa_habilitado" name="mfa_habilitado">
-                <label for="mfa_habilitado">Habilitar autenticación de dos factores (MFA)</label>
+            <div class="checkbox-container" id="mfa-container">
+                <div class="checkbox-group" onclick="toggleMFA()">
+                    <input type="checkbox" id="mfa_habilitado" name="mfa_habilitado">
+                    <label for="mfa_habilitado">Habilitar autenticación de dos factores (MFA)</label>
+                </div>
             </div>
         </div>
 
@@ -259,10 +410,31 @@
                     <label for="nueva_password">Contraseña <span class="required">*</span></label>
                     <input type="password" id="nueva_password" name="nueva_password" class="form-control" required>
                     <span class="help-text">Mínimo 12 caracteres</span>
+                    <div class="password-strength">
+                        <div class="password-strength-bar" id="strength-bar"></div>
+                    </div>
+                    <div class="password-requirements" id="password-requirements">
+                        <div class="requirement unmet" id="req-length">
+                            <span>○</span> Al menos 12 caracteres
+                        </div>
+                        <div class="requirement unmet" id="req-upper">
+                            <span>○</span> Al menos una mayúscula
+                        </div>
+                        <div class="requirement unmet" id="req-lower">
+                            <span>○</span> Al menos una minúscula
+                        </div>
+                        <div class="requirement unmet" id="req-number">
+                            <span>○</span> Al menos un número
+                        </div>
+                        <div class="requirement unmet" id="req-special">
+                            <span>○</span> Al menos un carácter especial (!@#$%^&*)
+                        </div>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="confirmar_password">Confirmar Contraseña <span class="required">*</span></label>
                     <input type="password" id="confirmar_password" name="confirmar_password" class="form-control" required>
+                    <span class="help-text" id="password-match"></span>
                 </div>
             </div>
         </div>
@@ -271,21 +443,23 @@
             <h2 class="section-title">Información Adicional</h2>
             <div class="form-row">
                 <div class="form-group">
-                    <label for="area">Área / Unidad</label>
-                    <input type="text" id="area" name="area" class="form-control" value="Administración">
+                    <label for="area">Área / Unidad <span style="color: var(--text-gray); font-weight: normal;">(opcional)</span></label>
+                    <input type="text" id="area" name="area" class="form-control" placeholder="Ej: Administración">
                 </div>
             </div>
             <div class="form-row">
                 <div class="form-group">
-                    <label for="observaciones">Observaciones</label>
-                    <textarea id="observaciones" name="observaciones" class="form-control">Nuevo usuario administrador del sistema</textarea>
+                    <label for="observaciones">Observaciones <span style="color: var(--text-gray); font-weight: normal;">(opcional)</span></label>
+                    <textarea id="observaciones" name="observaciones" class="form-control" placeholder="Información adicional sobre el usuario..."></textarea>
                 </div>
             </div>
         </div>
 
         <div class="form-actions">
-            <a href="{% url 'core:lista_usuarios' %}" class="btn btn-secondary">Cancelar</a>
-            <button type="submit" class="btn btn-primary">Crear Usuario</button>
+            <a href="{% url 'core:lista_usuarios' %}" class="btn btn-secondary">✕ Cancelar</a>
+            <button type="submit" class="btn btn-primary">
+                <span>✓</span> Crear Usuario
+            </button>
         </div>
     </form>
 </div>
@@ -295,43 +469,290 @@
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+    // Toggle MFA checkbox
+    function toggleMFA() {
+        const checkbox = document.getElementById('mfa_habilitado');
+        checkbox.checked = !checkbox.checked;
+        updateMFAContainer();
+        event.stopPropagation();
+    }
+
+    function updateMFAContainer() {
+        const checkbox = document.getElementById('mfa_habilitado');
+        const container = document.getElementById('mfa-container');
+        
+        if (checkbox.checked) {
+            container.classList.add('checked');
+            Swal.fire({
+                icon: 'info',
+                title: 'MFA Habilitado',
+                text: 'El usuario deberá configurar la autenticación de dos factores en su primer inicio de sesión',
+                timer: 2000,
+                showConfirmButton: false,
+                toast: true,
+                position: 'top-end'
+            });
+        } else {
+            container.classList.remove('checked');
+        }
+    }
+
+    // Validación de fortaleza de contraseña
+    const passwordInput = document.getElementById('nueva_password');
+    const strengthBar = document.getElementById('strength-bar');
+    const requirements = document.getElementById('password-requirements');
+
+    passwordInput.addEventListener('focus', function() {
+        requirements.classList.add('show');
+    });
+
+    passwordInput.addEventListener('input', function() {
+        const password = this.value;
+        let strength = 0;
+        
+        // Verificar requisitos
+        const hasLength = password.length >= 12;
+        const hasUpper = /[A-Z]/.test(password);
+        const hasLower = /[a-z]/.test(password);
+        const hasNumber = /[0-9]/.test(password);
+        const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+        
+        // Actualizar indicadores
+        updateRequirement('req-length', hasLength);
+        updateRequirement('req-upper', hasUpper);
+        updateRequirement('req-lower', hasLower);
+        updateRequirement('req-number', hasNumber);
+        updateRequirement('req-special', hasSpecial);
+        
+        // Calcular fortaleza
+        if (hasLength) strength++;
+        if (hasUpper) strength++;
+        if (hasLower) strength++;
+        if (hasNumber) strength++;
+        if (hasSpecial) strength++;
+        
+        // Actualizar barra de fortaleza
+        strengthBar.className = 'password-strength-bar';
+        if (strength <= 2) {
+            strengthBar.classList.add('strength-weak');
+        } else if (strength <= 4) {
+            strengthBar.classList.add('strength-medium');
+        } else {
+            strengthBar.classList.add('strength-strong');
+        }
+        
+        // Verificar coincidencia de contraseñas
+        checkPasswordMatch();
+    });
+
+    function updateRequirement(id, isMet) {
+        const element = document.getElementById(id);
+        if (isMet) {
+            element.classList.remove('unmet');
+            element.classList.add('met');
+            element.querySelector('span').textContent = '✓';
+        } else {
+            element.classList.remove('met');
+            element.classList.add('unmet');
+            element.querySelector('span').textContent = '○';
+        }
+    }
+
+    // Verificar coincidencia de contraseñas
+    const confirmPasswordInput = document.getElementById('confirmar_password');
+    const matchText = document.getElementById('password-match');
+
+    confirmPasswordInput.addEventListener('input', checkPasswordMatch);
+
+    function checkPasswordMatch() {
+        const password = passwordInput.value;
+        const confirmPassword = confirmPasswordInput.value;
+        
+        if (confirmPassword.length === 0) {
+            matchText.textContent = '';
+            matchText.style.color = '';
+            return;
+        }
+        
+        if (password === confirmPassword) {
+            matchText.textContent = '✓ Las contraseñas coinciden';
+            matchText.style.color = '#16a34a';
+        } else {
+            matchText.textContent = '✗ Las contraseñas no coinciden';
+            matchText.style.color = '#dc2626';
+        }
+    }
+
+    // Formatear username (sin espacios, minúsculas)
+    document.getElementById('username').addEventListener('input', function(e) {
+        e.target.value = e.target.value.toLowerCase().replace(/\s+/g, '');
+    });
+
+    // Validación del formulario
     document.getElementById("create-user-form").addEventListener("submit", function(event) {
         event.preventDefault();
 
+        // Obtener valores de los campos
+        const username = document.getElementById("username").value.trim();
+        const email = document.getElementById("email").value.trim();
+        const nombres = document.getElementById("nombres").value.trim();
+        const apellidos = document.getElementById("apellidos").value.trim();
+        const rol = document.getElementById("rol").value;
+        const estado = document.getElementById("estado").value;
         const password = document.getElementById("nueva_password").value;
         const confirmPassword = document.getElementById("confirmar_password").value;
+
+        // Verificar campos vacíos
+        if (!username || !email || !nombres || !apellidos || !rol || !estado || !password || !confirmPassword) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Campos incompletos',
+                text: 'Por favor, completa todos los campos obligatorios marcados con *',
+                confirmButtonText: 'Entendido',
+                customClass: {
+                    confirmButton: 'swal2-confirm'
+                }
+            });
+            return;
+        }
+
+        // Validar username
+        if (username.length < 3) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Username inválido',
+                text: 'El username debe tener al menos 3 caracteres',
+                confirmButtonText: 'Corregir',
+                customClass: {
+                    confirmButton: 'swal2-confirm'
+                }
+            });
+            document.getElementById('username').focus();
+            return;
+        }
+
+        // Validar formato de email
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Email inválido',
+                text: 'Por favor ingresa un correo electrónico válido',
+                confirmButtonText: 'Corregir',
+                customClass: {
+                    confirmButton: 'swal2-confirm'
+                }
+            });
+            document.getElementById('email').focus();
+            return;
+        }
+
+        // Validar fortaleza de contraseña
+        if (password.length < 12) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Contraseña débil',
+                text: 'La contraseña debe tener al menos 12 caracteres',
+                confirmButtonText: 'Corregir',
+                customClass: {
+                    confirmButton: 'swal2-confirm'
+                }
+            });
+            document.getElementById('nueva_password').focus();
+            return;
+        }
+
+        const hasUpper = /[A-Z]/.test(password);
+        const hasLower = /[a-z]/.test(password);
+        const hasNumber = /[0-9]/.test(password);
+        const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+
+        if (!hasUpper || !hasLower || !hasNumber || !hasSpecial) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Contraseña insegura',
+                html: 'La contraseña debe contener:<br>• Mayúsculas y minúsculas<br>• Números<br>• Caracteres especiales',
+                confirmButtonText: 'Mejorar contraseña',
+                customClass: {
+                    confirmButton: 'swal2-confirm'
+                }
+            });
+            document.getElementById('nueva_password').focus();
+            return;
+        }
 
         // Verificar que las contraseñas coinciden
         if (password !== confirmPassword) {
             Swal.fire({
                 icon: 'error',
-                title: '¡Error!',
-                text: 'Las contraseñas no coinciden. Por favor verifique.',
+                title: 'Las contraseñas no coinciden',
+                text: 'Por favor verifica que ambas contraseñas sean iguales',
+                confirmButtonText: 'Corregir',
+                customClass: {
+                    confirmButton: 'swal2-confirm'
+                }
             });
+            document.getElementById('confirmar_password').focus();
             return;
         }
 
-        // Verificar que la contraseña tenga al menos 12 caracteres
-        if (password.length < 12) {
-            Swal.fire({
-                icon: 'error',
-                title: '¡Error!',
-                text: 'La contraseña debe tener al menos 12 caracteres.',
-            });
-            return;
-        }
+        // Mostrar confirmación con resumen
+        const rolTexto = {
+            'admin': 'Administrador',
+            'vendedor': 'Vendedor',
+            'almacen': 'Almacén',
+            'contador': 'Contador'
+        };
 
-        // Si pasa las verificaciones, mostrar un mensaje de éxito
+        const estadoTexto = {
+            'ACTIVO': 'Activo',
+            'BLOQUEADO': 'Bloqueado',
+            'INACTIVO': 'Inactivo'
+        };
+
+        const mfaHabilitado = document.getElementById('mfa_habilitado').checked;
+
         Swal.fire({
-            icon: 'success',
-            title: 'Usuario creado correctamente',
-            text: 'El nuevo usuario ha sido creado exitosamente.',
+            icon: 'question',
+            title: '¿Crear usuario?',
+            html: `
+                <div style="text-align: left; margin-top: 1rem;">
+                    <p><strong>Username:</strong> ${username}</p>
+                    <p><strong>Email:</strong> ${email}</p>
+                    <p><strong>Nombre completo:</strong> ${nombres} ${apellidos}</p>
+                    <p><strong>Rol:</strong> ${rolTexto[rol]}</p>
+                    <p><strong>Estado:</strong> ${estadoTexto[estado]}</p>
+                    <p><strong>MFA:</strong> ${mfaHabilitado ? '🔒 Habilitado' : '❌ Deshabilitado'}</p>
+                </div>
+            `,
+            showCancelButton: true,
+            confirmButtonText: '✓ Sí, crear',
+            cancelButtonText: 'Revisar',
+            customClass: {
+                confirmButton: 'swal2-confirm',
+                cancelButton: 'swal2-cancel'
+            }
         }).then((result) => {
             if (result.isConfirmed) {
-                // Redirigir al listado de usuarios
-                window.location.href = "{% url 'core:lista_usuarios' %}";
+                crearUsuario();
             }
         });
     });
+
+    function crearUsuario() {
+        Swal.fire({
+            icon: 'success',
+            title: '✓ Usuario creado exitosamente',
+            html: 'El usuario ha sido registrado en el sistema<br>Se enviará un email de bienvenida',
+            timer: 2000,
+            showConfirmButton: false,
+            timerProgressBar: true,
+            willClose: () => {
+                window.location.href = "{% url 'core:lista_usuarios' %}";
+            }
+        });
+    }
+
+
 </script>
 {% endblock %}

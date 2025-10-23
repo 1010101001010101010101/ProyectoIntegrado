@@ -18,7 +18,7 @@
     }
 
     .btn-primary {
-        background: linear-gradient(135deg, #98D8C8 0%, #5EAAA8 100%);
+        background: linear-gradient(135deg, #ff0000 0%, #ff0000 100%);
         color: white;
         padding: 0.8rem 1.5rem;
         border-radius: 10px;
@@ -116,7 +116,7 @@
     }
 
     thead {
-        background: linear-gradient(135deg, #98D8C8 0%, #5EAAA8 100%);
+        background: linear-gradient(135deg, #ff0000 0%, #ff0000 100%);
         color: white;
     }
 
@@ -219,7 +219,7 @@
 
 {% block content %}
 <div class="page-header">
-    <h1 class="page-title">📦 Movimientos de Inventario</h1>
+    <h1 class="page-title">Movimientos de Inventario</h1>
     <a href="{% url 'core:crear_movimiento' %}" class="btn-primary">
         <span>➕</span> Nuevo Movimiento
     </a>
@@ -245,7 +245,7 @@
 </div>
 
 <div class="filters-bar">
-    <input type="text" class="search-input" placeholder="🔍 Buscar por producto, proveedor o folio...">
+    <input type="text" class="search-input" placeholder="Buscar por producto, proveedor o folio...">
     <select class="filter-select">
         <option value="">Todos los tipos</option>
         <option value="ingreso">Ingreso</option>
@@ -263,114 +263,164 @@
         <thead>
             <tr>
                 <th>Fecha</th>
-                <th>Folio</th>
                 <th>Tipo</th>
-                <th>Producto</th>
+                <th>SKU</th>
                 <th>Proveedor</th>
-                <th>Cantidad</th>
                 <th>Bodega</th>
-                <th>Usuario</th>
+                <th>Cantidad</th>
+                <th>Lote</th>
+                <th>Serie</th>
+                <th>Vence</th>
+                <th>Doc Ref</th>
                 <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
             <tr>
-                <td>20/10/2025 09:30</td>
-                <td><strong>ING-0145</strong></td>
-                <td><span class="badge badge-ingreso">Ingreso</span></td>
-                <td>Caramelos Surtidos</td>
-                <td>Dulces del Sur</td>
-                <td><strong>+150 UN</strong></td>
-                <td>Bodega Principal</td>
-                <td>Jorge Cortés</td>
+                <td>2025-09-10 09:30</td>
+                <td><span class="badge badge-ingreso">ingreso</span></td>
+                <td>SKU-0001</td>
+                <td>76.543.210-5</td>
+                <td>BOD-CENTRAL</td>
+                <td><strong>+10</strong></td>
+                <td>—</td>
+                <td>—</td>
+                <td>—</td>
+                <td>OC-101</td>
                 <td>
                     <div class="action-buttons">
-                        <button class="btn-icon btn-view" title="Ver detalle" onclick="verDetalle('ING-0145')">👁️</button>
+                        <a href="{% url 'core:editar_movimiento' 8 %}" class="btn-icon btn-edit" title="Editar">✏️</a>
+                        <button class="btn-icon btn-delete" title="Eliminar" onclick="confirmarEliminacion(8, 'Caramelos de Yogur')">🗑️</button>
                     </div>
                 </td>
             </tr>
             <tr>
-                <td>19/10/2025 15:20</td>
-                <td><strong>SAL-0234</strong></td>
-                <td><span class="badge badge-salida">Salida</span></td>
-                <td>Chocolate Milka</td>
-                <td>-</td>
-                <td><strong>-45 UN</strong></td>
-                <td>Bodega Principal</td>
-                <td>María López</td>
+                <td>2025-09-10 15:00</td>
+                <td><span class="badge badge-salida">salida</span></td>
+                <td>SKU-0001</td>
+                <td>—</td>
+                <td>BOD-CENTRAL</td>
+                <td><strong>-2</strong></td>
+                <td>—</td>
+                <td>—</td>
+                <td>—</td>
+                <td>FAC-900</td>
                 <td>
                     <div class="action-buttons">
-                        <button class="btn-icon btn-view" title="Ver detalle" onclick="verDetalle('SAL-0234')">👁️</button>
+                        <a href="{% url 'core:editar_movimiento' 8 %}" class="btn-icon btn-edit" title="Editar">✏️</a>
+                        <button class="btn-icon btn-delete" title="Eliminar" onclick="confirmarEliminacion(8, 'Caramelos de Yogur')">🗑️</button>
                     </div>
                 </td>
             </tr>
             <tr>
-                <td>19/10/2025 11:45</td>
-                <td><strong>ING-0144</strong></td>
-                <td><span class="badge badge-ingreso">Ingreso</span></td>
-                <td>Gomitas Ositos</td>
+                <td>2025-09-09 11:45</td>
+                <td><span class="badge badge-ingreso">ingreso</span></td>
+                <td>SKU-0002</td>
                 <td>Choco Andino</td>
-                <td><strong>+200 UN</strong></td>
-                <td>Bodega Principal</td>
-                <td>Pedro Fernández</td>
+                <td>BOD-CENTRAL</td>
+                <td><strong>+200</strong></td>
+                <td>L-2025-09</td>
+                <td>—</td>
+                <td>2026-09-09</td>
+                <td>OC-102</td>
                 <td>
                     <div class="action-buttons">
-                        <button class="btn-icon btn-view" title="Ver detalle" onclick="verDetalle('ING-0144')">👁️</button>
+                        <a href="{% url 'core:editar_movimiento' 8 %}" class="btn-icon btn-edit" title="Editar">✏️</a>
+                        <button class="btn-icon btn-delete" title="Eliminar" onclick="confirmarEliminacion(8, 'Caramelos de Yogur')">🗑️</button>
                     </div>
                 </td>
             </tr>
             <tr>
-                <td>18/10/2025 16:30</td>
-                <td><strong>AJU-0012</strong></td>
-                <td><span class="badge badge-ajuste">Ajuste</span></td>
-                <td>Chicles Trident</td>
-                <td>-</td>
-                <td><strong>-5 UN</strong></td>
-                <td>Bodega Principal</td>
-                <td>Jorge Cortés</td>
+                <td>2025-09-08 16:30</td>
+                <td><span class="badge badge-ajuste">ajuste</span></td>
+                <td>SKU-0003</td>
+                <td>—</td>
+                <td>BOD-CENTRAL</td>
+                <td><strong>-5</strong></td>
+                <td>—</td>
+                <td>—</td>
+                <td>—</td>
+                <td>AJ-012</td>
                 <td>
                     <div class="action-buttons">
-                        <button class="btn-icon btn-view" title="Ver detalle" onclick="verDetalle('AJU-0012')">👁️</button>
+                        <a href="{% url 'core:editar_movimiento' 8 %}" class="btn-icon btn-edit" title="Editar">✏️</a>
+                        <button class="btn-icon btn-delete" title="Eliminar" onclick="confirmarEliminacion(8, 'Caramelos de Yogur')">🗑️</button>
                     </div>
                 </td>
             </tr>
             <tr>
-                <td>18/10/2025 10:15</td>
-                <td><strong>DEV-0008</strong></td>
-                <td><span class="badge badge-devolucion">Devolución</span></td>
-                <td>Chupetes Lollipop</td>
+                <td>2025-09-08 10:15</td>
+                <td><span class="badge badge-devolucion">devolución</span></td>
+                <td>SKU-0004</td>
                 <td>Golo Global</td>
-                <td><strong>+20 UN</strong></td>
-                <td>Bodega Principal</td>
-                <td>María López</td>
+                <td>BOD-CENTRAL</td>
+                <td><strong>+20</strong></td>
+                <td>L-2025-08</td>
+                <td>—</td>
+                <td>2026-08-08</td>
+                <td>DEV-008</td>
                 <td>
                     <div class="action-buttons">
-                        <button class="btn-icon btn-view" title="Ver detalle" onclick="verDetalle('DEV-0008')">👁️</button>
+                        <a href="{% url 'core:editar_movimiento' 8 %}" class="btn-icon btn-edit" title="Editar">✏️</a>
+                        <button class="btn-icon btn-delete" title="Eliminar" onclick="confirmarEliminacion(8, 'Caramelos de Yogur')">🗑️</button>
                     </div>
                 </td>
             </tr>
             <tr>
-                <td>17/10/2025 14:00</td>
-                <td><strong>TRA-0003</strong></td>
-                <td><span class="badge badge-transferencia">Transferencia</span></td>
-                <td>Caramelos Surtidos</td>
-                <td>-</td>
-                <td><strong>50 UN</strong></td>
-                <td>Bodega 2</td>
-                <td>Pedro Fernández</td>
+                <td>2025-09-07 14:00</td>
+                <td><span class="badge badge-transferencia">transferencia</span></td>
+                <td>SKU-0001</td>
+                <td>—</td>
+                <td>BOD-SUCURSAL-2</td>
+                <td><strong>50</strong></td>
+                <td>—</td>
+                <td>—</td>
+                <td>—</td>
+                <td>TRA-003</td>
                 <td>
                     <div class="action-buttons">
-                        <button class="btn-icon btn-view" title="Ver detalle" onclick="verDetalle('TRA-0003')">👁️</button>
+                        <a href="{% url 'core:editar_movimiento' 8 %}" class="btn-icon btn-edit" title="Editar">✏️</a>
+                        <button class="btn-icon btn-delete" title="Eliminar" onclick="confirmarEliminacion(8, 'Caramelos de Yogur')">🗑️</button>
                     </div>
                 </td>
             </tr>
         </tbody>
     </table>
 </div>
+{% endblock %}
 
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    function verDetalle(folio) {
-        alert(`Ver detalle del movimiento ${folio} (simulacion PENKA)`);
+    function confirmarEliminacion(id, nombre) {
+        Swal.fire({
+            title: '¿Estás seguro?',
+            html: `¿Deseas eliminar el producto <strong>${nombre}</strong>?<br><small style="color: #6c757d;">Esta acción no se puede deshacer</small>`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar',
+            reverseButtons: true,
+            customClass: {
+                confirmButton: 'swal2-confirm',
+                cancelButton: 'swal2-cancel'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Aquí harías la petición para eliminar el producto
+                // Por ejemplo: window.location.href = `/productos/eliminar/${id}/`;
+                
+                Swal.fire({
+                    title: '¡Eliminado!',
+                    text: `El producto ${nombre} ha sido eliminado correctamente`,
+                    icon: 'success',
+                    confirmButtonText: 'Aceptar',
+                    customClass: {
+                        confirmButton: 'swal2-confirm'
+                    }
+                });
+            }
+        });
     }
 </script>
 {% endblock %}
