@@ -7,10 +7,12 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 
-from django.shortcuts import render
+# ===============================================
+# AUTENTICACIÓN
+# ===============================================
 
 def login_view(request):
-    # Si ya está autenticado, redirigir al dashboard
+    """Vista de inicio de sesión"""
     if request.user.is_authenticated:
         return redirect('core:dashboard')
     
@@ -18,92 +20,154 @@ def login_view(request):
         username = request.POST.get('username', '').strip()
         password = request.POST.get('password', '')
         remember = request.POST.get('remember')
-        
-        # Autenticar usuario
+
         user = authenticate(request, username=username, password=password)
-        
+
         if user is not None:
-            # Usuario autenticado correctamente
             login(request, user)
-            
-            # Configurar duración de sesión según "Recordarme"
+
+            # Sesión expira al cerrar el navegador si no se marca "Recordarme"
             if not remember:
-                # Sesión expira al cerrar el navegador
                 request.session.set_expiry(0)
             else:
-                # Sesión dura 2 semanas
-                request.session.set_expiry(1209600)  # 14 días en segundos
-            
-            # Redirigir al dashboard
-            messages.success(request, f'¡Bienvenido de vuelta, {user.get_full_name() or user.username}!')
+                request.session.set_expiry(1209600)  # 14 días
+
+            messages.success(request, f'¡Bienvenido, {user.get_full_name() or user.username}!')
             return redirect('core:dashboard')
         else:
-            # Credenciales inválidas
             messages.error(request, 'Usuario o contraseña incorrectos')
-            return render(request, 'login.html', {
-                'error': True,
-                'username': username  # Mantener el username en el formulario
-            })
-    
-    return render(request, 'login.html')
+            return render(request, 'auth/login.html', {'username': username})
+
+    return render(request, 'auth/login.html')
 
 
 @login_required
 def dashboard(request):
+    """Página principal después del login"""
     return render(request, 'dashboard.html')
 
+
+@login_required
 def logout_view(request):
+    """Cerrar sesión"""
     logout(request)
-    messages.info(request, 'Has cerrado sesión correctamente')
+    messages.info(request, 'Has cerrado sesión correctamente.')
     return redirect('core:login')
 
+
 def recuperar_password(request):
-    return render(request, 'recuperar_password.html')
+    return render(request, 'auth/recuperar_password.html')
 
 def validar_token(request, token=None):
-    return render(request, 'validar_token.html', {'token': token})
+    return render(request, 'auth/validar_token.html', {'token': token})
 
 def nueva_password(request):
-    return render(request, 'nueva_password.html')
+    return render(request, 'auth/nueva_password.html')
 
-def dashboard(request):
-    return render(request, 'dashboard.html')
 
+# ===============================================
+# USUARIOS
+# ===============================================
+
+@login_required
 def lista_usuarios(request):
-    return render(request, 'usuarios/lista.html')
+    return render(request, 'usuarios/lista_usuarios.html')
 
+@login_required
 def crear_usuario(request):
-    return render(request, 'usuarios/crear.html')
+    return render(request, 'usuarios/crear_usuario.html')
 
+@login_required
 def editar_usuario(request, id):
-    return render(request, 'usuarios/editar.html', {'id': id})
+    return render(request, 'usuarios/editar_usuario.html', {'id': id})
 
+
+# ===============================================
+# PRODUCTOS
+# ===============================================
+
+@login_required
 def lista_productos(request):
-    return render(request, 'productos/lista.html')
+    return render(request, 'productos/lista_productos.html')
 
+@login_required
 def crear_producto(request):
-    return render(request, 'productos/crear.html')
+    return render(request, 'productos/crear_producto.html')
 
-def producto_paso1(request):
-    return render(request, 'productos/paso1.html')
-
-def producto_paso2(request):
-    return render(request, 'productos/paso2.html')
-
-def producto_paso3(request):
-    return render(request, 'productos/paso3.html')
-
+@login_required
 def editar_producto(request, id):
-    return render(request, 'productos/editar.html', {'id': id})
+    return render(request, 'productos/editar_producto.html', {'id': id})
 
+@login_required
+def producto_paso1(request):
+    return render(request, 'productos/producto_paso1.html')
+
+@login_required
+def producto_paso2(request):
+    return render(request, 'productos/producto_paso2.html')
+
+@login_required
+def producto_paso3(request):
+    return render(request, 'productos/producto_paso3.html')
+
+
+# ===============================================
+# PROVEEDORES
+# ===============================================
+
+@login_required
 def lista_proveedores(request):
-    return render(request, 'proveedores/lista.html')
+    return render(request, 'proveedores/lista_proveedores.html')
 
+@login_required
 def crear_proveedor(request):
-    return render(request, 'proveedores/crear.html')
+    return render(request, 'proveedores/crear_proveedor.html')
 
+@login_required
 def editar_proveedor(request, id):
-    return render(request, 'proveedores/editar.html', {'id': id})
+    return render(request, 'proveedores/editar_proveedor.html', {'id': id})
+
+@login_required
+def proveedor_paso1(request):
+    return render(request, 'proveedores/proveedor_paso1.html')
+
+@login_required
+def proveedor_paso2(request):
+    return render(request, 'proveedores/proveedor_paso2.html')
+
+@login_required
+def proveedor_paso3(request):
+    return render(request, 'proveedores/proveedor_paso3.html')
+
+
+# ===============================================
+# INVENTARIO
+# ===============================================
+
+@login_required
+def lista_movimientos(request):
+    return render(request, 'inventario/lista_movimientos.html')
+
+@login_required
+def crear_movimiento(request):
+    return render(request, 'inventario/crear_movimiento.html')
+
+@login_required
+def editar_movimiento(request, id):
+    return render(request, 'inventario/editar_movimiento.html', {'id': id})
+
+@login_required
+def movimiento_paso1(request):
+    return render(request, 'inventario/movimiento_paso1.html')
+
+@login_required
+def movimiento_paso2(request):
+    return render(request, 'inventario/movimiento_paso2.html')
+
+@login_required
+def movimiento_paso3(request):
+    return render(request, 'inventario/movimiento_paso3.html')
+
 
 # ===============================================
 # MODELO: Usuario Extendido
