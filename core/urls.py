@@ -5,8 +5,8 @@ app_name = 'core'
 
 urlpatterns = [
     path('', views.login_view, name='login'),
+    path('logout/', views.logout_view, name='logout'),
 # Autenticación
-    path('', views.login_view, name='login'),
     path('recuperar-password/', views.recuperar_password, name='recuperar_password'),
     path('validar-token/', views.validar_token, name='validar_token'),
     path('validar-token/<str:token>/', views.validar_token, name='validar_token_param'),

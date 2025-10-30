@@ -235,11 +235,12 @@
                 <div class="form-group">
                     <label for="username" class="form-label">Correo electrónico</label>
                     <input 
-                        type="email" 
+                        type="text" 
                         id="username" 
                         name="username" 
                         class="form-control" 
-                        placeholder="usuario@dominio.com"
+                        placeholder="Ingresa tu username"
+                        value="{{ username|default:'' }}"
                         autofocus
                     >
                 </div>
