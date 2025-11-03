@@ -6,9 +6,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY
 SECRET_KEY = config('DJANGO_SECRET_KEY', default='django-insecure-temp-key')
-DEBUG = config('DJANGO_DEBUG', default=True, cast=bool)
-ALLOWED_HOSTS = config('DJANGO_ALLOWED_HOSTS', default='').split(',')
-
+DEBUG = True
+ALLOWED_HOSTS = ['3.223.202.82', 'localhost', '127.0.0.1']
+CSRF_TRUSTED_ORIGINS = [o.strip() for o in config('DJANGO_CSRF_TRUSTED_ORIGINS', default='').split(',') if o.strip()]
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
