@@ -1,16 +1,27 @@
-from django.db import models
-from django.contrib.auth.models import User
-from django.core.validators import MinValueValidator, MaxValueValidator
-from decimal import Decimal
-from django.shortcuts import render, redirect
+# core/views.py
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.contrib.auth.models import User
+from django.db import transaction
+from django.utils import timezone
+from decimal import Decimal
+
+from .models import (
+    Usuario, Producto, Proveedor, ProductoProveedor, 
+    Bodega, MovimientoInventario, Categoria
+)
+from .forms import (
+    UsuarioForm, ProductoPaso1Form, ProductoPaso2Form, ProductoPaso3Form,
+    ProveedorPaso1Form, ProveedorPaso2Form, ProveedorPaso3Form,
+    MovimientoPaso1Form, MovimientoPaso2Form, MovimientoPaso3Form
+)
+
 
 # ===============================================
 # AUTENTICACIÓN
 # ===============================================
-
 def login_view(request):
     """Vista de inicio de sesión"""
     if request.user.is_authenticated:
@@ -32,6 +43,11 @@ def login_view(request):
             else:
                 request.session.set_expiry(1209600)  # 14 días
 
+            # Actualizar último acceso
+            if hasattr(user, 'perfil'):
+                user.perfil.ultimo_acceso = timezone.now()
+                user.perfil.save()
+
             messages.success(request, f'¡Bienvenido, {user.get_full_name() or user.username}!')
             return redirect('core:dashboard')
         else:
@@ -44,7 +60,14 @@ def login_view(request):
 @login_required
 def dashboard(request):
     """Página principal después del login"""
-    return render(request, 'dashboard.html')
+    context = {
+        'total_usuarios': Usuario.objects.filter(user__is_active=True).count(),
+        'total_productos': Producto.objects.filter(activo=True).count(),
+        'total_proveedores': Proveedor.objects.filter(estado='ACTIVO').count(),
+        'total_movimientos': MovimientoInventario.objects.count(),
+        'productos_bajo_stock': Producto.objects.filter(alerta_bajo_stock=True).count(),
+    }
+    return render(request, 'dashboard.html', context)
 
 
 @login_required
@@ -58,485 +81,522 @@ def logout_view(request):
 def recuperar_password(request):
     return render(request, 'auth/recuperar_password.html')
 
+
 def validar_token(request, token=None):
     return render(request, 'auth/validar_token.html', {'token': token})
+
 
 def nueva_password(request):
     return render(request, 'auth/nueva_password.html')
 
 
 # ===============================================
-# USUARIOS
+# USUARIOS - CRUD COMPLETO
 # ===============================================
-
 @login_required
 def lista_usuarios(request):
-    return render(request, 'usuarios/lista_usuarios.html')
+    """Listar todos los usuarios"""
+    usuarios = Usuario.objects.select_related('user').all()
+    return render(request, 'usuarios/lista_usuarios.html', {'usuarios': usuarios})
+
 
 @login_required
+@transaction.atomic
 def crear_usuario(request):
-    return render(request, 'usuarios/crear_usuario.html')
+    """Crear nuevo usuario"""
+    if request.method == 'POST':
+        form = UsuarioForm(request.POST)
+        if form.is_valid():
+            # Crear usuario de Django
+            user = User.objects.create_user(
+                username=form.cleaned_data['username'],
+                email=form.cleaned_data['email'],
+                password=form.cleaned_data['password'],
+                first_name=form.cleaned_data['nombres'],
+                last_name=form.cleaned_data['apellidos']
+            )
+            
+            # Crear perfil de usuario
+            usuario = form.save(commit=False)
+            usuario.user = user
+            usuario.save()
+            
+            messages.success(request, f'Usuario {user.username} creado exitosamente')
+            return redirect('core:lista_usuarios')
+        else:
+            for error in form.errors.values():
+                messages.error(request, error)
+    else:
+        form = UsuarioForm()
+    
+    return render(request, 'usuarios/crear_usuario.html', {'form': form})
+
 
 @login_required
+@transaction.atomic
 def editar_usuario(request, id):
-    return render(request, 'usuarios/editar_usuario.html', {'id': id})
+    """Editar usuario existente"""
+    usuario = get_object_or_404(Usuario, pk=id)
+    
+    if request.method == 'POST':
+        form = UsuarioForm(request.POST, instance=usuario)
+        if form.is_valid():
+            # Actualizar usuario de Django
+            user = usuario.user
+            user.username = form.cleaned_data['username']
+            user.email = form.cleaned_data['email']
+            user.first_name = form.cleaned_data['nombres']
+            user.last_name = form.cleaned_data['apellidos']
+            
+            # Si se proporcionó nueva contraseña
+            if form.cleaned_data.get('password'):
+                user.set_password(form.cleaned_data['password'])
+            
+            user.save()
+            
+            # Actualizar perfil
+            form.save()
+            
+            messages.success(request, f'Usuario {user.username} actualizado exitosamente')
+            return redirect('core:lista_usuarios')
+        else:
+            for error in form.errors.values():
+                messages.error(request, error)
+    else:
+        # Preparar datos iniciales
+        initial_data = {
+            'username': usuario.user.username,
+            'email': usuario.user.email,
+            'nombres': usuario.user.first_name,
+            'apellidos': usuario.user.last_name,
+        }
+        form = UsuarioForm(instance=usuario, initial=initial_data)
+    
+    return render(request, 'usuarios/editar_usuario.html', {'form': form, 'usuario': usuario})
 
 
 # ===============================================
-# PRODUCTOS
+# PRODUCTOS - CRUD COMPLETO CON PASOS
 # ===============================================
-
 @login_required
 def lista_productos(request):
-    return render(request, 'productos/lista_productos.html')
+    """Listar todos los productos"""
+    productos = Producto.objects.select_related('categoria').all()
+    return render(request, 'productos/lista_productos.html', {'productos': productos})
+
 
 @login_required
 def crear_producto(request):
+    """Vista inicial para crear producto"""
     return render(request, 'productos/crear_producto.html')
 
-@login_required
-def editar_producto(request, id):
-    return render(request, 'productos/editar_producto.html', {'id': id})
 
 @login_required
+@transaction.atomic
 def producto_paso1(request):
-    return render(request, 'productos/producto_paso1.html')
+    """Paso 1: Identificación y Precios"""
+    # Recuperar datos de sesión si existen
+    data = request.session.get('producto_temp', {})
+    
+    if request.method == 'POST':
+        form = ProductoPaso1Form(request.POST)
+        if form.is_valid():
+            # Guardar en sesión temporalmente
+            request.session['producto_temp'] = {
+                'sku': form.cleaned_data['sku'],
+                'ean_upc': form.cleaned_data.get('ean_upc', ''),
+                'nombre': form.cleaned_data['nombre'],
+                'descripcion': form.cleaned_data.get('descripcion', ''),
+                'categoria_id': form.cleaned_data['categoria'].id if form.cleaned_data.get('categoria') else None,
+                'marca': form.cleaned_data.get('marca', ''),
+                'modelo': form.cleaned_data.get('modelo', ''),
+                'uom_compra': form.cleaned_data['uom_compra'],
+                'uom_venta': form.cleaned_data['uom_venta'],
+                'factor_conversion': str(form.cleaned_data['factor_conversion']),
+                'costo_estandar': str(form.cleaned_data.get('costo_estandar', 0)),
+                'precio_venta': str(form.cleaned_data.get('precio_venta', 0)),
+                'impuesto_iva': str(form.cleaned_data['impuesto_iva']),
+            }
+            messages.success(request, 'Paso 1 completado')
+            return redirect('core:producto_paso2')
+        else:
+            for error in form.errors.values():
+                messages.error(request, error)
+    else:
+        form = ProductoPaso1Form(initial=data)
+    
+    return render(request, 'productos/producto_paso1.html', {'form': form, 'data': data})
+
 
 @login_required
 def producto_paso2(request):
-    return render(request, 'productos/producto_paso2.html')
+    """Paso 2: Stock y Control"""
+    data = request.session.get('producto_temp', {})
+    
+    if not data:
+        messages.warning(request, 'Debe completar el Paso 1 primero')
+        return redirect('core:producto_paso1')
+    
+    if request.method == 'POST':
+        form = ProductoPaso2Form(request.POST)
+        if form.is_valid():
+            # Actualizar sesión
+            data.update({
+                'stock_minimo': str(form.cleaned_data['stock_minimo']),
+                'stock_maximo': str(form.cleaned_data.get('stock_maximo', 0)),
+                'punto_reorden': str(form.cleaned_data.get('punto_reorden', 0)),
+                'perishable': form.cleaned_data['perishable'],
+                'control_por_lote': form.cleaned_data['control_por_lote'],
+                'control_por_serie': form.cleaned_data['control_por_serie'],
+            })
+            request.session['producto_temp'] = data
+            messages.success(request, 'Paso 2 completado')
+            return redirect('core:producto_paso3')
+        else:
+            for error in form.errors.values():
+                messages.error(request, error)
+    else:
+        form = ProductoPaso2Form(initial=data)
+    
+    return render(request, 'productos/producto_paso2.html', {'form': form, 'data': data})
+
 
 @login_required
+@transaction.atomic
 def producto_paso3(request):
-    return render(request, 'productos/producto_paso3.html')
+    """Paso 3: Relaciones - GUARDAR DEFINITIVO"""
+    data = request.session.get('producto_temp', {})
+    
+    if not data:
+        messages.warning(request, 'Debe completar los pasos anteriores')
+        return redirect('core:producto_paso1')
+    
+    if request.method == 'POST':
+        form = ProductoPaso3Form(request.POST)
+        if form.is_valid():
+            # Crear el producto con todos los datos
+            categoria = None
+            if data.get('categoria_id'):
+                categoria = Categoria.objects.filter(id=data['categoria_id']).first()
+            
+            producto = Producto.objects.create(
+                sku=data['sku'],
+                ean_upc=data.get('ean_upc', ''),
+                nombre=data['nombre'],
+                descripcion=data.get('descripcion', ''),
+                categoria=categoria,
+                marca=data.get('marca', ''),
+                modelo=data.get('modelo', ''),
+                uom_compra=data['uom_compra'],
+                uom_venta=data['uom_venta'],
+                factor_conversion=Decimal(data['factor_conversion']),
+                costo_estandar=Decimal(data.get('costo_estandar', 0)),
+                precio_venta=Decimal(data.get('precio_venta', 0)),
+                impuesto_iva=Decimal(data['impuesto_iva']),
+                stock_minimo=Decimal(data['stock_minimo']),
+                stock_maximo=Decimal(data.get('stock_maximo', 0)) if data.get('stock_maximo') else None,
+                punto_reorden=Decimal(data.get('punto_reorden', 0)) if data.get('punto_reorden') else None,
+                perishable=data.get('perishable', False),
+                control_por_lote=data.get('control_por_lote', False),
+                control_por_serie=data.get('control_por_serie', False),
+                imagen_url=form.cleaned_data.get('imagen_url', ''),
+                ficha_tecnica_url=form.cleaned_data.get('ficha_tecnica_url', ''),
+            )
+            
+            # Limpiar sesión
+            del request.session['producto_temp']
+            
+            messages.success(request, f'Producto {producto.sku} creado exitosamente')
+            return redirect('core:lista_productos')
+        else:
+            for error in form.errors.values():
+                messages.error(request, error)
+    else:
+        form = ProductoPaso3Form()
+    
+    return render(request, 'productos/producto_paso3.html', {'form': form, 'data': data})
+
+
+@login_required
+def editar_producto(request, id):
+    """Vista de selección de pasos para editar producto"""
+    producto = get_object_or_404(Producto, pk=id)
+    return render(request, 'productos/editar_producto.html', {'producto': producto})
 
 
 # ===============================================
-# PROVEEDORES
+# PROVEEDORES - CRUD COMPLETO CON PASOS
 # ===============================================
-
 @login_required
 def lista_proveedores(request):
-    return render(request, 'proveedores/lista_proveedores.html')
+    """Listar todos los proveedores"""
+    proveedores = Proveedor.objects.all()
+    return render(request, 'proveedores/lista_proveedores.html', {'proveedores': proveedores})
+
 
 @login_required
 def crear_proveedor(request):
+    """Vista inicial para crear proveedor"""
     return render(request, 'proveedores/crear_proveedor.html')
 
-@login_required
-def editar_proveedor(request, id):
-    return render(request, 'proveedores/editar_proveedor.html', {'id': id})
 
 @login_required
 def proveedor_paso1(request):
-    return render(request, 'proveedores/proveedor_paso1.html')
+    """Paso 1: Identificación y contacto"""
+    data = request.session.get('proveedor_temp', {})
+    
+    if request.method == 'POST':
+        form = ProveedorPaso1Form(request.POST)
+        if form.is_valid():
+            request.session['proveedor_temp'] = {
+                'rut_nif': form.cleaned_data['rut_nif'],
+                'razon_social': form.cleaned_data['razon_social'],
+                'nombre_fantasia': form.cleaned_data.get('nombre_fantasia', ''),
+                'email': form.cleaned_data['email'],
+                'telefono': form.cleaned_data.get('telefono', ''),
+                'sitio_web': form.cleaned_data.get('sitio_web', ''),
+            }
+            messages.success(request, 'Paso 1 completado')
+            return redirect('core:proveedor_paso2')
+        else:
+            for error in form.errors.values():
+                messages.error(request, error)
+    else:
+        form = ProveedorPaso1Form(initial=data)
+    
+    return render(request, 'proveedores/proveedor_paso1.html', {'form': form, 'data': data})
+
 
 @login_required
 def proveedor_paso2(request):
-    return render(request, 'proveedores/proveedor_paso2.html')
+    """Paso 2: Dirección y comercial"""
+    data = request.session.get('proveedor_temp', {})
+    
+    if not data:
+        messages.warning(request, 'Debe completar el Paso 1 primero')
+        return redirect('core:proveedor_paso1')
+    
+    if request.method == 'POST':
+        form = ProveedorPaso2Form(request.POST)
+        if form.is_valid():
+            data.update({
+                'direccion': form.cleaned_data.get('direccion', ''),
+                'ciudad': form.cleaned_data.get('ciudad', ''),
+                'region': form.cleaned_data.get('region', ''),
+                'codigo_postal': form.cleaned_data.get('codigo_postal', ''),
+                'pais': form.cleaned_data['pais'],
+                'condiciones_pago': form.cleaned_data.get('condiciones_pago', ''),
+                'moneda': form.cleaned_data['moneda'],
+                'contacto_principal_nombre': form.cleaned_data.get('contacto_principal_nombre', ''),
+                'contacto_principal_email': form.cleaned_data.get('contacto_principal_email', ''),
+                'contacto_principal_telefono': form.cleaned_data.get('contacto_principal_telefono', ''),
+            })
+            request.session['proveedor_temp'] = data
+            messages.success(request, 'Paso 2 completado')
+            return redirect('core:proveedor_paso3')
+        else:
+            for error in form.errors.values():
+                messages.error(request, error)
+    else:
+        form = ProveedorPaso2Form(initial=data)
+    
+    return render(request, 'proveedores/proveedor_paso2.html', {'form': form, 'data': data})
+
 
 @login_required
+@transaction.atomic
 def proveedor_paso3(request):
-    return render(request, 'proveedores/proveedor_paso3.html')
+    """Paso 3: Observaciones - GUARDAR DEFINITIVO"""
+    data = request.session.get('proveedor_temp', {})
+    
+    if not data:
+        messages.warning(request, 'Debe completar los pasos anteriores')
+        return redirect('core:proveedor_paso1')
+    
+    if request.method == 'POST':
+        form = ProveedorPaso3Form(request.POST)
+        if form.is_valid():
+            proveedor = Proveedor.objects.create(
+                rut_nif=data['rut_nif'],
+                razon_social=data['razon_social'],
+                nombre_fantasia=data.get('nombre_fantasia', ''),
+                email=data['email'],
+                telefono=data.get('telefono', ''),
+                sitio_web=data.get('sitio_web', ''),
+                direccion=data.get('direccion', ''),
+                ciudad=data.get('ciudad', ''),
+                region=data.get('region', ''),
+                codigo_postal=data.get('codigo_postal', ''),
+                pais=data.get('pais', 'Chile'),
+                condiciones_pago=data.get('condiciones_pago', ''),
+                moneda=data.get('moneda', 'CLP'),
+                contacto_principal_nombre=data.get('contacto_principal_nombre', ''),
+                contacto_principal_email=data.get('contacto_principal_email', ''),
+                contacto_principal_telefono=data.get('contacto_principal_telefono', ''),
+                observaciones=form.cleaned_data.get('observaciones', ''),
+                estado=form.cleaned_data['estado'],
+            )
+            
+            del request.session['proveedor_temp']
+            
+            messages.success(request, f'Proveedor {proveedor.razon_social} creado exitosamente')
+            return redirect('core:lista_proveedores')
+        else:
+            for error in form.errors.values():
+                messages.error(request, error)
+    else:
+        form = ProveedorPaso3Form()
+    
+    return render(request, 'proveedores/proveedor_paso3.html', {'form': form, 'data': data})
+
+
+@login_required
+def editar_proveedor(request, id):
+    """Vista de selección de pasos para editar proveedor"""
+    proveedor = get_object_or_404(Proveedor, pk=id)
+    return render(request, 'proveedores/editar_proveedor.html', {'proveedor': proveedor})
 
 
 # ===============================================
-# INVENTARIO
+# MOVIMIENTOS - CRUD COMPLETO CON PASOS
 # ===============================================
-
 @login_required
 def lista_movimientos(request):
-    return render(request, 'inventario/lista_movimientos.html')
+    """Listar todos los movimientos"""
+    movimientos = MovimientoInventario.objects.select_related(
+        'producto', 'proveedor', 'bodega', 'usuario'
+    ).order_by('-fecha')
+    return render(request, 'inventario/lista_movimientos.html', {'movimientos': movimientos})
+
 
 @login_required
 def crear_movimiento(request):
+    """Vista inicial para crear movimiento"""
     return render(request, 'inventario/crear_movimiento.html')
 
-@login_required
-def editar_movimiento(request, id):
-    return render(request, 'inventario/editar_movimiento.html', {'id': id})
 
 @login_required
 def movimiento_paso1(request):
-    return render(request, 'inventario/movimiento_paso1.html')
+    """Paso 1: Datos del movimiento"""
+    data = request.session.get('movimiento_temp', {})
+    
+    if request.method == 'POST':
+        form = MovimientoPaso1Form(request.POST)
+        if form.is_valid():
+            # Validar que existan producto y bodega
+            try:
+                producto = Producto.objects.get(sku=form.cleaned_data['producto_sku'])
+                bodega = Bodega.objects.get(codigo=form.cleaned_data['bodega_codigo'])
+                
+                proveedor = None
+                if form.cleaned_data.get('proveedor_rut'):
+                    proveedor = Proveedor.objects.filter(rut_nif=form.cleaned_data['proveedor_rut']).first()
+                
+                request.session['movimiento_temp'] = {
+                    'fecha': form.cleaned_data['fecha'].isoformat(),
+                    'tipo': form.cleaned_data['tipo'],
+                    'cantidad': str(form.cleaned_data['cantidad']),
+                    'producto_id': producto.id,
+                    'bodega_id': bodega.id,
+                    'proveedor_id': proveedor.id if proveedor else None,
+                }
+                messages.success(request, 'Paso 1 completado')
+                return redirect('core:movimiento_paso2')
+            except Producto.DoesNotExist:
+                messages.error(request, 'Producto no encontrado')
+            except Bodega.DoesNotExist:
+                messages.error(request, 'Bodega no encontrada')
+        else:
+            for error in form.errors.values():
+                messages.error(request, error)
+    else:
+        form = MovimientoPaso1Form(initial=data)
+    
+    return render(request, 'inventario/movimiento_paso1.html', {'form': form, 'data': data})
+
 
 @login_required
 def movimiento_paso2(request):
-    return render(request, 'inventario/movimiento_paso2.html')
+    """Paso 2: Control avanzado"""
+    data = request.session.get('movimiento_temp', {})
+    
+    if not data:
+        messages.warning(request, 'Debe completar el Paso 1 primero')
+        return redirect('core:movimiento_paso1')
+    
+    if request.method == 'POST':
+        form = MovimientoPaso2Form(request.POST)
+        if form.is_valid():
+            data.update({
+                'lote': form.cleaned_data.get('lote', ''),
+                'serie': form.cleaned_data.get('serie', ''),
+                'fecha_vencimiento': form.cleaned_data.get('fecha_vencimiento').isoformat() if form.cleaned_data.get('fecha_vencimiento') else None,
+            })
+            request.session['movimiento_temp'] = data
+            messages.success(request, 'Paso 2 completado')
+            return redirect('core:movimiento_paso3')
+        else:
+            for error in form.errors.values():
+                messages.error(request, error)
+    else:
+        form = MovimientoPaso2Form(initial=data)
+    
+    return render(request, 'inventario/movimiento_paso2.html', {'form': form, 'data': data})
+
 
 @login_required
+@transaction.atomic
 def movimiento_paso3(request):
-    return render(request, 'inventario/movimiento_paso3.html')
-
-
-# ===============================================
-# MODELO: Usuario Extendido
-# ===============================================
-class Usuario(models.Model):
-    ESTADO_CHOICES = [
-        ('ACTIVO', 'Activo'),
-        ('BLOQUEADO', 'Bloqueado'),
-        ('INACTIVO', 'Inactivo'),
-    ]
+    """Paso 3: Referencias - GUARDAR DEFINITIVO"""
+    data = request.session.get('movimiento_temp', {})
     
-    ROL_CHOICES = [
-        ('admin', 'Administrador'),
-        ('vendedor', 'Vendedor'),
-        ('almacen', 'Almacén'),
-        ('contador', 'Contador'),
-    ]
+    if not data:
+        messages.warning(request, 'Debe completar los pasos anteriores')
+        return redirect('core:movimiento_paso1')
     
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='perfil')
-    telefono = models.CharField(max_length=30, blank=True, null=True)
-    rol = models.CharField(max_length=20, choices=ROL_CHOICES, default='vendedor')
-    estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='ACTIVO')
-    mfa_habilitado = models.BooleanField(default=False)
-    ultimo_acceso = models.DateTimeField(blank=True, null=True)
-    sesiones_activas = models.IntegerField(default=0)
-    area = models.CharField(max_length=100, blank=True, null=True)
-    observaciones = models.TextField(blank=True, null=True)
-    
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
-    class Meta:
-        db_table = 'usuarios'
-        verbose_name = 'Usuario'
-        verbose_name_plural = 'Usuarios'
-        ordering = ['-created_at']
-    
-    def __str__(self):
-        return f"{self.user.get_full_name()} ({self.user.username})"
-
-
-# ===============================================
-# MODELO: Categoría de Productos
-# ===============================================
-class Categoria(models.Model):
-    nombre = models.CharField(max_length=100, unique=True)
-    descripcion = models.TextField(blank=True, null=True)
-    activa = models.BooleanField(default=True)
-    
-    class Meta:
-        db_table = 'categorias'
-        verbose_name = 'Categoría'
-        verbose_name_plural = 'Categorías'
-        ordering = ['nombre']
-    
-    def __str__(self):
-        return self.nombre
-
-
-# ===============================================
-# MODELO: Producto
-# ===============================================
-class Producto(models.Model):
-    UOM_CHOICES = [
-        ('UN', 'Unidad'),
-        ('CAJA', 'Caja'),
-        ('KG', 'Kilogramo'),
-        ('LT', 'Litro'),
-        ('PACK', 'Pack'),
-    ]
-    
-    # Identificación
-    sku = models.CharField(max_length=50, unique=True, db_index=True)
-    ean_upc = models.CharField(max_length=13, blank=True, null=True, unique=True)
-    nombre = models.CharField(max_length=200)
-    descripcion = models.TextField(blank=True, null=True)
-    categoria = models.ForeignKey(Categoria, on_delete=models.PROTECT, related_name='productos')
-    marca = models.CharField(max_length=100, blank=True, null=True)
-    modelo = models.CharField(max_length=100, blank=True, null=True)
-    
-    # Unidades y precios
-    uom_compra = models.CharField(max_length=10, choices=UOM_CHOICES, default='UN')
-    uom_venta = models.CharField(max_length=10, choices=UOM_CHOICES, default='UN')
-    factor_conversion = models.DecimalField(max_digits=10, decimal_places=6, default=Decimal('1.0'))
-    costo_estandar = models.DecimalField(max_digits=18, decimal_places=6, blank=True, null=True)
-    costo_promedio = models.DecimalField(max_digits=18, decimal_places=6, blank=True, null=True)
-    precio_venta = models.DecimalField(max_digits=18, decimal_places=6, blank=True, null=True)
-    impuesto_iva = models.DecimalField(
-        max_digits=5, 
-        decimal_places=2, 
-        default=Decimal('19.0'),
-        validators=[MinValueValidator(0), MaxValueValidator(100)]
-    )
-    
-    # Stock y control
-    stock_minimo = models.DecimalField(max_digits=18, decimal_places=6, default=Decimal('0.0'))
-    stock_maximo = models.DecimalField(max_digits=18, decimal_places=6, blank=True, null=True)
-    punto_reorden = models.DecimalField(max_digits=18, decimal_places=6, blank=True, null=True)
-    stock_actual = models.DecimalField(max_digits=18, decimal_places=6, default=Decimal('0.0'))
-    
-    perecible = models.BooleanField(default=False)
-    control_por_lote = models.BooleanField(default=False)
-    control_por_serie = models.BooleanField(default=False)
-    
-    # Relaciones y soporte
-    imagen_url = models.URLField(blank=True, null=True)
-    ficha_tecnica_url = models.URLField(blank=True, null=True)
-    
-    activo = models.BooleanField(default=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
-    class Meta:
-        db_table = 'productos'
-        verbose_name = 'Producto'
-        verbose_name_plural = 'Productos'
-        ordering = ['nombre']
-        indexes = [
-            models.Index(fields=['sku']),
-            models.Index(fields=['categoria']),
-            models.Index(fields=['activo']),
-        ]
-    
-    def __str__(self):
-        return f"{self.sku} - {self.nombre}"
-    
-    @property
-    def alerta_bajo_stock(self):
-        return self.stock_actual < self.stock_minimo
-    
-    @property
-    def estado_stock(self):
-        if self.stock_actual <= 0:
-            return 'SIN_STOCK'
-        elif self.stock_actual < self.stock_minimo:
-            return 'BAJO'
-        elif self.stock_maximo and self.stock_actual > self.stock_maximo:
-            return 'EXCESO'
-        return 'OK'
-
-
-# ===============================================
-# MODELO: Proveedor
-# ===============================================
-class Proveedor(models.Model):
-    ESTADO_CHOICES = [
-        ('ACTIVO', 'Activo'),
-        ('BLOQUEADO', 'Bloqueado'),
-        ('INACTIVO', 'Inactivo'),
-    ]
-    
-    MONEDA_CHOICES = [
-        ('CLP', 'Peso Chileno'),
-        ('USD', 'Dólar'),
-        ('EUR', 'Euro'),
-        ('ARS', 'Peso Argentino'),
-        ('BRL', 'Real'),
-    ]
-    
-    # Identificación legal y contacto
-    rut_nif = models.CharField(max_length=20, unique=True, db_index=True)
-    razon_social = models.CharField(max_length=255)
-    nombre_fantasia = models.CharField(max_length=255, blank=True, null=True)
-    email = models.EmailField()
-    telefono = models.CharField(max_length=30, blank=True, null=True)
-    sitio_web = models.URLField(blank=True, null=True)
-    
-    # Dirección
-    direccion = models.CharField(max_length=255, blank=True, null=True)
-    ciudad = models.CharField(max_length=128, blank=True, null=True)
-    region = models.CharField(max_length=128, blank=True, null=True)
-    codigo_postal = models.CharField(max_length=20, blank=True, null=True)
-    pais = models.CharField(max_length=64, default='Chile')
-    
-    # Comercial
-    condiciones_pago = models.CharField(max_length=100, blank=True, null=True)
-    moneda = models.CharField(max_length=8, choices=MONEDA_CHOICES, default='CLP')
-    contacto_principal_nombre = models.CharField(max_length=120, blank=True, null=True)
-    contacto_principal_email = models.EmailField(blank=True, null=True)
-    contacto_principal_telefono = models.CharField(max_length=30, blank=True, null=True)
-    
-    estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='ACTIVO')
-    observaciones = models.TextField(blank=True, null=True)
-    
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
-    class Meta:
-        db_table = 'proveedores'
-        verbose_name = 'Proveedor'
-        verbose_name_plural = 'Proveedores'
-        ordering = ['razon_social']
-        indexes = [
-            models.Index(fields=['rut_nif']),
-            models.Index(fields=['estado']),
-        ]
-    
-    def __str__(self):
-        return f"{self.razon_social} ({self.rut_nif})"
-
-
-# ===============================================
-# MODELO: Relación Producto-Proveedor
-# ===============================================
-class ProductoProveedor(models.Model):
-    producto = models.ForeignKey(Producto, on_delete=models.CASCADE, related_name='proveedores')
-    proveedor = models.ForeignKey(Proveedor, on_delete=models.CASCADE, related_name='productos')
-    
-    costo = models.DecimalField(max_digits=18, decimal_places=6)
-    lead_time_dias = models.IntegerField(default=7, validators=[MinValueValidator(0)])
-    min_lote = models.DecimalField(max_digits=18, decimal_places=6, default=Decimal('1.0'))
-    descuento_pct = models.DecimalField(
-        max_digits=5, 
-        decimal_places=2, 
-        default=Decimal('0.0'),
-        validators=[MinValueValidator(0), MaxValueValidator(100)]
-    )
-    preferente = models.BooleanField(default=False)
-    
-    activo = models.BooleanField(default=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
-    class Meta:
-        db_table = 'producto_proveedor'
-        verbose_name = 'Producto-Proveedor'
-        verbose_name_plural = 'Productos-Proveedores'
-        unique_together = [['producto', 'proveedor']]
-        indexes = [
-            models.Index(fields=['producto', 'proveedor']),
-            models.Index(fields=['preferente']),
-        ]
-    
-    def __str__(self):
-        return f"{self.producto.sku} - {self.proveedor.razon_social}"
-
-
-# ===============================================
-# MODELO: Bodega
-# ===============================================
-class Bodega(models.Model):
-    codigo = models.CharField(max_length=50, unique=True, db_index=True)
-    nombre = models.CharField(max_length=200)
-    direccion = models.CharField(max_length=255, blank=True, null=True)
-    ciudad = models.CharField(max_length=128, blank=True, null=True)
-    responsable = models.ForeignKey(Usuario, on_delete=models.SET_NULL, null=True, blank=True)
-    
-    activa = models.BooleanField(default=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
-    class Meta:
-        db_table = 'bodegas'
-        verbose_name = 'Bodega'
-        verbose_name_plural = 'Bodegas'
-        ordering = ['nombre']
-    
-    def __str__(self):
-        return f"{self.codigo} - {self.nombre}"
-
-
-# ===============================================
-# MODELO: Movimiento de Inventario
-# ===============================================
-class MovimientoInventario(models.Model):
-    TIPO_CHOICES = [
-        ('INGRESO', 'Ingreso'),
-        ('SALIDA', 'Salida'),
-        ('AJUSTE', 'Ajuste'),
-        ('DEVOLUCION', 'Devolución'),
-        ('TRANSFERENCIA', 'Transferencia'),
-    ]
-    
-    # Datos del movimiento
-    fecha = models.DateTimeField()
-    tipo = models.CharField(max_length=20, choices=TIPO_CHOICES)
-    cantidad = models.DecimalField(max_digits=18, decimal_places=6)
-    
-    # Relaciones
-    producto = models.ForeignKey(Producto, on_delete=models.PROTECT, related_name='movimientos')
-    proveedor = models.ForeignKey(Proveedor, on_delete=models.SET_NULL, null=True, blank=True, related_name='movimientos')
-    bodega = models.ForeignKey(Bodega, on_delete=models.PROTECT, related_name='movimientos')
-    usuario = models.ForeignKey(Usuario, on_delete=models.SET_NULL, null=True, related_name='movimientos_realizados')
-    
-    # Control avanzado
-    lote = models.CharField(max_length=100, blank=True, null=True, db_index=True)
-    serie = models.CharField(max_length=100, blank=True, null=True, db_index=True)
-    fecha_vencimiento = models.DateField(blank=True, null=True)
-    
-    # Referencias
-    doc_referencia = models.CharField(max_length=100, blank=True, null=True)
-    motivo = models.CharField(max_length=200, blank=True, null=True)
-    observaciones = models.TextField(blank=True, null=True)
-    
-    # Transferencias (bodega destino)
-    bodega_destino = models.ForeignKey(
-        Bodega, 
-        on_delete=models.SET_NULL, 
-        null=True, 
-        blank=True, 
-        related_name='movimientos_recibidos'
-    )
-    
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
-    class Meta:
-        db_table = 'movimientos_inventario'
-        verbose_name = 'Movimiento de Inventario'
-        verbose_name_plural = 'Movimientos de Inventario'
-        ordering = ['-fecha', '-created_at']
-        indexes = [
-            models.Index(fields=['fecha', 'tipo']),
-            models.Index(fields=['producto', 'bodega']),
-            models.Index(fields=['lote']),
-            models.Index(fields=['serie']),
-        ]
-    
-    def __str__(self):
-        return f"{self.get_tipo_display()} - {self.producto.sku} - {self.fecha.strftime('%Y-%m-%d')}"
-    
-    def save(self, *args, **kwargs):
-        """Actualizar stock del producto al guardar movimiento"""
-        is_new = self.pk is None
-        super().save(*args, **kwargs)
-        
-        if is_new:
-            if self.tipo in ['INGRESO', 'DEVOLUCION']:
-                self.producto.stock_actual += self.cantidad
-            elif self.tipo == 'SALIDA':
-                self.producto.stock_actual -= self.cantidad
-            elif self.tipo == 'AJUSTE':
-                # El ajuste puede ser positivo o negativo
-                self.producto.stock_actual = self.cantidad
+    if request.method == 'POST':
+        form = MovimientoPaso3Form(request.POST)
+        if form.is_valid():
+            # Recuperar objetos relacionados
+            producto = Producto.objects.get(id=data['producto_id'])
+            bodega = Bodega.objects.get(id=data['bodega_id'])
+            proveedor = Proveedor.objects.get(id=data['proveedor_id']) if data.get('proveedor_id') else None
+            usuario_perfil = request.user.perfil if hasattr(request.user, 'perfil') else None
             
-            self.producto.save(update_fields=['stock_actual', 'updated_at'])
+            # Crear movimiento
+            movimiento = MovimientoInventario.objects.create(
+                fecha=data['fecha'],
+                tipo=data['tipo'],
+                cantidad=Decimal(data['cantidad']),
+                producto=producto,
+                bodega=bodega,
+                proveedor=proveedor,
+                usuario=usuario_perfil,
+                lote=data.get('lote', ''),
+                serie=data.get('serie', ''),
+                fecha_vencimiento=data.get('fecha_vencimiento'),
+                doc_referencia=form.cleaned_data.get('doc_referencia', ''),
+                motivo=form.cleaned_data.get('motivo', ''),
+                observaciones=form.cleaned_data.get('observaciones', ''),
+            )
+            
+            # Actualizar stock del producto (el método save() del modelo ya lo hace)
+            
+            del request.session['movimiento_temp']
+            
+            messages.success(request, f'Movimiento registrado exitosamente')
+            return redirect('core:lista_movimientos')
+        else:
+            for error in form.errors.values():
+                messages.error(request, error)
+    else:
+        form = MovimientoPaso3Form()
+    
+    return render(request, 'inventario/movimiento_paso3.html', {'form': form, 'data': data})
 
 
-# ===============================================
-# MODELO: Log de Auditoría
-# ===============================================
-class LogAuditoria(models.Model):
-    ACCION_CHOICES = [
-        ('CREATE', 'Crear'),
-        ('UPDATE', 'Actualizar'),
-        ('DELETE', 'Eliminar'),
-        ('LOGIN', 'Inicio de sesión'),
-        ('LOGOUT', 'Cierre de sesión'),
-    ]
-    
-    usuario = models.ForeignKey(Usuario, on_delete=models.SET_NULL, null=True, related_name='logs')
-    accion = models.CharField(max_length=20, choices=ACCION_CHOICES)
-    modelo = models.CharField(max_length=100)
-    objeto_id = models.IntegerField(blank=True, null=True)
-    descripcion = models.TextField(blank=True, null=True)
-    ip_address = models.GenericIPAddressField(blank=True, null=True)
-    user_agent = models.TextField(blank=True, null=True)
-    
-    timestamp = models.DateTimeField(auto_now_add=True)
-    
-    class Meta:
-        db_table = 'log_auditoria'
-        verbose_name = 'Log de Auditoría'
-        verbose_name_plural = 'Logs de Auditoría'
-        ordering = ['-timestamp']
-        indexes = [
-            models.Index(fields=['usuario', 'timestamp']),
-            models.Index(fields=['modelo', 'objeto_id']),
-        ]
-    
-    def __str__(self):
-        return f"{self.get_accion_display()} - {self.modelo} - {self.timestamp}"
+@login_required
+def editar_movimiento(request, id):
+    """Vista de selección de pasos para editar movimiento"""
+    movimiento = get_object_or_404(MovimientoInventario, pk=id)
+    return render(request, 'inventario/editar_movimiento.html', {'movimiento': movimiento})
