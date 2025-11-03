@@ -30,11 +30,24 @@
         gap: 0.5rem;
         box-shadow: 0 4px 15px rgba(243, 4, 4, 0.3);
     }
-
     .btn-primary:hover {
         transform: translateY(-2px);
         box-shadow: 0 6px 25px rgba(207, 4, 4, 0.5);
     }
+
+    .export-btn {
+        background: #10B981;
+        color: white;
+        padding: 0.8rem 1.5rem;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all .2s ease;
+    }
+    .export-btn:hover { transform: translateY(-2px); }
 
     .filters-bar {
         background: white;
@@ -46,7 +59,6 @@
         gap: 1rem;
         flex-wrap: wrap;
     }
-
     .search-input {
         flex: 1;
         min-width: 250px;
@@ -55,11 +67,7 @@
         border-radius: 8px;
         font-size: 1rem;
     }
-
-    .search-input:focus {
-        outline: none;
-        border-color: var(--primary);
-    }
+    .search-input:focus { outline: none; border-color: var(--primary); }
 
     .filter-select {
         padding: 0.8rem 1rem;
@@ -67,36 +75,7 @@
         border-radius: 8px;
         font-size: 1rem;
         cursor: pointer;
-    }
-
-    .stats-row {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1rem;
-        margin-bottom: 1.5rem;
-    }
-
-    .stat-box {
-        background: white;
-        padding: 1.2rem;
-        border-radius: 10px;
-        box-shadow: 0 2px 8px var(--shadow);
-        text-align: center;
-    }
-
-    .stat-box-value {
-        font-size: 1.8rem;
-        font-weight: 700;
-        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
-
-    .stat-box-label {
-        font-size: 0.9rem;
-        color: var(--text-gray);
-        margin-top: 0.3rem;
+        min-width: 180px;
     }
 
     .table-container {
@@ -105,45 +84,21 @@
         overflow: hidden;
         box-shadow: 0 2px 12px var(--shadow);
     }
-
-    table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
+    table { width: 100%; border-collapse: collapse; }
     thead {
         background: linear-gradient(135deg, #ff0000 0%, #ff0000b8 100%);
         color: white;
     }
-
     th {
         padding: 1.2rem 1rem;
         text-align: left;
         font-weight: 600;
         font-size: 0.95rem;
     }
-
-    td {
-        padding: 1rem;
-        border-bottom: 1px solid var(--border);
-    }
-
-    tbody tr {
-        transition: background-color 0.2s ease;
-    }
-
+    td { padding: 1rem; border-bottom: 1px solid var(--border); }
+    tbody tr { transition: background-color 0.2s ease; }
     tbody tr:hover {
         background: linear-gradient(135deg, rgba(255, 217, 0, 0.05) 0%, rgba(211, 39, 39, 0.05) 100%);
-    }
-
-    .product-info {
-        display: flex;
-        align-items: center;
-        gap: 0.8rem;
-    }
-
-    .product-icon {
-        font-size: 1.8rem;
     }
 
     .badge {
@@ -153,93 +108,62 @@
         font-weight: 600;
         display: inline-block;
     }
+    .badge-success { background: #D4EDDA; color: #155724; }
+    .badge-danger  { background: #F8D7DA; color: #721C24; }
+    .badge-warning { background: #FFF3CD; color: #856404; }
 
-    .badge-success {
-        background: #D4EDDA;
-        color: #155724;
-    }
-
-    .badge-danger {
-        background: #F8D7DA;
-        color: #721C24;
-    }
-
-    .badge-warning {
-        background: #FFF3CD;
-        color: #856404;
-    }
-
-    .action-buttons {
-        display: flex;
-        gap: 0.5rem;
-    }
-
+    .action-buttons { display: flex; gap: 0.5rem; }
     .btn-icon {
-        padding: 0.5rem 0.8rem;
-        border: none;
+        padding: 0.5rem 0.8rem; border: none; border-radius: 6px;
+        cursor: pointer; transition: all 0.2s ease; font-size: 1rem;
+        text-decoration: none; display: inline-block;
+    }
+    .btn-edit  { background: #E3F2FD; color: #1976D2; }
+    .btn-edit:hover  { background: #1976D2; color: white; transform: scale(1.1); }
+    .btn-delete { background: #FFEBEE; color: #C62828; }
+    .btn-delete:hover { background: #C62828; color: white; transform: scale(1.1); }
+
+    /* Paginación */
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-top: 2rem;
+    }
+    .pagination a, .pagination span {
+        padding: 0.6rem 1rem;
+        border: 2px solid var(--border);
         border-radius: 6px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        font-size: 1rem;
         text-decoration: none;
-        display: inline-block;
+        color: var(--text-dark);
+        font-weight: 600;
+        transition: all 0.2s ease;
     }
-
-    .btn-edit {
-        background: #E3F2FD;
-        color: #1976D2;
-    }
-
-    .btn-edit:hover {
-        background: #1976D2;
+    .pagination a:hover {
+        background: var(--primary);
         color: white;
-        transform: scale(1.1);
+        border-color: var(--primary);
     }
-
-    .btn-delete {
-        background: #FFEBEE;
-        color: #C62828;
-    }
-
-    .btn-delete:hover {
-        background: #C62828;
+    .pagination .current {
+        background: var(--primary);
         color: white;
-        transform: scale(1.1);
+        border-color: var(--primary);
     }
 
     @media (max-width: 768px) {
-        .page-header {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 1rem;
-        }
-
-        .table-container {
-            overflow-x: auto;
-        }
-
-        table {
-            min-width: 1000px;
-        }
+        .page-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+        .table-container { overflow-x: auto; }
+        table { min-width: 1000px; }
     }
 
-    /* Estilos personalizados para SweetAlert2 */
-    .swal2-popup {
-        border-radius: 16px;
-    }
-
+    /* SweetAlert2 */
+    .swal2-popup { border-radius: 16px; }
     .swal2-confirm {
         background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%) !important;
-        border-radius: 8px;
-        padding: 0.6rem 2rem;
-        font-weight: 600;
+        border-radius: 8px; padding: 0.6rem 2rem; font-weight: 600;
     }
-
     .swal2-cancel {
-        background: #6c757d !important;
-        border-radius: 8px;
-        padding: 0.6rem 2rem;
-        font-weight: 600;
+        background: #6c757d !important; border-radius: 8px; padding: 0.6rem 2rem; font-weight: 600;
     }
 </style>
 {% endblock %}
@@ -247,54 +171,54 @@
 {% block content %}
 <div class="page-header">
     <h1 class="page-title">Gestión de Productos</h1>
-    <a href="{% url 'core:producto_paso1' %}" class="btn-primary">
-        <span>➕</span> Nuevo Producto
-    </a>
-</div>
-
-<div class="stats-row">
-    <div class="stat-box">
-        <div class="stat-box-value">150</div>
-        <div class="stat-box-label">Total Productos</div>
-    </div>
-    <div class="stat-box">
-        <div class="stat-box-value">12</div>
-        <div class="stat-box-label">Stock Bajo</div>
-    </div>
-    <div class="stat-box">
-        <div class="stat-box-value">8</div>
-        <div class="stat-box-label">Por Vencer</div>
-    </div>
-    <div class="stat-box">
-        <div class="stat-box-value">$2.5M</div>
-        <div class="stat-box-label">Valor Inventario</div>
+    <div style="display: flex; gap: 1rem;">
+        <a href="{% url 'core:exportar_productos_excel' %}" class="export-btn">📊 Exportar Excel</a>
+        <a href="{% url 'core:producto_paso1' %}" class="btn-primary"><span>➕</span> Nuevo Producto</a>
     </div>
 </div>
 
 <div class="filters-bar">
-    <input type="text" class="search-input" placeholder="Buscar por SKU, nombre o categoría...">
-    <select class="filter-select">
-        <option value="">Todas las categorías</option>
-        <option value="dulces">Dulces</option>
-        <option value="chocolates">Chocolates</option>
-        <option value="chicles">Chicles</option>
-        <option value="caramelos">Caramelos</option>
-        <option value="gomitas">Gomitas</option>
-    </select>
-    <select class="filter-select">
-        <option value="">Estado Stock</option>
-        <option value="optimo">Stock Óptimo</option>
-        <option value="bajo">Stock Bajo</option>
-        <option value="critico">Stock Crítico</option>
-    </select>
+    <form method="get" style="display: contents;">
+        <input
+            type="text" name="q" class="search-input"
+            placeholder="Buscar por SKU, nombre o categoría..."
+            value="{{ query }}"
+        />
+
+        <select name="categoria" class="filter-select" onchange="this.form.submit()">
+            <option value="">Todas las categorías</option>
+            {% for cat in categorias %}
+                <option value="{{ cat.nombre }}" {% if categoria_filtro == cat.nombre %}selected{% endif %}>
+                    {{ cat.nombre }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <select name="estado" class="filter-select" onchange="this.form.submit()">
+            <option value="">Estado Stock</option>
+            <option value="ok"   {% if estado_filtro == 'ok' %}selected{% endif %}>Stock Óptimo</option>
+            <option value="bajo" {% if estado_filtro == 'bajo' %}selected{% endif %}>Stock Bajo</option>
+        </select>
+
+        <select name="orden" class="filter-select" onchange="this.form.submit()">
+            <option value="nombre"   {% if orden == 'nombre' %}selected{% endif %}>Nombre A-Z</option>
+            <option value="-nombre"  {% if orden == '-nombre' %}selected{% endif %}>Nombre Z-A</option>
+            <option value="sku"      {% if orden == 'sku' %}selected{% endif %}>SKU A-Z</option>
+            <option value="-precio"  {% if orden == '-precio' %}selected{% endif %}>Precio Mayor</option>
+            <option value="precio"   {% if orden == 'precio' %}selected{% endif %}>Precio Menor</option>
+            <option value="-stock"   {% if orden == '-stock' %}selected{% endif %}>Stock Mayor</option>
+        </select>
+
+        <button type="submit" class="btn-primary">Buscar</button>
+    </form>
 </div>
 
 <div class="table-container">
     <table>
         <thead>
             <tr>
-                <th>Producto</th>
                 <th>SKU</th>
+                <th>Producto</th>
                 <th>Categoría</th>
                 <th>Stock Actual</th>
                 <th>Precio Venta</th>
@@ -303,231 +227,82 @@
             </tr>
         </thead>
         <tbody>
+        {% for producto in productos %}
             <tr>
+                <td><strong>{{ producto.sku }}</strong></td>
+                <td>{{ producto.nombre }}</td>
+                <td>{{ producto.categoria.nombre }}</td>
+                <td>{{ producto.stock_actual }}</td>
+                <td>${{ producto.precio_venta|floatformat:0 }}</td>
                 <td>
-                    <div class="product-info">
-                        <div>
-                            <strong>Caramelos Surtidos</strong>
-                            <div style="font-size: 0.85rem; color: var(--text-gray);">Bolsa 500g</div>
-                        </div>
-                    </div>
+                    {% if producto.alerta_bajo_stock %}
+                        <span class="badge badge-warning">Stock Bajo</span>
+                    {% else %}
+                        <span class="badge badge-success">Stock OK</span>
+                    {% endif %}
                 </td>
-                <td><strong>CAR-001</strong></td>
-                <td>Caramelos</td>
-                <td>250 UN</td>
-                <td>$2.990</td>
-                <td><span class="badge badge-success">Stock OK</span></td>
                 <td>
                     <div class="action-buttons">
-                        <a href="{% url 'core:editar_producto' 1 %}" class="btn-icon btn-edit" title="Editar">✏️</a>
-                        <button class="btn-icon btn-delete" title="Eliminar" onclick="confirmarEliminacion(1, 'Caramelos Surtidos')">🗑️</button>
+                        <a href="{% url 'core:editar_producto' producto.id %}" class="btn-icon btn-edit" title="Editar">✏️</a>
+                        <button class="btn-icon btn-delete" title="Eliminar"
+                                onclick="confirmarEliminacion({{ producto.id }}, '{{ producto.nombre }}')">🗑️</button>
                     </div>
                 </td>
             </tr>
+        {% empty %}
             <tr>
-                <td>
-                    <div class="product-info">
-                            <strong>Chocolate Milka</strong>
-                            <div style="font-size: 0.85rem; color: var(--text-gray);">Tableta 100g</div>
-                        </div>
-                    </div>
-                </td>
-                <td><strong>CHO-025</strong></td>
-                <td>Chocolates</td>
-                <td>100 UN</td>
-                <td>$3.490</td>
-                <td><span class="badge badge-warning">Stock Bajo</span></td>
-                <td>
-                    <div class="action-buttons">
-                        <a href="{% url 'core:editar_producto' 2 %}" class="btn-icon btn-edit" title="Editar">✏️</a>
-                        <button class="btn-icon btn-delete" title="Eliminar" onclick="confirmarEliminacion(2, 'Chocolate Milka')">🗑️</button>
-                    </div>
+                <td colspan="7" style="text-align: center; padding: 2rem;">
+                    No se encontraron productos
                 </td>
             </tr>
-            <tr>
-                <td>
-                    <div class="product-info">
-                        <div>
-                            <strong>Chicles Adams</strong>
-                            <div style="font-size: 0.85rem; color: var(--text-gray);">Paquete 150g</div>
-                        </div>
-                    </div>
-                </td>
-                <td><strong>CHI-077</strong></td>
-                <td>Chicles</td>
-                <td>0 UN</td>
-                <td>$1.990</td>
-                <td><span class="badge badge-danger">Sin Stock</span></td>
-                <td>
-                    <div class="action-buttons">
-                        <a href="{% url 'core:editar_producto' 3 %}" class="btn-icon btn-edit" title="Editar">✏️</a>
-                        <button class="btn-icon btn-delete" title="Eliminar" onclick="confirmarEliminacion(3, 'Chicles Adams')">🗑️</button>
-                    </div>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <div class="product-info">
-                        <div>
-                            <strong>Caramelos de Menta</strong>
-                            <div style="font-size: 0.85rem; color: var(--text-gray);">Bolsa 500g</div>
-                        </div>
-                    </div>
-                </td>
-                <td><strong>CAR-002</strong></td>
-                <td>Caramelos</td>
-                <td>50 UN</td>
-                <td>$2.490</td>
-                <td><span class="badge badge-warning">Stock Bajo</span></td>
-                <td>
-                    <div class="action-buttons">
-                        <a href="{% url 'core:editar_producto' 4 %}" class="btn-icon btn-edit" title="Editar">✏️</a>
-                        <button class="btn-icon btn-delete" title="Eliminar" onclick="confirmarEliminacion(4, 'Caramelos de Menta')">🗑️</button>
-                    </div>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <div class="product-info">
-                        <div>
-                            <strong>Chocolate amargo 70%</strong>
-                            <div style="font-size: 0.85rem; color: var(--text-gray);">Tableta 100g</div>
-                        </div>
-                    </div>
-                </td>
-                <td><strong>CHO-026</strong></td>
-                <td>Chocolates</td>
-                <td>150 UN</td>
-                <td>$3.990</td>
-                <td><span class="badge badge-success">Stock OK</span></td>
-                <td>
-                    <div class="action-buttons">
-                        <a href="{% url 'core:editar_producto' 5 %}" class="btn-icon btn-edit" title="Editar">✏️</a>
-                        <button class="btn-icon btn-delete" title="Eliminar" onclick="confirmarEliminacion(5, 'Chocolate amargo 70%')">🗑️</button>
-                    </div>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <div class="product-info">
-                        <div>
-                            <strong>Caramelos de Frutas</strong>
-                            <div style="font-size: 0.85rem; color: var(--text-gray);">Bolsa 500g</div>
-                        </div>
-                    </div>
-                </td>
-                <td><strong>CAR-003</strong></td>
-                <td>Caramelos</td>
-                <td>300 UN</td>
-                <td>$2.990</td>
-                <td><span class="badge badge-success">Stock OK</span></td>
-                <td>
-                    <div class="action-buttons">
-                        <a href="{% url 'core:editar_producto' 6 %}" class="btn-icon btn-edit" title="Editar">✏️</a>
-                        <button class="btn-icon btn-delete" title="Eliminar" onclick="confirmarEliminacion(6, 'Caramelos de Frutas')">🗑️</button>
-                    </div>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <div class="product-info">
-                        <div>
-                            <strong>Chocolate con Almendras</strong>
-                            <div style="font-size: 0.85rem; color: var(--text-gray);">Tableta 100g</div>
-                        </div>
-                    </div>
-                </td>
-                <td><strong>CHO-027</strong></td>
-                <td>Chocolates</td>
-                <td>80 UN</td>
-                <td>$4.490</td>
-                <td><span class="badge badge-warning">Stock Bajo</span></td>
-                <td>
-                    <div class="action-buttons">
-                        <a href="{% url 'core:editar_producto' 7 %}" class="btn-icon btn-edit" title="Editar">✏️</a>
-                        <button class="btn-icon btn-delete" title="Eliminar" onclick="confirmarEliminacion(7, 'Chocolate con Almendras')">🗑️</button>
-                    </div>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <div class="product-info">
-                        <div>
-                            <strong>Caramelos de Yogur</strong>
-                            <div style="font-size: 0.85rem; color: var(--text-gray);">Bolsa 500g</div>
-                        </div>
-                    </div>
-                </td>
-                <td><strong>CAR-004</strong></td>
-                <td>Caramelos</td>
-                <td>120 UN</td>
-                <td>$2.990</td>
-                <td><span class="badge badge-success">Stock OK</span></td>
-                <td>
-                    <div class="action-buttons">
-                        <a href="{% url 'core:editar_producto' 8 %}" class="btn-icon btn-edit" title="Editar">✏️</a>
-                        <button class="btn-icon btn-delete" title="Eliminar" onclick="confirmarEliminacion(8, 'Caramelos de Yogur')">🗑️</button>
-                    </div>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <div class="product-info">
-                        <div>
-                            <strong>Chocolate Blanco</strong>
-                            <div style="font-size: 0.85rem; color: var(--text-gray);">Tableta 100g</div>
-                        </div>
-                    </div>
-                </td>
-                <td><strong>CHO-028</strong></td>
-                <td>Chocolates</td>
-                <td>90 UN</td>
-                <td>$4.990</td>
-                <td><span class="badge badge-warning">Stock Bajo</span></td>
-                <td>
-                    <div class="action-buttons">
-                        <a href="{% url 'core:editar_producto' 9 %}" class="btn-icon btn-edit" title="Editar">✏️</a>
-                        <button class="btn-icon btn-delete" title="Eliminar" onclick="confirmarEliminacion(9, 'Chocolate Blanco')">🗑️</button>
-                    </div>
-                </td>
-            </tr>
+        {% endfor %}
         </tbody>
     </table>
 </div>
+
+{% if productos.has_other_pages %}
+<div class="pagination">
+    {% if productos.has_previous %}
+        <a href="?page=1&q={{ query }}&categoria={{ categoria_filtro }}&estado={{ estado_filtro }}&orden={{ orden }}">« Primera</a>
+        <a href="?page={{ productos.previous_page_number }}&q={{ query }}&categoria={{ categoria_filtro }}&estado={{ estado_filtro }}&orden={{ orden }}">‹ Anterior</a>
+    {% endif %}
+
+    <span class="current">Página {{ productos.number }} de {{ productos.paginator.num_pages }}</span>
+
+    {% if productos.has_next %}
+        <a href="?page={{ productos.next_page_number }}&q={{ query }}&categoria={{ categoria_filtro }}&estado={{ estado_filtro }}&orden={{ orden }}">Siguiente ›</a>
+        <a href="?page={{ productos.paginator.num_pages }}&q={{ query }}&categoria={{ categoria_filtro }}&estado={{ estado_filtro }}&orden={{ orden }}">Última »</a>
+    {% endif %}
+</div>
+{% endif %}
 {% endblock %}
 
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    function confirmarEliminacion(id, nombre) {
-        Swal.fire({
-            title: '¿Estás seguro?',
-            html: `¿Deseas eliminar el producto <strong>${nombre}</strong>?<br><small style="color: #6c757d;">Esta acción no se puede deshacer</small>`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Sí, eliminar',
-            cancelButtonText: 'Cancelar',
-            reverseButtons: true,
-            customClass: {
-                confirmButton: 'swal2-confirm',
-                cancelButton: 'swal2-cancel'
-            }
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Aquí harías la petición para eliminar el producto
-                // Por ejemplo: window.location.href = `/productos/eliminar/${id}/`;
-                
-                Swal.fire({
-                    title: '¡Eliminado!',
-                    text: `El producto ${nombre} ha sido eliminado correctamente`,
-                    icon: 'success',
-                    confirmButtonText: 'Aceptar',
-                    customClass: {
-                        confirmButton: 'swal2-confirm'
-                    }
-                });
-            }
-        });
-    }
+function confirmarEliminacion(id, nombre) {
+    Swal.fire({
+        title: '¿Estás seguro?',
+        html: `¿Deseas eliminar el producto <strong>${nombre}</strong>?<br><small style="color:#6c757d;">Esta acción no se puede deshacer</small>`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar',
+        reverseButtons: true,
+        customClass: { confirmButton: 'swal2-confirm', cancelButton: 'swal2-cancel' }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // TODO: Implementa eliminación real, por ejemplo:
+            // window.location.href = `{% url 'core:eliminar_producto' 0 %}`.replace('/0/', `/${id}/`);
+            Swal.fire({
+                title: '¡Eliminado!',
+                text: `El producto ${nombre} ha sido eliminado correctamente`,
+                icon: 'success',
+                confirmButtonText: 'Aceptar',
+                customClass: { confirmButton: 'swal2-confirm' }
+            });
+        }
+    });
+}
 </script>
 {% endblock %}

@@ -7,7 +7,11 @@ from django.contrib.auth.models import User
 from django.db import transaction
 from django.utils import timezone
 from decimal import Decimal
-
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.db.models import Q
+import openpyxl
+from django.http import HttpResponse
+from .decorators import admin_required, vendedor_o_admin
 from .models import (
     Usuario, Producto, Proveedor, ProductoProveedor, 
     Bodega, MovimientoInventario, Categoria
@@ -101,6 +105,7 @@ def lista_usuarios(request):
 
 
 @login_required
+@admin_required
 @transaction.atomic
 def crear_usuario(request):
     """Crear nuevo usuario"""
@@ -133,6 +138,7 @@ def crear_usuario(request):
 
 
 @login_required
+@admin_required
 @transaction.atomic
 def editar_usuario(request, id):
     """Editar usuario existente"""
@@ -179,13 +185,124 @@ def editar_usuario(request, id):
 # PRODUCTOS - CRUD COMPLETO CON PASOS
 # ===============================================
 @login_required
+@vendedor_o_admin
 def lista_productos(request):
-    """Listar todos los productos"""
-    productos = Producto.objects.select_related('categoria').all()
-    return render(request, 'productos/lista_productos.html', {'productos': productos})
+    """Listar productos con paginación, búsqueda y ordenamiento"""
+    
+    # Obtener parámetros de búsqueda y ordenamiento
+    query = request.GET.get('q', '')
+    categoria_filtro = request.GET.get('categoria', '')
+    estado_filtro = request.GET.get('estado', '')
+    orden = request.GET.get('orden', 'nombre')  # Default: ordenar por nombre
+    
+    # Filtro base
+    productos = Producto.objects.select_related('categoria').filter(activo=True)
+    
+    # Aplicar búsqueda
+    if query:
+        productos = productos.filter(
+            Q(sku__icontains=query) |
+            Q(nombre__icontains=query) |
+            Q(marca__icontains=query) |
+            Q(categoria__nombre__icontains=query)
+        )
+    
+    # Filtrar por categoría
+    if categoria_filtro:
+        productos = productos.filter(categoria__nombre=categoria_filtro)
+    
+    # Filtrar por estado de stock
+    if estado_filtro == 'bajo':
+        productos = productos.filter(alerta_bajo_stock=True)
+    elif estado_filtro == 'ok':
+        productos = productos.filter(alerta_bajo_stock=False)
+    
+    # Aplicar ordenamiento
+    orden_valido = {
+        'nombre': 'nombre',
+        '-nombre': '-nombre',
+        'sku': 'sku',
+        '-sku': '-sku',
+        'precio': 'precio_venta',
+        '-precio': '-precio_venta',
+        'stock': 'stock_actual',
+        '-stock': '-stock_actual',
+    }
+    productos = productos.order_by(orden_valido.get(orden, 'nombre'))
+    
+    # Paginación
+    paginator = Paginator(productos, 10)  # 10 productos por página
+    page = request.GET.get('page', 1)
+    
+    try:
+        productos_paginados = paginator.page(page)
+    except PageNotAnInteger:
+        productos_paginados = paginator.page(1)
+    except EmptyPage:
+        productos_paginados = paginator.page(paginator.num_pages)
+    
+    # Obtener categorías para el filtro
+    categorias = Categoria.objects.all()
+    
+    context = {
+        'productos': productos_paginados,
+        'categorias': categorias,
+        'query': query,
+        'categoria_filtro': categoria_filtro,
+        'estado_filtro': estado_filtro,
+        'orden': orden,
+    }
+    
+    return render(request, 'productos/lista_productos.html', context)
 
 
 @login_required
+def exportar_productos_excel(request):
+    """Exportar productos a Excel"""
+    
+    # Crear libro de Excel
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Productos"
+    
+    # Encabezados
+    headers = ['SKU', 'Nombre', 'Categoría', 'Marca', 'Stock Actual', 
+               'Stock Mínimo', 'Precio Venta', 'Estado']
+    ws.append(headers)
+    
+    # Aplicar estilo a encabezados
+    for cell in ws[1]:
+        cell.font = openpyxl.styles.Font(bold=True)
+        cell.fill = openpyxl.styles.PatternFill(start_color="FF6B9D", end_color="FF6B9D", fill_type="solid")
+    
+    # Obtener productos
+    productos = Producto.objects.select_related('categoria').filter(activo=True)
+    
+    # Agregar datos
+    for producto in productos:
+        estado = "Stock OK" if not producto.alerta_bajo_stock else "Stock Bajo"
+        ws.append([
+            producto.sku,
+            producto.nombre,
+            producto.categoria.nombre if producto.categoria else '',
+            producto.marca or '',
+            float(producto.stock_actual),
+            float(producto.stock_minimo),
+            float(producto.precio_venta) if producto.precio_venta else 0,
+            estado
+        ])
+    
+    # Configurar respuesta HTTP
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = 'attachment; filename=productos.xlsx'
+    
+    wb.save(response)
+    return response
+
+@login_required
+@admin_required
 def crear_producto(request):
     """Vista inicial para crear producto"""
     return render(request, 'productos/crear_producto.html')
@@ -600,3 +717,4 @@ def editar_movimiento(request, id):
     """Vista de selección de pasos para editar movimiento"""
     movimiento = get_object_or_404(MovimientoInventario, pk=id)
     return render(request, 'inventario/editar_movimiento.html', {'movimiento': movimiento})
+
