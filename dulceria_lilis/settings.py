@@ -1,12 +1,12 @@
 from pathlib import Path
-from decouple import config
+from decouple import config, Csv
 import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY
 SECRET_KEY = config('DJANGO_SECRET_KEY', default='django-insecure-temp-key')
-DEBUG = False
+DEBUG = config('DJANGO_DEBUG', cast=bool, default=True)
 
 # Application definition
 INSTALLED_APPS = [
@@ -57,11 +57,11 @@ WSGI_APPLICATION = 'dulceria_lilis.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'dulceria_lilis_2',
-        'USER': 'admin',
-        'PASSWORD': 'Ventana-123',
-        'HOST': 'basededatosproyectointegrado.cmsozqfxqswv.us-east-1.rds.amazonaws.com',
-        'PORT': 3306,
+        'NAME':     config('DB_NAME'),
+        'USER':     config('DB_USER'),
+        'PASSWORD': config('DB_PASSWORD'),
+        'HOST':     config('DB_HOST'),
+        'PORT':     config('DB_PORT', cast=int, default=3306),
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
             'charset': 'utf8mb4',
@@ -69,13 +69,17 @@ DATABASES = {
     }
 }
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
-CSRF_TRUSTED_ORIGINS = [
-    'http://3.223.202.82:8080',
-    'http://3.223.202.82',
-    'http://localhost',
-    'http://127.0.0.1'
-]
+ALLOWED_HOSTS = config(
+    'DJANGO_ALLOWED_HOSTS',
+    cast=Csv(),
+    default='3.223.202.82,localhost,127.0.0.1'
+)
+CSRF_TRUSTED_ORIGINS = config(
+    'DJANGO_CSRF_TRUSTED',
+    cast=Csv(),
+    default='http://3.223.202.82,https://3.223.202.82'
+)
+
 
 
 # Password validation
