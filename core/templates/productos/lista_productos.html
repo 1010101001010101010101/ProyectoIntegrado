@@ -4,101 +4,216 @@
 
 {% block extra_css %}
 <style>
+    :root {
+        --primary: #ff0000;
+        --primary-dark: #cc0000;
+        --text-dark: #1f2937;
+        --text-gray: #6b7280;
+        --border: #e5e7eb;
+        --shadow: rgba(0, 0, 0, 0.1);
+        --bg-light: #f9fafb;
+    }
+
     .page-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
         margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--border);
     }
 
     .page-title {
         font-size: 2rem;
         color: var(--text-dark);
         font-weight: 700;
+        margin: 0;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.95rem;
     }
 
     .btn-primary {
         background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
         color: white;
-        padding: 0.8rem 1.5rem;
-        border-radius: 10px;
-        text-decoration: none;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        box-shadow: 0 4px 15px rgba(243, 4, 4, 0.3);
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
     }
+
     .btn-primary:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 25px rgba(207, 4, 4, 0.5);
+        box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, #16a34a, #22c55e);
+        color: white;
+        box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
+    }
+
+    .btn-success:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(22, 163, 74, 0.4);
+    }
+
+    .btn-danger {
+        background: linear-gradient(135deg, #dc2626, #ef4444);
+        color: white;
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+    }
+
+    .btn-danger:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
+    }
+
+    .btn-sm {
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
     }
 
     .export-btn {
         background: #10B981;
         color: white;
-        padding: 0.8rem 1.5rem;
-        border-radius: 10px;
-        text-decoration: none;
-        font-weight: 600;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        transition: all .2s ease;
     }
-    .export-btn:hover { transform: translateY(-2px); }
 
-    .filters-bar {
+    .export-btn:hover {
+        background: #059669;
+    }
+
+    /* Filtros */
+    .filters-card {
         background: white;
         padding: 1.5rem;
         border-radius: 12px;
         margin-bottom: 1.5rem;
         box-shadow: 0 2px 12px var(--shadow);
-        display: flex;
+    }
+
+    .filters-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
         gap: 1rem;
-        flex-wrap: wrap;
     }
-    .search-input {
-        flex: 1;
-        min-width: 250px;
-        padding: 0.8rem 1rem;
-        border: 2px solid var(--border);
-        border-radius: 8px;
-        font-size: 1rem;
-    }
-    .search-input:focus { outline: none; border-color: var(--primary); }
 
-    .filter-select {
-        padding: 0.8rem 1rem;
+    .filter-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+    }
+
+    .filter-item label {
+        font-weight: 600;
+        color: var(--text-dark);
+        font-size: 0.9rem;
+    }
+
+    .form-control {
+        padding: 0.75rem 1rem;
         border: 2px solid var(--border);
         border-radius: 8px;
-        font-size: 1rem;
+        font-size: 0.95rem;
+        transition: all 0.2s ease;
+        width: 100%;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+    }
+
+    select.form-control {
         cursor: pointer;
-        min-width: 180px;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        padding-right: 2.5rem;
     }
 
-    .table-container {
+    .input-wrapper {
+        position: relative;
+    }
+
+    .search-loading {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        display: none;
+    }
+
+    .search-loading.active {
+        display: block;
+    }
+
+    .spinner {
+        width: 20px;
+        height: 20px;
+        border: 3px solid var(--border);
+        border-top-color: var(--primary);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* Tabla */
+    .table-card {
         background: white;
         border-radius: 12px;
         overflow: hidden;
         box-shadow: 0 2px 12px var(--shadow);
     }
-    table { width: 100%; border-collapse: collapse; }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
     thead {
-        background: linear-gradient(135deg, #ff0000 0%, #ff0000b8 100%);
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
         color: white;
     }
+
     th {
-        padding: 1.2rem 1rem;
+        padding: 1rem;
         text-align: left;
         font-weight: 600;
-        font-size: 0.95rem;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
-    td { padding: 1rem; border-bottom: 1px solid var(--border); }
-    tbody tr { transition: background-color 0.2s ease; }
+
+    td {
+        padding: 1rem;
+        border-bottom: 1px solid var(--border);
+        color: var(--text-dark);
+    }
+
+    tbody tr {
+        transition: background-color 0.2s ease;
+    }
+
     tbody tr:hover {
-        background: linear-gradient(135deg, rgba(255, 217, 0, 0.05) 0%, rgba(211, 39, 39, 0.05) 100%);
+        background-color: #FFF5F7;
+    }
+
+    tbody tr:last-child td {
+        border-bottom: none;
     }
 
     .badge {
@@ -108,126 +223,212 @@
         font-weight: 600;
         display: inline-block;
     }
-    .badge-success { background: #D4EDDA; color: #155724; }
-    .badge-danger  { background: #F8D7DA; color: #721C24; }
-    .badge-warning { background: #FFF3CD; color: #856404; }
 
-    .action-buttons { display: flex; gap: 0.5rem; }
-    .btn-icon {
-        padding: 0.5rem 0.8rem; border: none; border-radius: 6px;
-        cursor: pointer; transition: all 0.2s ease; font-size: 1rem;
-        text-decoration: none; display: inline-block;
+    .badge-success {
+        background: linear-gradient(135deg, #16a34a, #22c55e);
+        color: white;
     }
-    .btn-edit  { background: #E3F2FD; color: #1976D2; }
-    .btn-edit:hover  { background: #1976D2; color: white; transform: scale(1.1); }
-    .btn-delete { background: #FFEBEE; color: #C62828; }
-    .btn-delete:hover { background: #C62828; color: white; transform: scale(1.1); }
+
+    .badge-warning {
+        background: linear-gradient(135deg, #f59e0b, #fbbf24);
+        color: white;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: var(--text-gray);
+    }
+
+    .empty-state svg {
+        width: 64px;
+        height: 64px;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
 
     /* Paginación */
-    .pagination {
+    .pagination-wrapper {
         display: flex;
-        justify-content: center;
-        gap: 0.5rem;
-        margin-top: 2rem;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 1rem;
+        gap: 1rem;
+        flex-wrap: wrap;
     }
-    .pagination a, .pagination span {
-        padding: 0.6rem 1rem;
-        border: 2px solid var(--border);
-        border-radius: 6px;
-        text-decoration: none;
+
+    .pagination-info {
         color: var(--text-dark);
-        font-weight: 600;
-        transition: all 0.2s ease;
+        font-weight: 500;
     }
-    .pagination a:hover {
+
+    .pagination-nav {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .pagination-nav ul {
+        display: flex;
+        gap: 0.5rem;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .pagination-nav a,
+    .pagination-nav span {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        background: var(--bg-light);
+        color: var(--text-dark);
+        text-decoration: none;
+        transition: background 0.3s ease;
+        min-width: 40px;
+        text-align: center;
+    }
+
+    .pagination-nav a:hover {
         background: var(--primary);
         color: white;
-        border-color: var(--primary);
     }
-    .pagination .current {
+
+    .pagination-nav .current {
         background: var(--primary);
         color: white;
-        border-color: var(--primary);
     }
 
     @media (max-width: 768px) {
-        .page-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
-        .table-container { overflow-x: auto; }
-        table { min-width: 1000px; }
-    }
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
 
-    /* SweetAlert2 */
-    .swal2-popup { border-radius: 16px; }
-    .swal2-confirm {
-        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%) !important;
-        border-radius: 8px; padding: 0.6rem 2rem; font-weight: 600;
-    }
-    .swal2-cancel {
-        background: #6c757d !important; border-radius: 8px; padding: 0.6rem 2rem; font-weight: 600;
+        .filters-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .table-card {
+            overflow-x: auto;
+        }
+
+        table {
+            min-width: 800px;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
     }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="page-header">
-    <h1 class="page-title">Gestión de Productos</h1>
+    <h1 class="page-title">📦 Gestión de Productos</h1>
     <div style="display: flex; gap: 1rem;">
-        <a href="{% url 'core:exportar_productos_excel' %}" class="export-btn">📊 Exportar Excel</a>
-        <a href="{% url 'core:producto_paso1' %}" class="btn-primary"><span>➕</span> Nuevo Producto</a>
+        <a href="{% url 'core:exportar_productos_excel' %}?buscar={{ buscar }}&categoria={{ categoria_filtro }}&estado={{ estado_filtro }}&orden={{ orden }}" class="btn export-btn">
+            📊 Exportar Excel
+        </a>
+        <a href="{% url 'core:producto_paso1' %}" class="btn btn-primary">
+            ➕ Nuevo Producto
+        </a>
     </div>
 </div>
 
-<div class="filters-bar">
-    <form method="get" style="display: contents;">
-        <input
-            type="text" name="q" class="search-input"
-            placeholder="Buscar por SKU, nombre o categoría..."
-            value="{{ query }}"
-        />
+<!-- FILTROS Y BÚSQUEDA -->
+<div class="filters-card">
+    <form id="filtros-form" method="get" class="filters-grid">
+        <div class="filter-item">
+            <label for="buscar">Buscar</label>
+            <div class="input-wrapper">
+                <input type="search" id="buscar" name="buscar" value="{{ buscar }}" class="form-control" placeholder="Nombre, SKU, descripción…">
+                <span id="search-loading" class="search-loading">
+                    <span class="spinner"></span>
+                </span>
+            </div>
+        </div>
 
-        <select name="categoria" class="filter-select" onchange="this.form.submit()">
-            <option value="">Todas las categorías</option>
-            {% for cat in categorias %}
-                <option value="{{ cat.nombre }}" {% if categoria_filtro == cat.nombre %}selected{% endif %}>
+        <div class="filter-item">
+            <label for="categoria">Categoría</label>
+            <select id="categoria" name="categoria" class="form-control">
+                <option value="">Todas las categorías</option>
+                {% for cat in categorias %}
+                <option value="{{ cat.id }}" {% if categoria_filtro|default:'' == cat.id|stringformat:'s' %}selected{% endif %}>
                     {{ cat.nombre }}
                 </option>
-            {% endfor %}
-        </select>
+                {% endfor %}
+            </select>
+        </div>
 
-        <select name="estado" class="filter-select" onchange="this.form.submit()">
-            <option value="">Estado Stock</option>
-            <option value="ok"   {% if estado_filtro == 'ok' %}selected{% endif %}>Stock Óptimo</option>
-            <option value="bajo" {% if estado_filtro == 'bajo' %}selected{% endif %}>Stock Bajo</option>
-        </select>
+        <div class="filter-item">
+            <label for="estado">Estado</label>
+            <select id="estado" name="estado" class="form-control">
+                <option value="">Todos</option>
+                <option value="ACTIVO" {% if estado_filtro == 'ACTIVO' %}selected{% endif %}>Stock OK</option>
+                <option value="INACTIVO" {% if estado_filtro == 'INACTIVO' %}selected{% endif %}>Stock Bajo</option>
+            </select>
+        </div>
 
-        <select name="orden" class="filter-select" onchange="this.form.submit()">
-            <option value="nombre"   {% if orden == 'nombre' %}selected{% endif %}>Nombre A-Z</option>
-            <option value="-nombre"  {% if orden == '-nombre' %}selected{% endif %}>Nombre Z-A</option>
-            <option value="sku"      {% if orden == 'sku' %}selected{% endif %}>SKU A-Z</option>
-            <option value="-precio"  {% if orden == '-precio' %}selected{% endif %}>Precio Mayor</option>
-            <option value="precio"   {% if orden == 'precio' %}selected{% endif %}>Precio Menor</option>
-            <option value="-stock"   {% if orden == '-stock' %}selected{% endif %}>Stock Mayor</option>
-        </select>
-
-        <button type="submit" class="btn-primary">Buscar</button>
+        <div class="filter-item">
+            <label for="page_size">Registros por página</label>
+            <select id="page_size" name="page_size" class="form-control">
+                {% for size in page_size_choices %}
+                <option value="{{ size }}" {% if page_size == size %}selected{% endif %}>{{ size }}</option>
+                {% endfor %}
+            </select>
+        </div>
     </form>
 </div>
 
-<div class="table-container">
+<!-- TABLA DE PRODUCTOS -->
+<div class="table-card">
     <table>
         <thead>
             <tr>
-                <th>SKU</th>
-                <th>Producto</th>
-                <th>Categoría</th>
-                <th>Stock Actual</th>
-                <th>Precio Venta</th>
+                <th>
+                    <a href="?{{ base_qs }}&orden=sku&dir={% if orden == 'sku' and dir == 'asc' %}desc{% else %}asc{% endif %}" style="color:#fff;text-decoration:none">
+                        SKU
+                        {% if orden == 'sku' %}{% if dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}
+                    </a>
+                </th>
+                <th>
+                    <a href="?{{ base_qs }}&orden=nombre&dir={% if orden == 'nombre' and dir == 'asc' %}desc{% else %}asc{% endif %}" style="color:#fff;text-decoration:none">
+                        Producto
+                        {% if orden == 'nombre' %}{% if dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}
+                    </a>
+                </th>
+                <th>
+                    <a href="?{{ base_qs }}&orden=categoria&dir={% if orden == 'categoria' and dir == 'asc' %}desc{% else %}asc{% endif %}" style="color:#fff;text-decoration:none">
+                        Categoría
+                        {% if orden == 'categoria' %}{% if dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}
+                    </a>
+                </th>
+                <th>
+                    <a href="?{{ base_qs }}&orden=stock&dir={% if orden == 'stock' and dir == 'asc' %}desc{% else %}asc{% endif %}" style="color:#fff;text-decoration:none">
+                        Stock Actual
+                        {% if orden == 'stock' %}{% if dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}
+                    </a>
+                </th>
+                <th>
+                    <a href="?{{ base_qs }}&orden=precio&dir={% if orden == 'precio' and dir == 'asc' %}desc{% else %}asc{% endif %}" style="color:#fff;text-decoration:none">
+                        Precio Venta
+                        {% if orden == 'precio' %}{% if dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}
+                    </a>
+                </th>
                 <th>Estado</th>
-                <th>Acciones</th>
+                <th style="text-align: center;">Acciones</th>
             </tr>
         </thead>
         <tbody>
-        {% for producto in productos %}
+            {% for producto in productos %}
             <tr>
                 <td><strong>{{ producto.sku }}</strong></td>
                 <td>{{ producto.nombre }}</td>
@@ -236,73 +437,137 @@
                 <td>${{ producto.precio_venta|floatformat:0 }}</td>
                 <td>
                     {% if producto.alerta_bajo_stock %}
-                        <span class="badge badge-warning">Stock Bajo</span>
+                        <span class="badge badge-warning">⚠️ Stock Bajo</span>
                     {% else %}
-                        <span class="badge badge-success">Stock OK</span>
+                        <span class="badge badge-success">✅ Stock OK</span>
                     {% endif %}
                 </td>
                 <td>
                     <div class="action-buttons">
-                        <a href="{% url 'core:editar_producto' producto.id %}" class="btn-icon btn-edit" title="Editar">✏️</a>
-                        <button class="btn-icon btn-delete" title="Eliminar"
-                                onclick="confirmarEliminacion({{ producto.id }}, '{{ producto.nombre }}')">🗑️</button>
+                        <a href="{% url 'core:editar_producto' producto.id %}" class="btn btn-sm btn-success">
+                            ✏️ Editar
+                        </a>
+                        <button
+                            type="button"
+                            class="btn btn-sm btn-danger btn-eliminar"
+                            data-id="{{ producto.id }}"
+                            data-nombre="{{ producto.nombre|escape }}">
+                            🗑️ Eliminar
+                        </button>
                     </div>
                 </td>
             </tr>
-        {% empty %}
+            {% empty %}
             <tr>
-                <td colspan="7" style="text-align: center; padding: 2rem;">
-                    No se encontraron productos
+                <td colspan="7" class="empty-state">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                    </svg>
+                    <p><strong>No hay productos que coincidan con la búsqueda</strong></p>
+                    <p>Intenta con otros términos</p>
                 </td>
             </tr>
-        {% endfor %}
+            {% endfor %}
         </tbody>
     </table>
 </div>
 
-{% if productos.has_other_pages %}
-<div class="pagination">
-    {% if productos.has_previous %}
-        <a href="?page=1&q={{ query }}&categoria={{ categoria_filtro }}&estado={{ estado_filtro }}&orden={{ orden }}">« Primera</a>
-        <a href="?page={{ productos.previous_page_number }}&q={{ query }}&categoria={{ categoria_filtro }}&estado={{ estado_filtro }}&orden={{ orden }}">‹ Anterior</a>
-    {% endif %}
-
-    <span class="current">Página {{ productos.number }} de {{ productos.paginator.num_pages }}</span>
-
-    {% if productos.has_next %}
-        <a href="?page={{ productos.next_page_number }}&q={{ query }}&categoria={{ categoria_filtro }}&estado={{ estado_filtro }}&orden={{ orden }}">Siguiente ›</a>
-        <a href="?page={{ productos.paginator.num_pages }}&q={{ query }}&categoria={{ categoria_filtro }}&estado={{ estado_filtro }}&orden={{ orden }}">Última »</a>
-    {% endif %}
+<!-- PAGINACIÓN -->
+<div class="pagination-wrapper">
+    <div class="pagination-info">
+        Mostrando {{ page_obj.start_index }}–{{ page_obj.end_index }} de {{ page_obj.paginator.count }}
+    </div>
+    <nav class="pagination-nav" aria-label="Paginación">
+        <ul>
+            {% if page_obj.has_previous %}
+                <li><a href="?{{ base_qs }}&page=1">« Primero</a></li>
+                <li><a href="?{{ base_qs }}&page={{ page_obj.previous_page_number }}">‹ Anterior</a></li>
+            {% endif %}
+            {% for i in elided_range %}
+                {% if i == ELLIPSIS %}
+                    <li><span style="pointer-events:none">…</span></li>
+                {% elif i == page_obj.number %}
+                    <li><span class="current">{{ i }}</span></li>
+                {% else %}
+                    <li><a href="?{{ base_qs }}&page={{ i }}">{{ i }}</a></li>
+                {% endif %}
+            {% endfor %}
+            {% if page_obj.has_next %}
+                <li><a href="?{{ base_qs }}&page={{ page_obj.next_page_number }}">Siguiente ›</a></li>
+                <li><a href="?{{ base_qs }}&page={{ page_obj.paginator.num_pages }}">Último »</a></li>
+            {% endif %}
+        </ul>
+    </nav>
 </div>
-{% endif %}
+
+<!-- Formulario oculto para eliminar -->
+<form id="form-eliminar" method="post" style="display:none;">
+    {% csrf_token %}
+</form>
 {% endblock %}
 
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-function confirmarEliminacion(id, nombre) {
-    Swal.fire({
-        title: '¿Estás seguro?',
-        html: `¿Deseas eliminar el producto <strong>${nombre}</strong>?<br><small style="color:#6c757d;">Esta acción no se puede deshacer</small>`,
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Sí, eliminar',
-        cancelButtonText: 'Cancelar',
-        reverseButtons: true,
-        customClass: { confirmButton: 'swal2-confirm', cancelButton: 'swal2-cancel' }
-    }).then((result) => {
-        if (result.isConfirmed) {
-            // TODO: Implementa eliminación real, por ejemplo:
-            // window.location.href = `{% url 'core:eliminar_producto' 0 %}`.replace('/0/', `/${id}/`);
-            Swal.fire({
-                title: '¡Eliminado!',
-                text: `El producto ${nombre} ha sido eliminado correctamente`,
-                icon: 'success',
-                confirmButtonText: 'Aceptar',
-                customClass: { confirmButton: 'swal2-confirm' }
-            });
-        }
+    // ==========================================
+    // BÚSQUEDA EN TIEMPO REAL (debounce)
+    // ==========================================
+    const form = document.getElementById('filtros-form');
+    const searchInput = document.getElementById('buscar');
+    const searchLoading = document.getElementById('search-loading');
+    let searchTimeout = null;
+
+    const autoSubmit = (delay = 0) => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => form.submit(), delay);
+    };
+
+    searchInput.addEventListener('input', () => {
+        searchLoading?.classList.add('active');
+        autoSubmit(350);
     });
-}
+
+    ['categoria', 'estado', 'page_size'].forEach(id => {
+        document.getElementById(id)?.addEventListener('change', () => autoSubmit());
+    });
+
+    form.addEventListener('submit', () => searchLoading?.classList.remove('active'));
+
+    // ==========================================
+    // CONFIRMAR ELIMINACIÓN con SweetAlert2
+    // ==========================================
+    document.querySelectorAll('.btn-eliminar').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const id = this.dataset.id;
+            const nombre = this.dataset.nombre;
+            
+            Swal.fire({
+                title: '🗑️ Confirmar eliminación',
+                html: `<p>¿Estás seguro de eliminar el producto <strong>${nombre}</strong>?</p><p style="color:#dc2626;font-weight:600;">Esta acción no se puede deshacer.</p>`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar',
+                reverseButtons: true,
+                allowOutsideClick: false,
+                allowEscapeKey: true,
+                buttonsStyling: false,
+                customClass: {
+                    confirmButton: 'swal2-confirm',
+                    cancelButton: 'swal2-cancel'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const form = document.getElementById('form-eliminar');
+                    form.action = `/productos/${id}/eliminar/`;
+                    form.submit();
+                }
+            });
+        });
+    });
 </script>
 {% endblock %}

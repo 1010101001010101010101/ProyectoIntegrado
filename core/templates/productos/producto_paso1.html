@@ -1,145 +1,100 @@
 {% extends 'base.html' %}
 
-{% block title %}Producto - Paso 1{% endblock %}
+{% block title %}Nuevo Producto - Paso 1{% endblock %}
 
 {% block extra_css %}
 <style>
-    .page-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+    :root {
+        --primary: #2563eb;
+        --primary-dark: #1e40af;
+        --text-dark: #1f2937;
+        --text-gray: #6b7280;
+        --border: #e5e7eb;
+        --shadow: rgba(0, 0, 0, 0.1);
+    }
+    
+    .wizard-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    
+    .wizard-header {
+        text-align: center;
         margin-bottom: 2rem;
     }
     
-    .page-title {
-        font-size: 2rem;
-        color: var(--text-dark);
+    .wizard-title {
+        font-size: 1.75rem;
         font-weight: 700;
+        color: var(--text-dark);
         margin-bottom: 0.5rem;
     }
     
-    .breadcrumb {
-        color: var(--text-gray);
-        font-size: 0.95rem;
-    }
-    
-    .breadcrumb a {
-        color: #dc2626;
-        text-decoration: none;
-        transition: color 0.3s;
-    }
-    
-    .breadcrumb a:hover {
-        color: #991b1b;
-    }
-    
-    .form-card {
-        background: white;
-        border-radius: 12px;
-        padding: 2.5rem;
-        box-shadow: 0 2px 12px var(--shadow);
-    }
-    
-    .steps-progress {
-        background: white;
-        border-radius: 12px;
-        padding: 1.5rem;
-        box-shadow: 0 2px 12px var(--shadow);
+    /* WIZARD STEPS */
+    .wizard-steps {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
         margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px var(--shadow);
     }
-
-    .steps-header {
+    
+    .step {
         display: flex;
-        justify-content: space-between;
         align-items: center;
-        position: relative;
+        gap: 0.75rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        transition: all 0.3s ease;
     }
-
-    .step-item {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 0.5rem;
-        flex: 1;
-        position: relative;
-        z-index: 2;
+    
+    .step.active {
+        background: var(--primary);
+        color: white;
     }
-
+    
     .step-number {
-        width: 45px;
-        height: 45px;
+        width: 32px;
+        height: 32px;
         border-radius: 50%;
-        background: var(--border);
-        color: var(--text-gray);
+        background: rgba(255,255,255,0.2);
         display: flex;
         align-items: center;
         justify-content: center;
         font-weight: 700;
-        font-size: 1.2rem;
-        transition: all 0.3s ease;
     }
-
-    .step-item.active .step-number {
-        background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
-        color: white;
-        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
-        animation: pulse 2s infinite;
+    
+    .step.active .step-number {
+        background: white;
+        color: var(--primary);
     }
-
-    @keyframes pulse {
-        0%, 100% {
-            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
-        }
-        50% {
-            box-shadow: 0 4px 20px rgba(220, 38, 38, 0.6);
-        }
-    }
-
-    .step-label {
-        font-size: 0.85rem;
-        color: var(--text-gray);
-        font-weight: 600;
-        text-align: center;
-    }
-
-    .step-item.active .step-label {
-        color: #dc2626;
-        font-weight: 700;
-    }
-
-    .progress-line {
-        position: absolute;
-        top: 22px;
-        left: 0;
-        right: 0;
-        height: 3px;
-        background: var(--border);
-        z-index: 1;
-    }
-
-    .progress-line-fill {
-        height: 100%;
-        background: linear-gradient(90deg, #dc2626 0%, #991b1b 100%);
-        width: 0%;
-        transition: width 0.5s ease;
+    
+    /* FORM CARD */
+    .form-card {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 2px 12px var(--shadow);
     }
     
     .section-title {
-        font-size: 1.3rem;
+        font-size: 1.1rem;
         color: var(--text-dark);
         font-weight: 700;
-        margin-bottom: 1.5rem;
-        margin-top: 2rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
+        margin: 1.5rem 0 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--border);
     }
     
     .form-row {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 1.5rem;
-        margin-bottom: 1.5rem;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1rem;
     }
     
     .form-group {
@@ -149,67 +104,55 @@
     
     .form-group label {
         font-weight: 600;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.4rem;
         color: var(--text-dark);
-        font-size: 0.95rem;
+        font-size: 0.9rem;
     }
     
-    .label-optional {
-        font-weight: normal;
+    .label-hint {
+        font-size: 0.75rem;
         color: var(--text-gray);
-        font-size: 0.85rem;
-    }
-    
-    .label-required {
-        color: #dc2626;
+        margin-top: 0.25rem;
     }
     
     .form-control {
-        padding: 0.9rem;
+        padding: 0.75rem;
         border: 2px solid var(--border);
-        border-radius: 8px;
-        font-size: 1rem;
+        border-radius: 6px;
+        font-size: 0.95rem;
         transition: all 0.3s ease;
     }
     
     .form-control:focus {
         outline: none;
-        border-color: #dc2626;
-        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    
+    .form-control[readonly] {
+        background: #f9fafb;
+        color: var(--text-gray);
     }
     
     textarea.form-control {
-        min-height: 100px;
+        min-height: 80px;
         resize: vertical;
         font-family: inherit;
     }
     
-    .info-box {
-        background: #fef2f2;
-        border-left: 4px solid #dc2626;
-        padding: 1rem;
-        border-radius: 8px;
-        margin-bottom: 1.5rem;
-    }
-
-    .info-box p {
-        margin: 0;
-        color: #991b1b;
-        font-size: 0.95rem;
-    }
-    
+    /* FORM ACTIONS */
     .form-actions {
         display: flex;
         justify-content: space-between;
         margin-top: 2rem;
-        padding-top: 2rem;
+        padding-top: 1.5rem;
         border-top: 2px solid var(--border);
     }
     
     .btn {
-        padding: 0.9rem 1.8rem;
+        padding: 0.75rem 1.5rem;
         border: none;
-        border-radius: 10px;
+        border-radius: 8px;
         font-weight: 600;
         cursor: pointer;
         transition: all 0.3s ease;
@@ -217,790 +160,493 @@
         display: inline-flex;
         align-items: center;
         gap: 0.5rem;
+        font-size: 0.95rem;
     }
     
     .btn-primary {
-        background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+        background: var(--primary);
         color: white;
-        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
     }
     
     .btn-primary:hover {
+        background: var(--primary-dark);
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
+        box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
     }
     
     .btn-secondary {
-        background: #f5f5f5;
+        background: #f3f4f6;
         color: var(--text-dark);
     }
     
     .btn-secondary:hover {
-        background: #e0e0e0;
-    }
-
-    /* Estilos personalizados para SweetAlert2 */
-    .swal2-popup {
-        border-radius: 16px;
-        font-family: inherit;
+        background: #e5e7eb;
     }
     
-    .swal2-title {
-        color: var(--text-dark);
-        font-size: 1.5rem;
-    }
-    
-    .swal2-html-container {
-        color: var(--text-gray);
-    }
-    
-    .swal2-confirm {
-        background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%) !important;
-        border-radius: 8px;
-        padding: 0.6rem 2rem;
-        font-weight: 600;
-    }
-    
-    .swal2-cancel {
-        background: #f5f5f5 !important;
-        color: var(--text-dark) !important;
-        border-radius: 8px;
-        padding: 0.6rem 2rem;
-        font-weight: 600;
-    }
-
-    @media (max-width: 768px) {
-        .page-header {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 1rem;
-        }
-        
-        .form-row {
-            grid-template-columns: 1fr;
-        }
-        
-        .form-actions {
-            flex-direction: column;
-            gap: 1rem;
-        }
-        
-        .btn {
-            width: 100%;
-            justify-content: center;
-        }
+    .error-message {
+        color: #dc2626;
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="page-header">
-    <div>
-        <h1 class="page-title">Formulario de Producto - Paso 1</h1>
-        <div class="breadcrumb">
-            <a href="{% url 'core:dashboard' %}">Dashboard</a> / 
-            <a href="{% url 'core:lista_productos' %}">Productos</a> / 
-            Nuevo
-        </div>
+<div class="wizard-container">
+    <div class="wizard-header">
+        <h1 class="wizard-title">📦 Formulario de Producto</h1>
     </div>
-    <a href="{% url 'core:lista_productos' %}" class="btn btn-secondary">← Volver</a>
-</div>
 
-<div class="steps-progress">
-    <div class="steps-header">
-        <div class="progress-line">
-            <div class="progress-line-fill"></div>
-        </div>
-        <div class="step-item active">
+    <!-- WIZARD STEPS -->
+    <div class="wizard-steps">
+        <div class="step active">
             <div class="step-number">1</div>
-            <div class="step-label">Identificación y Precios</div>
+            <div class="step-label">Identificación y precios</div>
         </div>
-        <div class="step-item">
+        <div class="step">
             <div class="step-number">2</div>
-            <div class="step-label">Stock y Control</div>
+            <div class="step-label">Stock y control</div>
         </div>
-        <div class="step-item">
+        <div class="step">
             <div class="step-number">3</div>
-            <div class="step-label">Relaciones</div>
+            <div class="step-label">Relaciones y derivados</div>
         </div>
     </div>
-</div>
 
-<div class="form-card">
-    <div class="info-box">
-        <p><strong>Información:</strong> Complete los datos básicos del producto. Los campos marcados con asterisco (*) son obligatorios.</p>
+    <div class="form-card">
+        <!-- ⚠️ AGREGAMOS novalidate AQUÍ -->
+        <form method="POST" id="productoForm" novalidate>
+            {% csrf_token %}
+            
+            <h3 class="section-title">Identificación</h3>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="{{ form.sku.id_for_label }}">{{ form.sku.label }} <span style="color:#dc2626;">*</span></label>
+                    {{ form.sku }}
+                    {% if form.sku.errors %}
+                        <span class="error-message">{{ form.sku.errors.0 }}</span>
+                    {% else %}
+                        <span class="label-hint">{{ form.sku.help_text }}</span>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.ean_upc.id_for_label }}">{{ form.ean_upc.label }}</label>
+                    {{ form.ean_upc }}
+                    {% if form.ean_upc.errors %}
+                        <span class="error-message">{{ form.ean_upc.errors.0 }}</span>
+                    {% else %}
+                        <span class="label-hint">{{ form.ean_upc.help_text }}</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label for="{{ form.nombre.id_for_label }}">{{ form.nombre.label }} <span style="color:#dc2626;">*</span></label>
+                    {{ form.nombre }}
+                    {% if form.nombre.errors %}
+                        <span class="error-message">{{ form.nombre.errors.0 }}</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label for="{{ form.descripcion.id_for_label }}">{{ form.descripcion.label }}</label>
+                    {{ form.descripcion }}
+                    {% if form.descripcion.errors %}
+                        <span class="error-message">{{ form.descripcion.errors.0 }}</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="{{ form.categoria.id_for_label }}">{{ form.categoria.label }} <span style="color:#dc2626;">*</span></label>
+                    {{ form.categoria }}
+                    {% if form.categoria.errors %}
+                        <span class="error-message">{{ form.categoria.errors.0 }}</span>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.marca.id_for_label }}">{{ form.marca.label }}</label>
+                    {{ form.marca }}
+                    {% if form.marca.errors %}
+                        <span class="error-message">{{ form.marca.errors.0 }}</span>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.modelo.id_for_label }}">{{ form.modelo.label }}</label>
+                    {{ form.modelo }}
+                    {% if form.modelo.errors %}
+                        <span class="error-message">{{ form.modelo.errors.0 }}</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <h3 class="section-title">Unidades y precios</h3>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="{{ form.uom_compra.id_for_label }}">{{ form.uom_compra.label }} <span style="color:#dc2626;">*</span></label>
+                    {{ form.uom_compra }}
+                    {% if form.uom_compra.errors %}
+                        <span class="error-message">{{ form.uom_compra.errors.0 }}</span>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.uom_venta.id_for_label }}">{{ form.uom_venta.label }} <span style="color:#dc2626;">*</span></label>
+                    {{ form.uom_venta }}
+                    {% if form.uom_venta.errors %}
+                        <span class="error-message">{{ form.uom_venta.errors.0 }}</span>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.factor_conversion.id_for_label }}">{{ form.factor_conversion.label }} <span style="color:#dc2626;">*</span></label>
+                    {{ form.factor_conversion }}
+                    {% if form.factor_conversion.errors %}
+                        <span class="error-message">{{ form.factor_conversion.errors.0 }}</span>
+                    {% else %}
+                        <span class="label-hint">{{ form.factor_conversion.help_text }}</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="{{ form.costo_estandar.id_for_label }}">{{ form.costo_estandar.label }}</label>
+                    {{ form.costo_estandar }}
+                    {% if form.costo_estandar.errors %}
+                        <span class="error-message">{{ form.costo_estandar.errors.0 }}</span>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.costo_promedio.id_for_label }}">{{ form.costo_promedio.label }}</label>
+                    {{ form.costo_promedio }}
+                    <span class="label-hint">{{ form.costo_promedio.help_text }}</span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.precio_venta.id_for_label }}">{{ form.precio_venta.label }}</label>
+                    {{ form.precio_venta }}
+                    {% if form.precio_venta.errors %}
+                        <span class="error-message">{{ form.precio_venta.errors.0 }}</span>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.impuesto_iva.id_for_label }}">{{ form.impuesto_iva.label }} <span style="color:#dc2626;">*</span></label>
+                    {{ form.impuesto_iva }}
+                    {% if form.impuesto_iva.errors %}
+                        <span class="error-message">{{ form.impuesto_iva.errors.0 }}</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <a href="{% url 'core:lista_productos' %}" class="btn btn-secondary">
+                    ❌ Cancelar
+                </a>
+                <button type="button" class="btn btn-secondary" onclick="limpiarFormulario()">
+                    🔄 Limpiar
+                </button>
+                <button type="submit" class="btn btn-primary">
+                    💾 Guardar
+                </button>
+            </div>
+        </form>
     </div>
-
-    <form method="post" id="productoForm" novalidate>
-        {% csrf_token %}
-        
-        <h3 class="section-title">Identificación</h3>
-        <div class="form-row">
-            <div class="form-group">
-                <label for="sku">SKU <span class="label-required">*</span></label>
-                <input type="text" id="sku" name="sku" class="form-control" value="{{ data.sku|default:'SKU-0001' }}" placeholder="Ej: SKU-0001" required>
-                <span class="label-optional">Código único del producto</span>
-            </div>
-            <div class="form-group">
-                <label for="ean_upc">EAN/UPC <span class="label-optional"></span></label>
-                <input type="text" id="ean_upc" name="ean_upc" class="form-control" value="{{ data.ean_upc }}" placeholder="Ej: 7891234567890" maxlength="13">
-                <span class="label-optional">Código de barras internacional</span>
-            </div>
-        </div>
-
-        <div class="form-row">
-            <div class="form-group" style="grid-column: 1 / -1;">
-                <label for="nombre">Nombre <span class="label-required">*</span></label>
-                <input type="text" id="nombre" name="nombre" class="form-control" value="{{ data.nombre }}" placeholder="Ej: Chocolate con leche 250g" required>
-            </div>
-        </div>
-
-        <div class="form-row">
-            <div class="form-group" style="grid-column: 1 / -1;">
-                <label for="descripcion">Descripción <span class="label-optional"></span></label>
-                <textarea id="descripcion" name="descripcion" class="form-control" placeholder="Detalles adicionales del producto...">{{ data.descripcion }}</textarea>
-            </div>
-        </div>
-
-        <div class="form-row">
-            <div class="form-group">
-                <label for="categoria">Categoría <span class="label-required">*</span></label>
-                <select id="categoria" name="categoria" class="form-control" required>
-                    <option value="">Seleccione...</option>
-                    <option value="dulces" {% if data.categoria == 'dulces' %}selected{% endif %}>Dulces</option>
-                    <option value="chocolates" {% if data.categoria == 'chocolates' %}selected{% endif %}>Chocolates</option>
-                    <option value="chicles" {% if data.categoria == 'chicles' %}selected{% endif %}>Chicles</option>
-                    <option value="caramelos" {% if data.categoria == 'caramelos' %}selected{% endif %}>Caramelos</option>
-                    <option value="gomitas" {% if data.categoria == 'gomitas' %}selected{% endif %}>Gomitas</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="marca">Marca <span class="label-optional"></span></label>
-                <input type="text" id="marca" name="marca" class="form-control" value="{{ data.marca }}" placeholder="Ej: Nestlé">
-            </div>
-            <div class="form-group">
-                <label for="modelo">Modelo <span class="label-optional"></span></label>
-                <input type="text" id="modelo" name="modelo" class="form-control" value="{{ data.modelo }}" placeholder="Ej: MX-200">
-            </div>
-        </div>
-
-        <h3 class="section-title">Unidades y Precios</h3>
-        <div class="form-row">
-            <div class="form-group">
-                <label for="uom_compra">Unidad de Compra <span class="label-required">*</span></label>
-                <select id="uom_compra" name="uom_compra" class="form-control" required>
-                    <option value="">Seleccione...</option>
-                    <option value="UN" {% if data.uom_compra == 'UN' %}selected{% endif %}>Unidad (UN)</option>
-                    <option value="CAJA" {% if data.uom_compra == 'CAJA' %}selected{% endif %}>Caja</option>
-                    <option value="KG" {% if data.uom_compra == 'KG' %}selected{% endif %}>Kilogramo (KG)</option>
-                    <option value="LT" {% if data.uom_compra == 'LT' %}selected{% endif %}>Litro (LT)</option>
-                    <option value="PACK" {% if data.uom_compra == 'PACK' %}selected{% endif %}>Pack</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="uom_venta">Unidad de Venta <span class="label-required">*</span></label>
-                <select id="uom_venta" name="uom_venta" class="form-control" required>
-                    <option value="">Seleccione...</option>
-                    <option value="UN" {% if data.uom_venta == 'UN' %}selected{% endif %}>Unidad (UN)</option>
-                    <option value="CAJA" {% if data.uom_venta == 'CAJA' %}selected{% endif %}>Caja</option>
-                    <option value="KG" {% if data.uom_venta == 'KG' %}selected{% endif %}>Kilogramo (KG)</option>
-                    <option value="LT" {% if data.uom_venta == 'LT' %}selected{% endif %}>Litro (LT)</option>
-                    <option value="PACK" {% if data.uom_venta == 'PACK' %}selected{% endif %}>Pack</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="factor_conversion">Factor de Conversión <span class="label-required">*</span></label>
-                <input type="number" id="factor_conversion" name="factor_conversion" class="form-control" value="{{ data.factor_conversion|default:'1' }}" step="0.01" min="0.01" required>
-                <span class="label-optional">Ej: 1 caja = 12 unidades</span>
-            </div>
-        </div>
-
-        <div class="form-row">
-            <div class="form-group">
-                <label for="costo_estandar">Costo Estándar <span class="label-optional"></span></label>
-                <input type="number" id="costo_estandar" name="costo_estandar" class="form-control" value="{{ data.costo_estandar }}" step="0.01" min="0" placeholder="$0.00">
-            </div>
-            <div class="form-group">
-                <label for="precio_venta">Precio de Venta <span class="label-optional"></span></label>
-                <input type="number" id="precio_venta" name="precio_venta" class="form-control" value="{{ data.precio_venta }}" step="0.01" min="0" placeholder="$0.00">
-            </div>
-            <div class="form-group">
-                <label for="impuesto_iva">Impuesto IVA (%) <span class="label-required">*</span></label>
-                <input type="number" id="impuesto_iva" name="impuesto_iva" class="form-control" value="{{ data.impuesto_iva|default:'19' }}" step="0.01" min="0" max="100" required>
-            </div>
-        </div>
-
-        <div class="form-actions">
-            <a class="btn btn-secondary" href="{% url 'core:lista_productos' %}">✕ Cancelar</a>
-            <button type="submit" class="btn btn-primary">
-                <span>→</span> Guardar y Continuar
-            </button>
-        </div>
-    </form>
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-
-
-    document.getElementById('productoForm').addEventListener('submit', function(e) {
+// ============================================
+// VALIDACIÓN COMPLETA DEL FORMULARIO
+// ============================================
+document.getElementById('productoForm').addEventListener('submit', function(e) {
     e.preventDefault();
     
-    // Obtener valores de todos los campos
-    const sku = document.getElementById('sku').value.trim();
-    const nombre = document.getElementById('nombre').value.trim();
-    const categoria = document.getElementById('categoria').value;
-    const uomCompra = document.getElementById('uom_compra').value;
-    const uomVenta = document.getElementById('uom_venta').value;
-    const factorConversion = document.getElementById('factor_conversion').value.trim();
-    const impuestoIva = document.getElementById('impuesto_iva').value.trim();
+    // ============================================
+    // RECOPILAR TODOS LOS CAMPOS
+    // ============================================
+    const skuInput = document.getElementById('{{ form.sku.id_for_label }}');
+    const nombreInput = document.getElementById('{{ form.nombre.id_for_label }}');
+    const categoriaInput = document.getElementById('{{ form.categoria.id_for_label }}');
+    const uomCompraInput = document.getElementById('{{ form.uom_compra.id_for_label }}');
+    const uomVentaInput = document.getElementById('{{ form.uom_venta.id_for_label }}');
+    const factorConversionInput = document.getElementById('{{ form.factor_conversion.id_for_label }}');
+    const impuestoIvaInput = document.getElementById('{{ form.impuesto_iva.id_for_label }}');
+    const costoEstandarInput = document.getElementById('id_costo_estandar');
+    const precioVentaInput = document.getElementById('id_precio_venta');
     
-    // Campos opcionales
-    const eanUpc = document.getElementById('ean_upc').value.trim();
-    const descripcion = document.getElementById('descripcion').value.trim();
-    const marca = document.getElementById('marca').value.trim();
-    const modelo = document.getElementById('modelo').value.trim();
-    const costoEstandar = document.getElementById('costo_estandar').value.trim();
-    const precioVenta = document.getElementById('precio_venta').value.trim();
+    const sku = skuInput.value.trim();
+    const nombre = nombreInput.value.trim();
+    const categoria = categoriaInput.value;
+    const uomCompra = uomCompraInput.value;
+    const uomVenta = uomVentaInput.value;
+    const factorConversion = factorConversionInput.value.trim();
+    const impuestoIva = impuestoIvaInput.value.trim();
     
     // ============================================
-    // VALIDACIÓN 1: SKU (OBLIGATORIO)
+    // VALIDAR CAMPOS OBLIGATORIOS
     // ============================================
+    let camposFaltantes = [];
+    let primerCampoError = null;
+    
+    // Validar SKU
     if (!sku) {
+        camposFaltantes.push('📦 SKU (Código del producto)');
+        if (!primerCampoError) primerCampoError = skuInput;
+    } else if (sku.length < 3) {
         Swal.fire({
             icon: 'error',
-            title: 'Campo obligatorio',
-            text: 'El campo SKU es obligatorio',
-            confirmButtonText: 'Entendido',
-            customClass: {
-                confirmButton: 'swal2-confirm'
-            }
-        });
-        document.getElementById('sku').focus();
-        return;
-    }
-    
-    if (sku.length < 3) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'SKU muy corto',
+            title: 'SKU inválido',
             text: 'El SKU debe tener al menos 3 caracteres',
-            confirmButtonText: 'Corregir',
-            customClass: {
-                confirmButton: 'swal2-confirm'
-            }
+            confirmButtonText: 'Corregir'
         });
-        document.getElementById('sku').focus();
+        skuInput.focus();
         return;
     }
     
-    if (sku.length > 50) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'SKU muy largo',
-            text: 'El SKU no puede exceder 50 caracteres',
-            confirmButtonText: 'Corregir',
-            customClass: {
-                confirmButton: 'swal2-confirm'
-            }
-        });
-        document.getElementById('sku').focus();
-        return;
-    }
-    
-    // Validar que el SKU no contenga caracteres especiales peligrosos
-    const skuRegex = /^[A-Z0-9\-_]+$/;
-    if (!skuRegex.test(sku)) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'SKU con caracteres inválidos',
-            html: 'El SKU solo puede contener letras mayúsculas, números, guiones (-) y guiones bajos (_)',
-            confirmButtonText: 'Corregir',
-            customClass: {
-                confirmButton: 'swal2-confirm'
-            }
-        });
-        document.getElementById('sku').focus();
-        return;
-    }
-    
-    // ============================================
-    // VALIDACIÓN 2: EAN/UPC (OPCIONAL pero si se llena debe ser válido)
-    // ============================================
-    if (eanUpc) {
-        // Validar que solo contenga números
-        if (!/^\d+$/.test(eanUpc)) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'EAN/UPC inválido',
-                text: 'El código EAN/UPC solo debe contener números',
-                confirmButtonText: 'Corregir',
-                customClass: {
-                    confirmButton: 'swal2-confirm'
-                }
-            });
-            document.getElementById('ean_upc').focus();
-            return;
-        }
-        
-        // Validar longitud (8, 12 o 13 dígitos son los estándares más comunes)
-        if (![8, 12, 13].includes(eanUpc.length)) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'EAN/UPC con longitud incorrecta',
-                html: 'El código EAN/UPC debe tener <strong>8</strong>, <strong>12</strong> o <strong>13</strong> dígitos',
-                confirmButtonText: 'Corregir',
-                customClass: {
-                    confirmButton: 'swal2-confirm'
-                }
-            });
-            document.getElementById('ean_upc').focus();
-            return;
-        }
-    }
-    
-    // ============================================
-    // VALIDACIÓN 3: NOMBRE (OBLIGATORIO)
-    // ============================================
+    // Validar Nombre
     if (!nombre) {
+        camposFaltantes.push('🏷️ Nombre del producto');
+        if (!primerCampoError) primerCampoError = nombreInput;
+    } else if (nombre.length < 3) {
         Swal.fire({
             icon: 'error',
-            title: 'Campo obligatorio',
-            text: 'El campo Nombre es obligatorio',
-            confirmButtonText: 'Entendido',
-            customClass: {
-                confirmButton: 'swal2-confirm'
-            }
-        });
-        document.getElementById('nombre').focus();
-        return;
-    }
-    
-    if (nombre.length < 3) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'Nombre muy corto',
+            title: 'Nombre inválido',
             text: 'El nombre debe tener al menos 3 caracteres',
-            confirmButtonText: 'Corregir',
-            customClass: {
-                confirmButton: 'swal2-confirm'
-            }
+            confirmButtonText: 'Corregir'
         });
-        document.getElementById('nombre').focus();
+        nombreInput.focus();
         return;
     }
     
-    if (nombre.length > 200) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'Nombre muy largo',
-            text: 'El nombre no puede exceder 200 caracteres',
-            confirmButtonText: 'Corregir',
-            customClass: {
-                confirmButton: 'swal2-confirm'
-            }
-        });
-        document.getElementById('nombre').focus();
-        return;
-    }
-    
-    // ============================================
-    // VALIDACIÓN 4: DESCRIPCIÓN (OPCIONAL pero validar longitud)
-    // ============================================
-    if (descripcion && descripcion.length > 1000) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'Descripción muy larga',
-            text: 'La descripción no puede exceder 1000 caracteres',
-            confirmButtonText: 'Corregir',
-            customClass: {
-                confirmButton: 'swal2-confirm'
-            }
-        });
-        document.getElementById('descripcion').focus();
-        return;
-    }
-    
-    // ============================================
-    // VALIDACIÓN 5: CATEGORÍA (OBLIGATORIO)
-    // ============================================
+    // Validar Categoría
     if (!categoria) {
-        Swal.fire({
-            icon: 'error',
-            title: 'Campo obligatorio',
-            text: 'Debe seleccionar una categoría',
-            confirmButtonText: 'Entendido',
-            customClass: {
-                confirmButton: 'swal2-confirm'
-            }
-        });
-        document.getElementById('categoria').focus();
-        return;
+        camposFaltantes.push('📁 Categoría');
+        if (!primerCampoError) primerCampoError = categoriaInput;
     }
     
-    // ============================================
-    // VALIDACIÓN 6: MARCA (OPCIONAL pero validar longitud)
-    // ============================================
-    if (marca && marca.length > 100) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'Marca muy larga',
-            text: 'La marca no puede exceder 100 caracteres',
-            confirmButtonText: 'Corregir',
-            customClass: {
-                confirmButton: 'swal2-confirm'
-            }
-        });
-        document.getElementById('marca').focus();
-        return;
-    }
-    
-    // ============================================
-    // VALIDACIÓN 7: MODELO (OPCIONAL pero validar longitud)
-    // ============================================
-    if (modelo && modelo.length > 100) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'Modelo muy largo',
-            text: 'El modelo no puede exceder 100 caracteres',
-            confirmButtonText: 'Corregir',
-            customClass: {
-                confirmButton: 'swal2-confirm'
-            }
-        });
-        document.getElementById('modelo').focus();
-        return;
-    }
-    
-    // ============================================
-    // VALIDACIÓN 8: UNIDAD DE COMPRA (OBLIGATORIO)
-    // ============================================
+    // Validar Unidad de Compra
     if (!uomCompra) {
-        Swal.fire({
-            icon: 'error',
-            title: 'Campo obligatorio',
-            text: 'Debe seleccionar la unidad de compra',
-            confirmButtonText: 'Entendido',
-            customClass: {
-                confirmButton: 'swal2-confirm'
-            }
-        });
-        document.getElementById('uom_compra').focus();
-        return;
+        camposFaltantes.push('📥 Unidad de Compra');
+        if (!primerCampoError) primerCampoError = uomCompraInput;
     }
     
-    // ============================================
-    // VALIDACIÓN 9: UNIDAD DE VENTA (OBLIGATORIO)
-    // ============================================
+    // Validar Unidad de Venta
     if (!uomVenta) {
-        Swal.fire({
-            icon: 'error',
-            title: 'Campo obligatorio',
-            text: 'Debe seleccionar la unidad de venta',
-            confirmButtonText: 'Entendido',
-            customClass: {
-                confirmButton: 'swal2-confirm'
-            }
-        });
-        document.getElementById('uom_venta').focus();
-        return;
+        camposFaltantes.push('📤 Unidad de Venta');
+        if (!primerCampoError) primerCampoError = uomVentaInput;
     }
     
-    // ============================================
-    // VALIDACIÓN 10: FACTOR DE CONVERSIÓN (OBLIGATORIO)
-    // ============================================
-    if (!factorConversion) {
-        Swal.fire({
-            icon: 'error',
-            title: 'Campo obligatorio',
-            text: 'El factor de conversión es obligatorio',
-            confirmButtonText: 'Entendido',
-            customClass: {
-                confirmButton: 'swal2-confirm'
-            }
-        });
-        document.getElementById('factor_conversion').focus();
-        return;
-    }
-    
+    // Validar Factor de Conversión
     const factorNum = parseFloat(factorConversion);
-    
-    if (isNaN(factorNum) || factorNum <= 0) {
+    if (!factorConversion || isNaN(factorNum) || factorNum <= 0) {
+        camposFaltantes.push('🔄 Factor de Conversión (debe ser mayor a 0)');
+        if (!primerCampoError) primerCampoError = factorConversionInput;
+    } else if (factorNum > 10000) {
         Swal.fire({
-            icon: 'warning',
-            title: 'Factor inválido',
-            text: 'El factor de conversión debe ser un número mayor a 0',
-            confirmButtonText: 'Corregir',
-            customClass: {
-                confirmButton: 'swal2-confirm'
-            }
+            icon: 'error',
+            title: 'Factor de conversión inválido',
+            text: 'El factor de conversión no puede superar 10,000',
+            confirmButtonText: 'Corregir'
         });
-        document.getElementById('factor_conversion').focus();
+        factorConversionInput.focus();
         return;
     }
     
-    if (factorNum > 10000) {
+    // Validar IVA
+    const ivaNum = parseFloat(impuestoIva);
+    if (!impuestoIva || isNaN(ivaNum)) {
+        camposFaltantes.push('🧾 IVA (%)');
+        if (!primerCampoError) primerCampoError = impuestoIvaInput;
+    } else if (ivaNum < 0 || ivaNum > 100) {
         Swal.fire({
-            icon: 'warning',
-            title: 'Factor muy alto',
-            text: 'El factor de conversión parece excesivamente alto. ¿Es correcto?',
-            showCancelButton: true,
-            confirmButtonText: 'Sí, continuar',
-            cancelButtonText: 'Revisar',
+            icon: 'error',
+            title: 'IVA inválido',
+            text: 'El IVA debe estar entre 0% y 100%',
+            confirmButtonText: 'Corregir'
+        });
+        impuestoIvaInput.focus();
+        return;
+    }
+    
+    // ============================================
+    // MOSTRAR ALERTA SI HAY CAMPOS FALTANTES
+    // ============================================
+    if (camposFaltantes.length > 0) {
+        let listaCampos = '<ul style="text-align: left; margin: 1rem 0; padding-left: 1.5rem;">';
+        camposFaltantes.forEach(campo => {
+            listaCampos += `<li style="margin: 0.5rem 0;">${campo}</li>`;
+        });
+        listaCampos += '</ul>';
+        
+        Swal.fire({
+            icon: 'error',
+            title: '❌ Faltan campos obligatorios',
+            html: `
+                <p style="margin-bottom: 1rem;">Debes completar los siguientes campos para continuar al siguiente paso:</p>
+                ${listaCampos}
+                <p style="margin-top: 1rem; color: #dc2626; font-weight: 600;">
+                    Total de campos faltantes: ${camposFaltantes.length}
+                </p>
+            `,
+            confirmButtonText: 'Entendido',
             customClass: {
-                confirmButton: 'swal2-confirm',
-                cancelButton: 'swal2-cancel'
+                popup: 'swal2-popup-large',
+                confirmButton: 'swal2-confirm'
+            },
+            willClose: () => {
+                // Hacer foco en el primer campo con error
+                if (primerCampoError) {
+                    primerCampoError.focus();
+                    primerCampoError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
             }
+        });
+        return;
+    }
+    
+    // ============================================
+    // VALIDAR PRECIOS (Solo si están completos)
+    // ============================================
+    const costoEst = parseInt(costoEstandarInput.value.replace(/\D/g, '')) || 0;
+    const precioVta = parseInt(precioVentaInput.value.replace(/\D/g, '')) || 0;
+    
+    // Validar límites de precios
+    if (costoEst > 10000000) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Costo muy alto',
+            text: 'El costo estándar no puede superar $10,000,000',
+            confirmButtonText: 'Corregir'
+        });
+        costoEstandarInput.focus();
+        return;
+    }
+    
+    if (precioVta > 100000000) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Precio muy alto',
+            text: 'El precio de venta no puede superar $100,000,000',
+            confirmButtonText: 'Corregir'
+        });
+        precioVentaInput.focus();
+        return;
+    }
+    
+    // Validar que precio sea mayor al costo
+    if (precioVta > 0 && costoEst > 0 && precioVta < costoEst) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Precio menor al costo',
+            html: `
+                <p>El precio de venta (<strong>$${precioVta.toLocaleString('es-CL')}</strong>) no puede ser menor al costo estándar (<strong>$${costoEst.toLocaleString('es-CL')}</strong>).</p>
+                <p style="color: #dc2626; margin-top: 1rem;">Esto generará pérdidas en cada venta.</p>
+            `,
+            confirmButtonText: 'Corregir',
+            showCancelButton: true,
+            cancelButtonText: 'Continuar de todas formas'
         }).then((result) => {
             if (result.isConfirmed) {
-                continuarValidacion();
+                precioVentaInput.focus();
+            } else if (result.isDismissed && result.dismiss === Swal.DismissReason.cancel) {
+                mostrarConfirmacionFinal(sku, nombre, uomCompra, uomVenta, factorConversion, impuestoIva, costoEst, precioVta);
             }
         });
         return;
     }
     
     // ============================================
-    // VALIDACIÓN 11: COSTO ESTÁNDAR (OPCIONAL pero validar si está presente)
+    // TODO CORRECTO - MOSTRAR CONFIRMACIÓN FINAL
     // ============================================
-    if (costoEstandar) {
-        const costoNum = parseFloat(costoEstandar);
-        
-        if (isNaN(costoNum) || costoNum < 0) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Costo inválido',
-                text: 'El costo estándar no puede ser negativo',
-                confirmButtonText: 'Corregir',
-                customClass: {
-                    confirmButton: 'swal2-confirm'
-                }
-            });
-            document.getElementById('costo_estandar').focus();
-            return;
-        }
-        
-        if (costoNum > 1000000) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Costo muy alto',
-                text: '¿El costo estándar es correcto? Parece excesivamente alto',
-                showCancelButton: true,
-                confirmButtonText: 'Sí, continuar',
-                cancelButtonText: 'Revisar',
-                customClass: {
-                    confirmButton: 'swal2-confirm',
-                    cancelButton: 'swal2-cancel'
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    continuarValidacion();
-                }
-            });
-            return;
-        }
-    }
-    
-    // ============================================
-    // VALIDACIÓN 12: PRECIO DE VENTA (OPCIONAL pero validar si está presente)
-    // ============================================
-    if (precioVenta) {
-        const precioNum = parseFloat(precioVenta);
-        
-        if (isNaN(precioNum) || precioNum < 0) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Precio inválido',
-                text: 'El precio de venta no puede ser negativo',
-                confirmButtonText: 'Corregir',
-                customClass: {
-                    confirmButton: 'swal2-confirm'
-                }
-            });
-            document.getElementById('precio_venta').focus();
-            return;
-        }
-        
-        if (precioNum > 1000000) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Precio muy alto',
-                text: '¿El precio de venta es correcto? Parece excesivamente alto',
-                showCancelButton: true,
-                confirmButtonText: 'Sí, continuar',
-                cancelButtonText: 'Revisar',
-                customClass: {
-                    confirmButton: 'swal2-confirm',
-                    cancelButton: 'swal2-cancel'
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    continuarValidacion();
-                }
-            });
-            return;
-        }
-    }
-    
-    // ============================================
-    // VALIDACIÓN 13: IMPUESTO IVA (OBLIGATORIO)
-    // ============================================
-    if (!impuestoIva && impuestoIva !== '0') {
-        Swal.fire({
-            icon: 'error',
-            title: 'Campo obligatorio',
-            text: 'El impuesto IVA es obligatorio',
-            confirmButtonText: 'Entendido',
-            customClass: {
-                confirmButton: 'swal2-confirm'
-            }
-        });
-        document.getElementById('impuesto_iva').focus();
-        return;
-    }
-    
-    const ivaNum = parseFloat(impuestoIva);
-    
-    if (isNaN(ivaNum) || ivaNum < 0 || ivaNum > 100) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'IVA inválido',
-            html: 'El IVA debe estar entre <strong>0%</strong> y <strong>100%</strong>',
-            confirmButtonText: 'Corregir',
-            customClass: {
-                confirmButton: 'swal2-confirm'
-            }
-        });
-        document.getElementById('impuesto_iva').focus();
-        return;
-    }
-    
-    // ============================================
-    // VALIDACIÓN 14: COMPARAR COSTO VS PRECIO
-    // ============================================
-    if (costoEstandar && precioVenta) {
-        const costoNum = parseFloat(costoEstandar);
-        const precioNum = parseFloat(precioVenta);
-        
-        if (precioNum < costoNum) {
-            const perdida = costoNum - precioNum;
-            Swal.fire({
-                icon: 'warning',
-                title: '⚠️ Advertencia de pérdida',
-                html: `
-                    <div style="text-align: left; margin-top: 1rem;">
-                        <p>El precio de venta (<strong>$${precioNum.toFixed(2)}</strong>) es menor al costo estándar (<strong>$${costoNum.toFixed(2)}</strong>).</p>
-                        <p style="color: #dc2626; font-weight: bold;">Pérdida por unidad: $${perdida.toFixed(2)}</p>
-                        <p>¿Desea continuar de todos modos?</p>
-                    </div>
-                `,
-                showCancelButton: true,
-                confirmButtonText: 'Sí, continuar',
-                cancelButtonText: 'Revisar precios',
-                customClass: {
-                    confirmButton: 'swal2-confirm',
-                    cancelButton: 'swal2-cancel'
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    mostrarConfirmacion();
-                }
-            });
-            return;
-        }
-    }
-    
-    // Si pasa todas las validaciones
-    continuarValidacion();
+    mostrarConfirmacionFinal(sku, nombre, uomCompra, uomVenta, factorConversion, impuestoIva, costoEst, precioVta);
 });
 
-function continuarValidacion() {
-    mostrarConfirmacion();
-}
-
-function mostrarConfirmacion() {
-    const sku = document.getElementById('sku').value.trim();
-    const nombre = document.getElementById('nombre').value.trim();
-    const categoria = document.getElementById('categoria').value;
-    const uomCompra = document.getElementById('uom_compra').value;
-    const uomVenta = document.getElementById('uom_venta').value;
-    const factorConversion = document.getElementById('factor_conversion').value.trim();
-    const costoEstandar = document.getElementById('costo_estandar').value.trim();
-    const precioVenta = document.getElementById('precio_venta').value.trim();
-    const impuestoIva = document.getElementById('impuesto_iva').value.trim();
+// ============================================
+// FUNCIÓN DE CONFIRMACIÓN FINAL
+// ============================================
+function mostrarConfirmacionFinal(sku, nombre, uomCompra, uomVenta, factorConversion, impuestoIva, costoEst, precioVta) {
+    const margen = costoEst > 0 && precioVta > 0 ? ((precioVta - costoEst) / costoEst * 100) : 0;
     
-    const categoriaTexto = {
-        'dulces': 'Dulces',
-        'chocolates': 'Chocolates',
-        'chicles': 'Chicles',
-        'caramelos': 'Caramelos',
-        'gomitas': 'Gomitas'
-    };
-    
-    const uomTexto = {
-        'UN': 'Unidad',
-        'CAJA': 'Caja',
-        'KG': 'Kilogramo',
-        'LT': 'Litro',
-        'PACK': 'Pack'
-    };
-    
-    let htmlContent = `
+    let resumenHTML = `
         <div style="text-align: left; margin-top: 1rem; font-size: 0.95rem;">
             <p><strong>📦 SKU:</strong> ${sku}</p>
             <p><strong>🏷️ Nombre:</strong> ${nombre}</p>
-            <p><strong>📂 Categoría:</strong> ${categoriaTexto[categoria] || categoria}</p>
-            <p><strong>🔄 Unidades:</strong> ${uomTexto[uomCompra]} → ${uomTexto[uomVenta]} (Factor: ${factorConversion})</p>
+            <hr style="margin: 1rem 0; border: none; border-top: 1px solid #e5e7eb;">
     `;
     
-    if (costoEstandar) {
-        htmlContent += `<p><strong>💰 Costo:</strong> $${parseFloat(costoEstandar).toFixed(2)}</p>`;
+    if (costoEst > 0) {
+        resumenHTML += `<p><strong>💰 Costo estándar:</strong> $${costoEst.toLocaleString('es-CL')}</p>`;
     }
     
-    if (precioVenta) {
-        htmlContent += `<p><strong>💵 Precio:</strong> $${parseFloat(precioVenta).toFixed(2)}</p>`;
-        
-        // Calcular y mostrar margen si ambos están presentes
-        if (costoEstandar) {
-            const costo = parseFloat(costoEstandar);
-            const precio = parseFloat(precioVenta);
-            const margen = ((precio - costo) / precio * 100).toFixed(2);
-            
-            let margenColor = '#22c55e'; // verde
-            if (margen < 0) margenColor = '#dc2626'; // rojo
-            else if (margen < 20) margenColor = '#f59e0b'; // amarillo
-            
-            htmlContent += `<p><strong>📊 Margen:</strong> <span style="color: ${margenColor}; font-weight: bold;">${margen}%</span></p>`;
-        }
+    if (precioVta > 0) {
+        resumenHTML += `<p><strong>💵 Precio de venta:</strong> $${precioVta.toLocaleString('es-CL')}</p>`;
     }
     
-    htmlContent += `<p><strong>🧾 IVA:</strong> ${impuestoIva}%</p>`;
-    htmlContent += '</div>';
+    if (margen > 0) {
+        let colorMargen = margen < 10 ? '#f59e0b' : margen < 20 ? '#22c55e' : '#16a34a';
+        resumenHTML += `<p><strong>📈 Margen:</strong> <span style="color: ${colorMargen}; font-weight: 700;">${margen.toFixed(1)}%</span></p>`;
+    }
+    
+    resumenHTML += `<p><strong>🧾 IVA:</strong> ${impuestoIva}%</p>`;
+    resumenHTML += '</div>';
     
     Swal.fire({
         icon: 'question',
-        title: '¿Confirmar datos del Paso 1?',
-        html: htmlContent,
+        title: '¿Guardar y continuar?',
+        html: `
+            <p style="color: var(--text-gray); margin-bottom: 0.5rem;">
+                Se guardará el <strong>Paso 1</strong> y continuarás al <strong>Paso 2</strong>
+            </p>
+            ${resumenHTML}
+        `,
         showCancelButton: true,
         confirmButtonText: '✓ Sí, continuar al Paso 2',
-        cancelButtonText: '← Revisar datos',
+        cancelButtonText: 'Revisar datos',
+        reverseButtons: true,
         customClass: {
+            popup: 'swal2-popup-large',
             confirmButton: 'swal2-confirm',
             cancelButton: 'swal2-cancel'
         }
     }).then((result) => {
         if (result.isConfirmed) {
-            guardarProducto();
+            guardarPaso1();
         }
     });
 }
 
-function guardarProducto() {
+// ============================================
+// FUNCIÓN PARA GUARDAR
+// ============================================
+function guardarPaso1() {
     Swal.fire({
         icon: 'success',
-        title: '✓ Paso 1 completado',
-        html: '<p>Guardando datos...</p><p style="font-size: 0.9rem; color: var(--text-gray);">Avanzando al Paso 2</p>',
+        title: '✓ Guardando Paso 1...',
+        html: `
+            <div style="margin-top: 1rem;">
+                <p>Procesando información básica del producto</p>
+                <div style="margin-top: 1rem; padding: 0.75rem; background: #f0f9ff; border-radius: 8px;">
+                    <p style="margin: 0; color: var(--primary); font-size: 0.9rem;">
+                        ⏳ Preparando Paso 2...
+                    </p>
+                </div>
+            </div>
+        `,
         timer: 2000,
         showConfirmButton: false,
         timerProgressBar: true,
@@ -1013,67 +659,72 @@ function guardarProducto() {
 }
 
 // ============================================
+// LIMPIAR FORMULARIO
+// ============================================
+function limpiarFormulario() {
+    Swal.fire({
+        icon: 'warning',
+        title: '¿Limpiar formulario?',
+        text: 'Se perderán todos los datos ingresados en el Paso 1',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, limpiar',
+        cancelButtonText: 'Cancelar',
+        reverseButtons: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('productoForm').reset();
+            
+            Swal.fire({
+                icon: 'success',
+                title: '✓ Formulario limpiado',
+                text: 'Puedes comenzar de nuevo',
+                timer: 1500,
+                showConfirmButton: false,
+                toast: true,
+                position: 'top-end'
+            });
+        }
+    });
+}
+
+// ============================================
 // VALIDACIONES EN TIEMPO REAL
 // ============================================
 
-// SKU - Convertir a mayúsculas y validar caracteres
-document.getElementById('sku').addEventListener('input', function(e) {
+// SKU - Solo mayúsculas y alfanuméricos
+document.getElementById('{{ form.sku.id_for_label }}').addEventListener('input', function(e) {
     e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9\-_]/g, '');
 });
 
 // EAN/UPC - Solo números
-document.getElementById('ean_upc').addEventListener('input', function(e) {
-    e.target.value = e.target.value.replace(/\D/g, '').substring(0, 13);
-});
+const eanInput = document.getElementById('{{ form.ean_upc.id_for_label }}');
+if (eanInput) {
+    eanInput.addEventListener('input', function(e) {
+        e.target.value = e.target.value.replace(/\D/g, '').substring(0, 13);
+    });
+}
 
-// Factor de conversión - Solo positivos
-document.getElementById('factor_conversion').addEventListener('input', function(e) {
-    const valor = parseFloat(e.target.value);
-    if (valor <= 0 && e.target.value !== '') {
+// Factor - No negativos
+document.getElementById('{{ form.factor_conversion.id_for_label }}').addEventListener('input', function(e) {
+    if (parseFloat(e.target.value) < 0) {
         e.target.value = '';
     }
 });
 
-// IVA - Limitar entre 0 y 100
-document.getElementById('impuesto_iva').addEventListener('input', function(e) {
+// IVA - Límite 0-100
+document.getElementById('{{ form.impuesto_iva.id_for_label }}').addEventListener('input', function(e) {
     let valor = parseFloat(e.target.value);
-    if (valor > 100) {
-        e.target.value = 100;
-    } else if (valor < 0) {
-        e.target.value = 0;
-    }
-});
-
-// Costo estándar - No negativos
-document.getElementById('costo_estandar').addEventListener('input', function(e) {
-    const valor = parseFloat(e.target.value);
-    if (valor < 0) {
-        e.target.value = '';
-    }
-});
-
-// Precio de venta - No negativos
-document.getElementById('precio_venta').addEventListener('input', function(e) {
-    const valor = parseFloat(e.target.value);
-    if (valor < 0) {
-        e.target.value = '';
-    }
+    if (valor > 100) e.target.value = 100;
+    if (valor < 0) e.target.value = 0;
 });
 
 // Toast al seleccionar categoría
-document.getElementById('categoria').addEventListener('change', function(e) {
+document.getElementById('{{ form.categoria.id_for_label }}').addEventListener('change', function(e) {
     if (e.target.value) {
-        const categoriaTexto = {
-            'dulces': '🍬 Dulces',
-            'chocolates': '🍫 Chocolates',
-            'chicles': '🍃 Chicles',
-            'caramelos': '🍭 Caramelos',
-            'gomitas': '🐻 Gomitas'
-        };
-        
+        const texto = e.target.options[e.target.selectedIndex].text;
         Swal.fire({
             icon: 'success',
-            title: categoriaTexto[e.target.value],
+            title: `✓ ${texto}`,
             text: 'Categoría seleccionada',
             timer: 1500,
             showConfirmButton: false,
@@ -1083,87 +734,120 @@ document.getElementById('categoria').addEventListener('change', function(e) {
     }
 });
 
-// Calcular y mostrar margen de ganancia
-function calcularMargen() {
-    const costo = parseFloat(document.getElementById('costo_estandar').value);
-    const precio = parseFloat(document.getElementById('precio_venta').value);
+// ============================================
+// VALIDACIONES DE PRECIOS - SOLO ENTEROS
+// ============================================
+function validarEnteroPrecios(input) {
+    input.addEventListener('input', function(e) {
+        e.target.value = e.target.value.replace(/[^\d]/g, '');
+        if (e.target.value.length > 1) {
+            e.target.value = e.target.value.replace(/^0+/, '');
+        }
+        e.target.classList.remove('error');
+    });
     
-    if (costo && precio && costo > 0 && precio > 0) {
-        const margen = ((precio - costo) / precio * 100).toFixed(2);
-        const ganancia = (precio - costo).toFixed(2);
+    input.addEventListener('blur', function(e) {
+        const valor = parseInt(e.target.value.replace(/\D/g, '')) || 0;
         
-        if (margen < 0) {
-            Swal.fire({
-                icon: 'error',
-                title: '❌ Margen negativo',
-                html: `<p>Margen: <strong style="color: #dc2626;">${margen}%</strong></p><p>Pérdida: <strong>$${Math.abs(ganancia)}</strong></p>`,
-                timer: 3500,
-                showConfirmButton: false,
-                toast: true,
-                position: 'top-end'
-            });
-        } else if (margen < 20) {
+        if (e.target.id === 'id_costo_estandar' && valor > 10000000) {
+            e.target.classList.add('error');
             Swal.fire({
                 icon: 'warning',
-                title: '⚠️ Margen bajo',
-                html: `<p>Margen: <strong style="color: #f59e0b;">${margen}%</strong></p><p>Ganancia: <strong>$${ganancia}</strong></p>`,
+                title: 'Precio muy alto',
+                text: 'El costo estándar no puede superar $10,000,000',
                 timer: 3000,
-                showConfirmButton: false,
                 toast: true,
-                position: 'top-end'
+                position: 'top-end',
+                showConfirmButton: false
             });
-        } else {
-            Swal.fire({
-                icon: 'success',
-                title: '✓ Margen saludable',
-                html: `<p>Margen: <strong style="color: #22c55e;">${margen}%</strong></p><p>Ganancia: <strong>$${ganancia}</strong></p>`,
-                timer: 3000,
-                showConfirmButton: false,
-                toast: true,
-                position: 'top-end'
-            });
+            e.target.value = '10000000';
         }
-    }
+        
+        if (e.target.id === 'id_precio_venta' && valor > 100000000) {
+            e.target.classList.add('error');
+            Swal.fire({
+                icon: 'warning',
+                title: 'Precio muy alto',
+                text: 'El precio de venta no puede superar $100,000,000',
+                timer: 3000,
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false
+            });
+            e.target.value = '100000000';
+        }
+    });
 }
 
-document.getElementById('costo_estandar').addEventListener('blur', calcularMargen);
-document.getElementById('precio_venta').addEventListener('blur', calcularMargen);
+const costoEstandar = document.getElementById('id_costo_estandar');
+const costoPromedio = document.getElementById('id_costo_promedio');
+const precioVenta = document.getElementById('id_precio_venta');
 
-// Validar longitud de caracteres en tiempo real
-document.getElementById('nombre').addEventListener('input', function(e) {
-    const maxLength = 200;
-    const currentLength = e.target.value.length;
-    
-    if (currentLength > maxLength) {
-        e.target.value = e.target.value.substring(0, maxLength);
-        Swal.fire({
-            icon: 'warning',
-            title: 'Límite alcanzado',
-            text: `El nombre no puede exceder ${maxLength} caracteres`,
-            timer: 2000,
-            showConfirmButton: false,
-            toast: true,
-            position: 'top-end'
-        });
-    }
-});
+if (costoEstandar) validarEnteroPrecios(costoEstandar);
+if (precioVenta) validarEnteroPrecios(precioVenta);
 
-document.getElementById('descripcion').addEventListener('input', function(e) {
-    const maxLength = 1000;
-    const currentLength = e.target.value.length;
-    
-    if (currentLength > maxLength) {
-        e.target.value = e.target.value.substring(0, maxLength);
+// Prevenir edición del costo promedio
+if (costoPromedio) {
+    costoPromedio.addEventListener('click', function() {
         Swal.fire({
-            icon: 'warning',
-            title: 'Límite alcanzado',
-            text: `La descripción no puede exceder ${maxLength} caracteres`,
-            timer: 2000,
-            showConfirmButton: false,
+            icon: 'info',
+            title: 'Campo de solo lectura',
+            text: 'El costo promedio se calcula automáticamente según los movimientos de inventario',
+            timer: 3000,
             toast: true,
-            position: 'top-end'
+            position: 'top-end',
+            showConfirmButton: false
         });
-    }
-});
+    });
+    
+    costoPromedio.addEventListener('keydown', function(e) {
+        e.preventDefault();
+    });
+}
+
+// Validar margen al perder foco en precio
+if (precioVenta && costoEstandar) {
+    precioVenta.addEventListener('blur', function() {
+        const precio = parseInt(precioVenta.value.replace(/\D/g, '')) || 0;
+        const costo = parseInt(costoEstandar.value.replace(/\D/g, '')) || 0;
+        
+        if (precio > 0 && costo > 0) {
+            const margen = ((precio - costo) / costo * 100);
+            
+            if (precio < costo) {
+                precioVenta.classList.add('error');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Precio menor al costo',
+                    html: `<p>El precio de venta (<strong>$${precio.toLocaleString('es-CL')}</strong>) es menor al costo estándar (<strong>$${costo.toLocaleString('es-CL')}</strong>).</p><p style="color: #dc2626;">Esto generará pérdidas.</p>`,
+                    confirmButtonText: 'Entendido'
+                });
+            } else if (margen < 10) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Margen bajo',
+                    html: `<p>El margen de ganancia es de <strong>${margen.toFixed(1)}%</strong>.</p><p>Se recomienda al menos 10% de margen.</p>`,
+                    timer: 4000,
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false
+                });
+            }
+        }
+    });
+}
 </script>
+
+<!-- ⚠️ AGREGAR ESTILOS ADICIONALES PARA POPUP GRANDE -->
+<style>
+.swal2-popup-large {
+    width: 600px !important;
+    max-width: 90% !important;
+}
+
+.swal2-popup-large .swal2-html-container {
+    max-height: 500px;
+    overflow-y: auto;
+}
+</style>
 {% endblock %}

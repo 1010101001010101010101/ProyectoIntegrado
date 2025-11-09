@@ -167,6 +167,130 @@
         font-weight: 600;
     }
 
+    .edit-form {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 8px 32px rgba(15, 23, 42, 0.12);
+        padding: 2.25rem;
+    }
+
+    .form-section {
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 1.75rem;
+        margin-bottom: 1.75rem;
+    }
+
+    .form-section:last-of-type {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .form-section h2 {
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 0.35rem;
+    }
+
+    .form-section p {
+        margin: 0 0 1.25rem;
+        color: var(--text-gray);
+        font-size: 0.92rem;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1.25rem 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        font-size: 0.82rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-gray);
+        margin-bottom: 0.35rem;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        border: 1px solid #d7dcef;
+        border-radius: 12px;
+        padding: 0.65rem 0.85rem;
+        font-size: 0.95rem;
+        background: #f8fafc;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .form-group textarea {
+        min-height: 140px;
+        resize: vertical;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 4px rgba(209, 29, 29, 0.18);
+        background: white;
+    }
+
+    .form-group.span-2 {
+        grid-column: span 2;
+    }
+
+    .form-errors,
+    .errorlist {
+        margin-top: 0.5rem;
+        color: #dc2626;
+        font-size: 0.85rem;
+        list-style: none;
+        padding-left: 0;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        margin-top: 2.25rem;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: #fff;
+        border: none;
+        padding: 0.85rem 1.75rem;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 15px 30px rgba(209, 29, 29, 0.25);
+    }
+
+    .btn-secondary {
+        background: #e2e8f0;
+        color: #1f2937;
+        padding: 0.85rem 1.75rem;
+        border-radius: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: background 0.2s ease;
+    }
+
+    .btn-secondary:hover {
+        background: #cbd5f5;
+    }
+
     @media (max-width: 768px) {
         .page-header {
             flex-direction: column;
@@ -188,6 +312,48 @@
         .proveedor-details {
             grid-template-columns: 1fr;
         }
+
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .form-actions {
+            flex-direction: column-reverse;
+            align-items: stretch;
+        }
+    }
+
+    .productos-formset {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .producto-form-card {
+        background: #f8fafc;
+        border: 1px dashed #cbd5f5;
+        border-radius: 12px;
+        padding: 1.5rem;
+    }
+
+    .checkbox-field label {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 600;
+        color: var(--text-gray);
+    }
+
+    .checkbox-field input {
+        width: auto;
+        margin: 0;
+    }
+
+    .form-hint {
+        font-size: 0.82rem;
+        color: #64748b;
+        margin-top: 0.75rem;
+        display: block;
     }
 </style>
 {% endblock %}
@@ -220,52 +386,158 @@
     </div>
 </div>
 
-<div class="steps-container">
-    <div class="steps-header">
-        <div class="step-indicator">
-            <div class="step-number">1</div>
-            <div class="step-label">Identificación</div>
-        </div>
-        <div class="step-divider"></div>
-        <div class="step-indicator">
-            <div class="step-number">2</div>
-            <div class="step-label">Dirección</div>
-        </div>
-        <div class="step-divider"></div>
-        <div class="step-indicator">
-            <div class="step-number">3</div>
-            <div class="step-label">Relaciones</div>
+<form method="post" class="edit-form">
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+        <div class="form-errors">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <div class="form-section">
+        <h2>Paso 1: Identificación y contacto</h2>
+        <p>Actualiza los datos básicos de identificación y contacto del proveedor.</p>
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="{{ form.rut.id_for_label }}">RUT</label>
+                {{ form.rut }}
+                {{ form.rut.errors }}
+            </div>
+            <div class="form-group">
+                <label for="{{ form.razon_social.id_for_label }}">Razón social</label>
+                {{ form.razon_social }}
+                {{ form.razon_social.errors }}
+            </div>
+            <div class="form-group">
+                <label for="{{ form.nombre_fantasia.id_for_label }}">Nombre fantasía</label>
+                {{ form.nombre_fantasia }}
+                {{ form.nombre_fantasia.errors }}
+            </div>
+            <div class="form-group">
+                <label for="{{ form.telefono.id_for_label }}">Teléfono</label>
+                {{ form.telefono }}
+                {{ form.telefono.errors }}
+            </div>
+            <div class="form-group">
+                <label for="{{ form.email.id_for_label }}">Correo electrónico</label>
+                {{ form.email }}
+            </div>
+            <div class="form-group span-2">
+                <label for="{{ form.sitio_web.id_for_label }}">Sitio web</label>
+                {{ form.sitio_web }}
+            </div>
         </div>
     </div>
 
-    <a href="{% url 'core:proveedor_paso1' %}?id={{ proveedor.id }}" class="card-option">
-        <div class="card-header">
-            <span class="card-icon"></span>
-            <h3 class="card-title">Paso 1: Identificación y contacto</h3>
+    <div class="form-section">
+        <h2>Paso 2: Dirección comercial</h2>
+        <p>Modifica la dirección fiscal y comercial del proveedor.</p>
+        <div class="form-grid">
+            <div class="form-group span-2">
+                <label for="{{ form.direccion.id_for_label }}">Dirección</label>
+                {{ form.direccion }}
+                {{ form.direccion.errors }}
+            </div>
+            <div class="form-group">
+                <label for="{{ form.comuna.id_for_label }}">Comuna</label>
+                {{ form.comuna }}
+                {{ form.comuna.errors }}
+            </div>
+            <div class="form-group">
+                <label for="{{ form.ciudad.id_for_label }}">Ciudad</label>
+                {{ form.ciudad }}
+                {{ form.ciudad.errors }}
+            </div>
+            <div class="form-group">
+                <label for="{{ form.region.id_for_label }}">Región</label>
+                {{ form.region }}
+                {{ form.region.errors }}
+            </div>
         </div>
-        <p class="card-description">
-            Edita los datos básicos del proveedor: RUT, razón social, nombre fantasía, email, teléfono y sitio web.
-        </p>
-    </a>
+    </div>
 
-    <a href="{% url 'core:proveedor_paso2' %}?id={{ proveedor.id }}" class="card-option">
-        <div class="card-header">
-            <span class="card-icon"></span>
-            <h3 class="card-title">Paso 2: Dirección</h3>
+    <div class="form-section">
+        <h2>Paso 3: Contactos y estado</h2>
+        <p>Gestiona la información operacional del proveedor.</p>
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="{{ form.estado.id_for_label }}">Estado</label>
+                {{ form.estado }}
+            </div>
+            <div class="form-group">
+                <label for="{{ form.lead_time.id_for_label }}">Lead Time (días)</label>
+                {{ form.lead_time }}
+            </div>
+            <div class="form-group">
+                <label for="{{ form.pedido_minimo.id_for_label }}">Pedido mínimo</label>
+                {{ form.pedido_minimo }}
+            </div>
+            <div class="form-group checkbox-field">
+                <label>
+                    {{ form.es_proveedor_preferente }}
+                    <span>Proveedor preferente</span>
+                </label>
+            </div>
+            <div class="form-group span-2">
+                <label for="{{ form.observaciones.id_for_label }}">Observaciones</label>
+                {{ form.observaciones }}
+            </div>
         </div>
-        <p class="card-description">
-            Actualiza la dirección completa del proveedor: calle, ciudad, región y código postal.
-        </p>
-    </a>
+    </div>
 
-    <a href="{% url 'core:proveedor_paso3' %}?id={{ proveedor.id }}" class="card-option">
-        <div class="card-header">
-            <span class="card-icon"></span>
-            <h3 class="card-title">Paso 3: Relaciones</h3>
+    <div class="form-actions">
+        <a href="{% url 'core:lista_proveedores' %}" class="btn-secondary">Cancelar</a>
+        <button type="submit" class="btn-primary">Guardar cambios</button>
+    </div>
+
+    <div class="form-section">
+        <h2>Paso 4: Productos asociados (opcional)</h2>
+        <p>Vincula productos al proveedor o deja los campos vacíos para agregarlos más tarde.</p>
+        {{ formset.management_form }}
+        <div class="productos-formset">
+            {% for producto_form in formset.forms %}
+                <div class="producto-form-card">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="{{ producto_form.producto.id_for_label }}">Producto</label>
+                            {{ producto_form.producto }}
+                            {{ producto_form.producto.errors }}
+                        </div>
+                        <div class="form-group">
+                            <label for="{{ producto_form.costo.id_for_label }}">Costo</label>
+                            {{ producto_form.costo }}
+                            {{ producto_form.costo.errors }}
+                        </div>
+                        <div class="form-group">
+                            <label for="{{ producto_form.lead_time.id_for_label }}">Lead Time (días)</label>
+                            {{ producto_form.lead_time }}
+                            {{ producto_form.lead_time.errors }}
+                        </div>
+                        <div class="form-group checkbox-field">
+                            <label>
+                                {{ producto_form.activo }}
+                                <span>Activo</span>
+                            </label>
+                            {{ producto_form.activo.errors }}
+                        </div>
+                    </div>
+                    <div class="checkbox-field">
+                        <label>
+                            {{ producto_form.DELETE }}
+                            <span>Eliminar este producto</span>
+                        </label>
+                        {{ producto_form.DELETE.errors }}
+                    </div>
+                    {% if producto_form.non_field_errors %}
+                        <ul class="errorlist">
+                            {% for error in producto_form.non_field_errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            {% endfor %}
         </div>
-        <p class="card-description">
-            Gestiona las relaciones del proveedor con productos y otros datos asociados.
-        </p>
-    </a>
-</div>
+        <span class="form-hint">Se guardarán únicamente los productos con datos completos y sin marcar como eliminados.</span>
+    </div>
+</form>
 {% endblock %}

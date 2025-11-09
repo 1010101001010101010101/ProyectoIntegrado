@@ -1,54 +1,68 @@
+# core/urls.py
 from django.urls import path
+from django.conf import settings
+from django.conf.urls.static import static
 from . import views
+from .views import usuarios as user_views
+from .views import productos as product_views
+from .views import inventario as inventario_views
 
 app_name = 'core'
 
 urlpatterns = [
-    path('', views.login_view, name='login'),
+    # ===== AUTENTICACIÓN =====
+    path('', views.dashboard, name='dashboard'),
+    path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
-# Autenticación
+    path('cambiar-password-inicial/', views.cambiar_password_inicial, name='cambiar_password_inicial'),
     path('recuperar-password/', views.recuperar_password, name='recuperar_password'),
-    path('validar-token/', views.validar_token, name='validar_token'),
-    path('validar-token/<str:token>/', views.validar_token, name='validar_token_param'),
+    path('validar-token/<str:token>/', views.validar_token, name='validar_token'),
     path('nueva-password/', views.nueva_password, name='nueva_password'),
 
-    path('dashboard/', views.dashboard, name='dashboard'),
-    
-    # Usuarios
-    path('usuarios/', views.lista_usuarios, name='lista_usuarios'),
-    path('usuarios/crear/', views.crear_usuario, name='crear_usuario'),
-    path('usuarios/editar/<int:id>/', views.editar_usuario, name='editar_usuario'),
-    
-    # Productos - Con pasos separados
+    # ===== USUARIOS =====
+    path('usuarios/', user_views.lista_usuarios, name='lista_usuarios'),
+    path('usuarios/crear/', user_views.crear_usuario, name='crear_usuario'),
+    path('usuarios/<int:id>/editar/', user_views.editar_usuario, name='editar_usuario'),
+    path('usuarios/<int:id>/eliminar/', user_views.eliminar_usuario, name='eliminar_usuario'),
+    path('usuarios/<int:id>/reactivar/', user_views.reactivar_usuario, name='reactivar_usuario'),
+
+    # ===== PRODUCTOS =====
     path('productos/', views.lista_productos, name='lista_productos'),
     path('productos/crear/', views.crear_producto, name='crear_producto'),
     path('productos/crear/paso1/', views.producto_paso1, name='producto_paso1'),
     path('productos/crear/paso2/', views.producto_paso2, name='producto_paso2'),
     path('productos/crear/paso3/', views.producto_paso3, name='producto_paso3'),
-    path('productos/editar/<int:id>/', views.editar_producto, name='editar_producto'),
-    path('productos/exportar/', views.exportar_productos_excel, name='exportar_productos_excel'),
-    # Proveedores
+    path('productos/<int:pk>/editar/', views.editar_producto, name='editar_producto'),
+    path('productos/<int:pk>/eliminar/', views.eliminar_producto, name='eliminar_producto'),
+    path('productos/eliminar/<int:pk>/', views.eliminar_producto, name='eliminar_producto_compat'),  # compat
+    path('productos/exportar-excel/', views.exportar_productos_excel, name='exportar_productos_excel'),
+    path('productos/buscar-ajax/', product_views.buscar_productos_ajax, name='buscar_productos_ajax'),  # ← aquí
+
+    # ===== PROVEEDORES =====
     path('proveedores/', views.lista_proveedores, name='lista_proveedores'),
-    path('proveedores/crear/', views.crear_proveedor, name='crear_proveedor'),
-    path('proveedores/editar/<int:id>/', views.editar_proveedor, name='editar_proveedor'),
-    
-    # Inventario - Movimientos con pasos separados
-    path('inventario/', views.lista_movimientos, name='lista_movimientos'),
-    path('inventario/crear/', views.crear_movimiento, name='crear_movimiento'),
-    path('inventario/crear/paso1/', views.movimiento_paso1, name='movimiento_paso1'),
-    path('inventario/crear/paso2/', views.movimiento_paso2, name='movimiento_paso2'),
-    path('inventario/crear/paso3/', views.movimiento_paso3, name='movimiento_paso3'),
-    path('inventario/editar/<int:id>/', views.editar_movimiento, name='editar_movimiento'),
-    
+    path('proveedores/paso1/', views.proveedor_paso1, name='proveedor_paso1'),
+    path('proveedores/paso2/', views.proveedor_paso2, name='proveedor_paso2'),  
+    path('proveedores/paso3/', views.proveedor_paso3, name='proveedor_paso3'),
+    path('proveedores/<int:pk>/editar/', views.editar_proveedor, name='editar_proveedor'),
+    path('proveedores/<int:pk>/eliminar/', views.eliminar_proveedor, name='eliminar_proveedor'),
+    path('proveedores/<int:pk>/estado/', views.cambiar_estado_proveedor, name='cambiar_estado_proveedor'),
+    path('proveedores/exportar/', views.exportar_proveedores_excel, name='exportar_proveedores_excel'),
+    path('proveedores/buscar-ajax/', views.buscar_proveedores_ajax, name='buscar_proveedores_ajax'),
 
-    # Agregar estas rutas al archivo urls.py existente, dentro de urlpatterns
+    # ===== INVENTARIO =====
+    path('movimientos/', inventario_views.lista_movimientos, name='lista_movimientos'),
+    path('movimientos/<int:pk>/editar/', inventario_views.editar_movimiento, name='editar_movimiento'),
+    path('movimientos/<int:pk>/editar/paso-1/', inventario_views.movimiento_editar_paso1, name='movimiento_editar_paso1'),
+    path('movimientos/crear/', inventario_views.crear_movimiento, name='crear_movimiento'),
+    path('movimientos/crear/paso1/', inventario_views.movimiento_paso1, name='movimiento_paso1'),
+    path('movimientos/crear/paso2/', inventario_views.movimiento_paso2, name='movimiento_paso2'),
+    path('movimientos/crear/paso3/', inventario_views.movimiento_paso3, name='movimiento_paso3'),
 
-# Proveedores - Con pasos separados
-path('proveedores/', views.lista_proveedores, name='lista_proveedores'),
-path('proveedores/crear/', views.crear_proveedor, name='crear_proveedor'),
-path('proveedores/crear/paso1/', views.proveedor_paso1, name='proveedor_paso1'),
-path('proveedores/crear/paso2/', views.proveedor_paso2, name='proveedor_paso2'),
-path('proveedores/crear/paso3/', views.proveedor_paso3, name='proveedor_paso3'),
-
-path('proveedores/editar/<int:id>/', views.editar_proveedor, name='editar_proveedor'),
+    # ===== VENTAS =====
+    path('ventas/', views.lista_ventas, name='lista_ventas'),
+    path('ventas/crear/', views.crear_venta, name='crear_venta'),
+    path('ventas/<int:pk>/', views.detalle_venta, name='detalle_venta'),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

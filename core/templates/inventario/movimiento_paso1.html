@@ -368,45 +368,64 @@
         <h3 class="section-title">Información del Movimiento</h3>
         <div class="form-row">
             <div class="form-group">
-                <label for="fecha">Fecha y Hora <span class="label-required">*</span></label>
-                <input type="datetime-local" id="fecha" name="fecha" class="form-control" value="{{ data.fecha }}" required>
+                <label for="fecha">Fecha y Hora *</label>
+                <input type="datetime-local" id="fecha" name="fecha" class="form-control" required>
             </div>
             <div class="form-group">
-                <label for="tipo">Tipo de Movimiento <span class="label-required">*</span></label>
+                <label for="tipo">Tipo de Movimiento *</label>
                 <select id="tipo" name="tipo" class="form-control" required>
-                    <option value="">Seleccione el tipo...</option>
-                    <option value="ingreso" {% if data.tipo == 'ingreso' %}selected{% endif %}>Ingreso</option>
-                    <option value="salida" {% if data.tipo == 'salida' %}selected{% endif %}>Salida</option>
-                    <option value="ajuste" {% if data.tipo == 'ajuste' %}selected{% endif %}>Ajuste</option>
-                    <option value="devolucion" {% if data.tipo == 'devolucion' %}selected{% endif %}>Devolución</option>
+                    <option value="">Seleccione...</option>
+                    <option value="ENTRADA">Entrada</option>
+                    <option value="SALIDA">Salida</option>
+                    <option value="AJUSTE">Ajuste</option>
+                    <option value="TRANSFERENCIA">Transferencia</option>
                 </select>
             </div>
             <div class="form-group">
-                <label for="cantidad">Cantidad <span class="label-required">*</span></label>
-                <input type="number" id="cantidad" name="cantidad" class="form-control" value="{{ data.cantidad }}" step="0.01" min="0.01" placeholder="0.00" required>
+                <label for="cantidad">Cantidad *</label>
+                <input type="number" id="cantidad" name="cantidad" class="form-control" step="0.01" min="0.01" required>
             </div>
         </div>
-
-        <h3 class="section-title">🔗 Relaciones</h3>
         <div class="form-row">
             <div class="form-group">
-                <label for="producto">Producto (SKU) <span class="label-required">*</span></label>
-                <input type="text" id="producto" name="producto" class="form-control" value="{{ data.producto|default:'SKU-0001' }}" placeholder="Ej: SKU-0001" required>
+                <label for="producto">Producto (SKU) *</label>
+                <select id="producto" name="producto" class="form-control" required>
+                    <option value="">Seleccione...</option>
+                    {% for prod in productos %}
+                        <option value="{{ prod.sku }}" {% if data.producto == prod.sku %}selected{% endif %}>
+                            {{ prod.sku }} - {{ prod.nombre }}
+                        </option>
+                    {% endfor %}
+                </select>
             </div>
             <div class="form-group">
-                <label for="proveedor">Proveedor <span class="label-optional">(opcional)</span></label>
-                <input type="text" id="proveedor" name="proveedor" class="form-control" value="{{ data.proveedor }}" placeholder="RUT o razón social">
+                <label for="proveedor">Proveedor (opcional)</label>
+                <select id="proveedor" name="proveedor" class="form-control">
+                    <option value="">Sin proveedor</option>
+                    {% for prov in proveedores %}
+                        <option value="{{ prov.rut }}" {% if data.proveedor == prov.rut %}selected{% endif %}>
+                            {{ prov.rut }} - {{ prov.razon_social }}
+                        </option>
+                    {% endfor %}
+                </select>
             </div>
             <div class="form-group">
-                <label for="bodega">Bodega <span class="label-required">*</span></label>
-                <input type="text" id="bodega" name="bodega" class="form-control" value="{{ data.bodega|default:'BOD-CENTRAL' }}" placeholder="Ej: BOD-CENTRAL" required>
+                <label for="bodega">Bodega *</label>
+                <select id="bodega" name="bodega" class="form-control" required>
+                    <option value="">Seleccione...</option>
+                    {% for bod in bodegas %}
+                        <option value="{{ bod.codigo }}" {% if data.bodega == bod.codigo %}selected{% endif %}>
+                            {{ bod.codigo }} - {{ bod.nombre }}
+                        </option>
+                    {% endfor %}
+                </select>
             </div>
         </div>
 
         <div class="form-actions">
             <a class="btn btn-secondary" href="{% url 'core:lista_movimientos' %}">✕ Cancelar</a>
             <button type="submit" class="btn btn-primary">
-                <span>→</span> Guardar y Continuar
+                Siguiente →
             </button>
         </div>
     </form>
@@ -755,3 +774,9 @@
     });
 </script>
 {% endblock %}
+{% if formulario_es_valido %}
+    # Guardar datos del paso 1
+    movimiento = MovimientoInventario.objects.create(...)
+    request.session['movimiento_id'] = movimiento.id
+    return redirect('core:movimiento_paso2')  # <-- Redirige al paso 2
+{% endif %}

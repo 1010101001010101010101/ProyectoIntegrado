@@ -291,7 +291,6 @@
         background: #e0e0e0;
     }
 
-    /* Estilos personalizados para SweetAlert2 */
     .swal2-popup {
         border-radius: 16px;
         font-family: inherit;
@@ -380,71 +379,78 @@
 
 <div class="form-card">
     <div class="info-box">
-        <p><strong> Control avanzado:</strong> Configure opciones adicionales para el control de inventario como lotes, series y fechas de vencimiento.</p>
+        <p><strong>⚙️ Control avanzado:</strong> Configure opciones adicionales para el control de inventario como lotes, series y fechas de vencimiento.</p>
     </div>
 
     <form method="post" id="movimientoForm" novalidate>
         {% csrf_token %}
         
         <h3 class="section-title">⚙️ Opciones de Control</h3>
+        
         <div class="form-row">
             <div class="form-group">
-                <label>Manejo por Lotes <span class="label-optional">(opcional)</span></label>
-                <div class="checkbox-container" id="lotes-container">
-                    <div class="checkbox-group" onclick="toggleCheckbox('manejo_lotes')">
-                        <input type="checkbox" id="manejo_lotes" name="manejo_lotes" value="1" 
-                               {% if data.manejo_lotes == '1' %}checked{% endif %}>
-                        <span class="checkbox-label" id="lotes-label">Sin manejo por lotes</span>
+                <div class="checkbox-container" id="manejo_lotes-container" onclick="toggleCheckbox('manejo_lotes')">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="manejo_lotes" name="manejo_lotes" onchange="habilitarCamposRelacionados(); event.stopPropagation();">
+                        <label class="checkbox-label" id="manejo_lotes-label" for="manejo_lotes">Sin manejo por lotes</label>
                     </div>
                 </div>
             </div>
+            
             <div class="form-group">
-                <label>Manejo por Series <span class="label-optional">(opcional)</span></label>
-                <div class="checkbox-container" id="series-container">
-                    <div class="checkbox-group" onclick="toggleCheckbox('manejo_series')">
-                        <input type="checkbox" id="manejo_series" name="manejo_series" value="1"
-                               {% if data.manejo_series == '1' %}checked{% endif %}>
-                        <span class="checkbox-label" id="series-label">Sin manejo por series</span>
+                <div class="checkbox-container" id="manejo_series-container" onclick="toggleCheckbox('manejo_series')">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="manejo_series" name="manejo_series" onchange="habilitarCamposRelacionados(); event.stopPropagation();">
+                        <label class="checkbox-label" id="manejo_series-label" for="manejo_series">Sin manejo por series</label>
                     </div>
                 </div>
             </div>
+            
             <div class="form-group">
-                <label>Producto Perecedero <span class="label-optional">(opcional)</span></label>
-                <div class="checkbox-container" id="perecible-container">
-                    <div class="checkbox-group" onclick="toggleCheckbox('perecible')">
-                        <input type="checkbox" id="perecible" name="perecible" value="1"
-                               {% if data.perecible == '1' %}checked{% endif %}>
-                        <span class="checkbox-label" id="perecible-label">No perecedero</span>
+                <div class="checkbox-container" id="perecible-container" onclick="toggleCheckbox('perecible')">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="perecible" name="perecible" onchange="habilitarCamposRelacionados(); event.stopPropagation();">
+                        <label class="checkbox-label" id="perecible-label" for="perecible">No perecedero</label>
                     </div>
                 </div>
             </div>
         </div>
 
-        <h3 class="section-title">Datos Específicos</h3>
+        <h3 class="section-title">📦 Información de Trazabilidad</h3>
+        
         <div class="form-row">
             <div class="form-group">
                 <label for="lote">Número de Lote <span class="label-optional">(opcional)</span></label>
                 <input type="text" id="lote" name="lote" class="form-control" 
-                       value="{{ data.lote }}" placeholder="Ej: L-2025-001">
+                       value="{{ data.lote }}" 
+                       placeholder="Ej: L-2025-001" 
+                       disabled>
             </div>
+            
             <div class="form-group">
                 <label for="serie">Número de Serie <span class="label-optional">(opcional)</span></label>
                 <input type="text" id="serie" name="serie" class="form-control" 
-                       value="{{ data.serie }}" placeholder="Ej: SN123456789">
+                       value="{{ data.numero_serie }}" 
+                       placeholder="Ej: SN123456789" 
+                       disabled>
             </div>
+            
             <div class="form-group">
                 <label for="fecha_vencimiento">Fecha de Vencimiento <span class="label-optional">(opcional)</span></label>
                 <input type="date" id="fecha_vencimiento" name="fecha_vencimiento" class="form-control" 
-                       value="{{ data.fecha_vencimiento }}">
+                       value="{{ data.fecha_vencimiento }}" 
+                       disabled>
             </div>
         </div>
 
-        <p class="help-text"><strong>Nota:</strong> Las opciones de control (lote/serie/vencimiento) normalmente se heredan de la configuración del producto. Aquí se permiten modificar para propósitos de demostración.</p>
+        <div class="help-text">
+            <strong>💡 Nota:</strong> Las opciones de control avanzado son opcionales pero recomendadas para productos que requieren trazabilidad estricta, control de vencimiento o seguimiento por número de serie.
+        </div>
 
         <div class="form-actions">
             <a class="btn btn-secondary" href="{% url 'core:movimiento_paso1' %}">← Anterior</a>
             <button type="submit" class="btn btn-primary">
-                <span>→</span> Guardar y Continuar
+                Siguiente →
             </button>
         </div>
     </form>
@@ -477,7 +483,7 @@
                 label.textContent = checkbox.checked ? '✓ Con manejo por series' : 'Sin manejo por series';
                 break;
             case 'perecible':
-                label.textContent = checkbox.checked ? 'Producto perecedero' : 'No perecedero';
+                label.textContent = checkbox.checked ? '⚠️ Producto perecedero' : 'No perecedero';
                 break;
         }
     }
@@ -525,9 +531,6 @@
         updateCheckboxContainer('manejo_series');
         updateCheckboxContainer('perecible');
         habilitarCamposRelacionados();
-        
-        
-        
     });
 
     // Validación del formulario
@@ -612,7 +615,7 @@
             if (diasRestantes <= 30) {
                 Swal.fire({
                     icon: 'warning',
-                    title: ' Producto próximo a vencer',
+                    title: '⚠️ Producto próximo a vencer',
                     html: `El producto vence en <strong>${diasRestantes}</strong> día${diasRestantes !== 1 ? 's' : ''}.<br><br>¿Desea continuar?`,
                     showCancelButton: true,
                     confirmButtonText: 'Sí, continuar',
@@ -641,9 +644,9 @@
         const perecible = document.getElementById('perecible').checked;
         
         let configuracion = [];
-        if (manejoLotes) configuracion.push('Lotes');
-        if (manejoSeries) configuracion.push('Series');
-        if (perecible) configuracion.push('Perecedero');
+        if (manejoLotes) configuracion.push('✓ Lotes');
+        if (manejoSeries) configuracion.push('✓ Series');
+        if (perecible) configuracion.push('⚠️ Perecedero');
         
         const textoConfig = configuracion.length > 0 
             ? configuracion.join(', ') 
@@ -657,6 +660,7 @@
             showConfirmButton: false,
             timerProgressBar: true,
             willClose: () => {
+                // Enviar el formulario
                 document.getElementById('movimientoForm').submit();
             }
         });

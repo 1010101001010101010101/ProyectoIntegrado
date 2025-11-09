@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+
+{% block title %}Página no encontrada · 404{% endblock %}
+
+{% block extra_css %}
+<style>
+  :root{
+    --primary:#dc2626;--primary-700:#b91c1c;
+    --text:#111827;--muted:#6b7280;--border:#e5e7eb;--bg:#f9fafb;
+  }
+  .notfound-wrap{
+    min-height:60vh;display:flex;align-items:center;justify-content:center;
+  }
+  .notfound-card{
+    background:#fff;border-radius:16px;border:1px solid var(--border);
+    box-shadow:0 10px 30px rgba(0,0,0,.08);padding:2rem;max-width:860px;width:100%;
+    display:grid;grid-template-columns:1fr 1.2fr;gap:2rem
+  }
+  .nf-illu{
+    display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#fee2e2,#fecaca);
+    border-radius:14px;padding:1rem;border:1px dashed #fecaca
+  }
+  .nf-illu svg{width:100%;max-width:220px;height:auto;color:#dc2626;opacity:.9}
+  .nf-content h1{font-size:2.2rem;margin:.25rem 0 .25rem;color:var(--text);font-weight:900}
+  .nf-code{display:inline-block;background:linear-gradient(135deg,var(--primary),var(--primary-700));color:#fff;
+    padding:.35rem .7rem;border-radius:10px;font-weight:800;letter-spacing:.5px}
+  .nf-path{color:var(--muted);font-size:.9rem;margin:.4rem 0 1rem}
+  .nf-text{color:var(--text);line-height:1.6;margin-bottom:1.25rem}
+  .nf-actions{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1rem}
+  .btn{display:inline-flex;align-items:center;gap:.5rem;border:none;border-radius:12px;padding:.85rem 1.2rem;font-weight:800;cursor:pointer;transition:transform .15s, box-shadow .2s;text-decoration:none}
+  .btn-primary{background:linear-gradient(135deg,var(--primary),var(--primary-700));color:#fff;box-shadow:0 10px 24px rgba(220,38,38,.25)}
+  .btn-primary:hover{transform:translateY(-1px);box-shadow:0 12px 26px rgba(220,38,38,.33)}
+  .btn-secondary{background:#fff;border:2px solid var(--border);color:var(--text)}
+  .btn-secondary:hover{background:var(--bg)}
+  .nf-search{margin-top:1rem;background:var(--bg);border:1px dashed var(--border);padding:1rem;border-radius:12px}
+  .nf-search form{display:grid;grid-template-columns:1fr .8fr auto;gap:.6rem}
+  .form-control{border:2px solid var(--border);border-radius:10px;padding:.75rem 1rem;font-size:.95rem}
+  .form-control:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 4px rgba(220,38,38,.12)}
+  @media(max-width:900px){.notfound-card{grid-template-columns:1fr}}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="notfound-wrap">
+  <div class="notfound-card">
+    <div class="nf-illu" aria-hidden="true">
+      <svg viewBox="0 0 200 200" fill="currentColor">
+        <path d="M100 20c44 0 80 36 80 80s-36 80-80 80S20 144 20 100 56 20 100 20zm-8 40a8 8 0 100 16 8 8 0 000-16zm32 0a8 8 0 100 16 8 8 0 000-16zM60 126c12 18 68 18 80 0 2-3-1-6-5-5-26 8-44 8-70 0-4-1-7 2-5 5z"/>
+        <text x="100" y="110" text-anchor="middle" font-size="44" font-weight="900">404</text>
+      </svg>
+    </div>
+
+    <div class="nf-content">
+      <span class="nf-code">Error 404</span>
+      <h1>Ups, no encontramos esta página</h1>
+      <div class="nf-path">Ruta solicitada: {{ request_path|default:request.path|default:"/" }}</div>
+      <p class="nf-text">
+        Puede que el enlace haya cambiado o que la dirección esté mal escrita.
+        Te dejamos opciones rápidas para continuar.
+      </p>
+
+      <div class="nf-actions">
+        <a href="{% url 'core:dashboard' %}" class="btn btn-primary">Volver al inicio</a>
+        <a href="{% url 'core:lista_productos' %}" class="btn btn-secondary">Ir a Productos</a>
+        <a href="{% url 'core:lista_usuarios' %}" class="btn btn-secondary">Ir a Usuarios</a>
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Redirigir búsqueda según el ámbito seleccionado
+  const form = document.getElementById('nf-search-form');
+  if (form){
+    form.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const q = document.getElementById('nf-q').value.trim();
+      const scope = document.getElementById('nf-scope').value;
+      if (!q){ return; }
+      if (scope === 'usuarios'){
+        window.location.href = `{% url 'core:lista_usuarios' %}?buscar=${encodeURIComponent(q)}`;
+      } else {
+        window.location.href = `{% url 'core:lista_productos' %}?q=${encodeURIComponent(q)}`;
+      }
+    });
+  }
+</script>
+{% endblock %}

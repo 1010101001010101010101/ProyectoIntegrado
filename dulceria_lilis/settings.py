@@ -6,9 +6,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY
 SECRET_KEY = config('DJANGO_SECRET_KEY', default='django-insecure-temp-key')
-DEBUG = True
-ALLOWED_HOSTS = ['3.223.202.82', 'localhost', '127.0.0.1']
-CSRF_TRUSTED_ORIGINS = [o.strip() for o in config('DJANGO_CSRF_TRUSTED_ORIGINS', default='').split(',') if o.strip()]
+DEBUG = False
+
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -22,7 +21,9 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'core.middleware.no_cache.NoCacheMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -55,19 +56,19 @@ WSGI_APPLICATION = 'dulceria_lilis.wsgi.application'
 # ===============================================
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'dulceria_lilis_2',
-        'USER': 'admin',
-        'PASSWORD': 'Ventana-123',
-        'HOST': 'basededatosproyectointegrado.cmsozqfxqswv.us-east-1.rds.amazonaws.com',
-        'PORT': 3306,
-        'OPTIONS': {
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
-            'charset': 'utf8mb4',
-            # NO pongas 'ssl' aquí cuando uses pymysql en desarrollo local
-        },
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+CSRF_TRUSTED_ORIGINS = [
+    'http://3.223.202.82:8080',
+    'http://3.223.202.82',
+    'http://localhost',
+    'http://127.0.0.1'
+]
+
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -76,7 +77,7 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
-
+SECRET_KEY = config('DJANGO_SECRET_KEY', default='django-insecure-temp-key')
 # Internationalization
 LANGUAGE_CODE = config('DJANGO_LANGUAGE_CODE', default='es-cl')
 TIME_ZONE = config('DJANGO_TIME_ZONE', default='America/Santiago')
@@ -84,11 +85,17 @@ USE_I18N = True
 USE_TZ = True
 
 # Static files
+# Static files
+DEBUG = True
+
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_DIRS = [BASE_DIR / 'core' / 'static']
 
-# Media files
+# Añade esta línea si tienes archivos estáticos propios
+#STATICFILES_DIRS = [
+ #   BASE_DIR / 'static',
+#]
+
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
@@ -108,3 +115,12 @@ SESSION_SAVE_EVERY_REQUEST = False
 SESSION_COOKIE_SECURE = False # en producción con HTTPS
 # sólo enviar la cookie en el mismo sitio (protección CSRF) / Lax por defecto en Django
 SESSION_COOKIE_SAMESITE = 'Lax' # o 'Strict'/'None'(+Secure)
+
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = "tu_correo@gmail.com"
+EMAIL_HOST_PASSWORD = "clave_app"
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+PASSWORD_RESET_TIMEOUT = 3600

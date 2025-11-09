@@ -351,6 +351,16 @@
         font-weight: 600;
     }
 
+    .swal-error-list {
+        text-align: left;
+        margin: 0;
+        padding-left: 1.2rem;
+    }
+
+    .swal-error-list li {
+        margin-bottom: 0.3rem;
+    }
+
     @media (max-width: 768px) {
         .form-row {
             grid-template-columns: 1fr;
@@ -366,7 +376,7 @@
 {% block content %}
 <div class="page-header">
     <h1 class="page-title">Crear Proveedor - Paso 3</h1>
-    <a href="{% url 'core:crear_proveedor' %}" class="btn-secondary">← Volver</a>
+    <a href="{% url 'core:lista_proveedores' %}" class="btn-secondary">← Volver</a>
 </div>
 
 <div class="steps-progress">
@@ -391,7 +401,9 @@
 
 <form method="POST" class="form-container" id="proveedorForm" novalidate>
     {% csrf_token %}
-    
+    {{ form.non_field_errors }}
+    {{ formset.management_form }}
+
     <div class="form-section">
         <h2 class="section-title">Relación con productos</h2>
         
@@ -402,7 +414,7 @@
         <div class="form-row">
             <div class="form-group">
                 <div class="checkbox-group">
-                    <input type="checkbox" id="es_proveedor_preferente" name="es_proveedor_preferente" value="1" {% if data.es_proveedor_preferente == '1' %}checked{% endif %}>
+                    <input type="checkbox" id="es_proveedor_preferente" name="es_proveedor_preferente" value="1" {% if data.es_proveedor_preferente %}checked{% endif %}>
                     <label for="es_proveedor_preferente">Marcar como proveedor preferente</label>
                 </div>
             </div>
@@ -410,12 +422,12 @@
 
         <div class="form-row">
             <div class="form-group">
-                <label for="lead_time">Lead Time (días) <span class="optional"></span></label>
+                <label for="lead_time">Lead Time (días) (opcional)</label>
                 <input type="number" id="lead_time" name="lead_time" placeholder="7" min="0" value="{{ data.lead_time }}">
             </div>
             
             <div class="form-group">
-                <label for="pedido_minimo">Pedido Mínimo <span class="optional"></span></label>
+                <label for="pedido_minimo">Pedido Mínimo (opcional)</label>
                 <input type="number" id="pedido_minimo" name="pedido_minimo" placeholder="10000" min="0" step="0.01" value="{{ data.pedido_minimo }}">
             </div>
             
@@ -427,37 +439,59 @@
         <h2 class="section-title">Productos asociados</h2>
         
         <div class="productos-table">
-            <table>
+            <table id="productosTable">
                 <thead>
                     <tr>
-                        <th>Producto</th>
-                        <th>SKU</th>
-                        <th>Costo</th>
-                        <th>Lead Time</th>
+                        <th>{{ formset.empty_form.producto.label }}</th>
+                        <th>{{ formset.empty_form.costo.label }}</th>
+                        <th>{{ formset.empty_form.lead_time.label }} <span class="optional">(opcional)</span></th>
+                        <th>{{ formset.empty_form.activo.label }} <span class="optional">(opcional)</span></th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td colspan="5" style="text-align: center; color: var(--text-gray); padding: 2rem;">
-                            No hay productos asociados aún
+                    {% for form_producto in formset.forms %}
+                    <tr class="producto-row">
+                        <td>{{ form_producto.producto }}</td>
+                        <td>{{ form_producto.costo }}</td>
+                        <td>{{ form_producto.lead_time }}</td>
+                        <td>{{ form_producto.activo }}</td>
+                        <td>
+                            {% if formset.can_delete %}
+                                {{ form_producto.DELETE }} <span class="link-eliminar">Eliminar</span>
+                            {% endif %}
                         </td>
                     </tr>
+                    {% endfor %}
                 </tbody>
             </table>
         </div>
         
-        <button type="button" class="btn-add" onclick="agregarProducto()">
+        <button type="button" class="btn-add" id="agregarProductoBtn">
             <span>➕</span> Agregar producto
         </button>
     </div>
+
+    <template id="producto-empty-template">
+        <tr class="producto-row">
+            <td>{{ formset.empty_form.producto }}</td>
+            <td>{{ formset.empty_form.costo }}</td>
+            <td>{{ formset.empty_form.lead_time }}</td>
+            <td>{{ formset.empty_form.activo }}</td>
+            <td>
+                {% if formset.can_delete %}
+                    {{ formset.empty_form.DELETE }} <span class="link-eliminar">Eliminar</span>
+                {% endif %}
+            </td>
+        </tr>
+    </template>
 
     <div class="form-section">
         <h2 class="section-title">Observaciones</h2>
         
         <div class="form-row">
             <div class="form-group full-width">
-                <label for="observaciones">Observaciones generales <span class="optional"></span></label>
+                <label for="observaciones">Observaciones generales (opcional)</label>
                 <textarea id="observaciones" name="observaciones" rows="5" placeholder="Notas adicionales sobre el proveedor, acuerdos especiales, historial, etc.">{{ data.observaciones }}</textarea>
             </div>
         </div>
@@ -468,12 +502,8 @@
         
         <div class="form-row">
             <div class="form-group">
-                <label for="estado">Estado</label>
-                <select id="estado" name="estado">
-                    <option value="activo" {% if data.estado == 'activo' or not data.estado %}selected{% endif %}>Activo</option>
-                    <option value="bloqueado" {% if data.estado == 'bloqueado' %}selected{% endif %}>Bloqueado</option>
-                    <option value="inactivo" {% if data.estado == 'inactivo' %}selected{% endif %}>Inactivo</option>
-                </select>
+                <label for="estado">Estado (requerido)</label>
+                {{ form.estado }}
             </div>
         </div>
     </div>
@@ -489,121 +519,155 @@
 
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+{{ errores|json_script:"erroresProveedorPaso3" }}
 <script>
-    // Función para agregar producto (puedes expandir esta funcionalidad)
-    function agregarProducto() {
+    const form = document.getElementById('proveedorForm');
+    const formPrefix = 'productos';
+    const totalForms = document.querySelector(`#id_${formPrefix}-TOTAL_FORMS`);
+    const tableBody = document.querySelector('#productosTable tbody');
+    const emptyTemplate = document.getElementById('producto-empty-template');
+
+    const mostrarErrores = (errores) => {
+        if (!errores.length) return;
+        const lista = `<ul class="swal-error-list">${errores.map(err => `<li>${err}</li>`).join('')}</ul>`;
         Swal.fire({
-            icon: 'info',
-            title: 'Funcionalidad en desarrollo',
-            html: 'La asociación de productos estará disponible próximamente.<br><br>Por ahora puedes continuar guardando el proveedor.',
+            icon: 'error',
+            title: 'Corrige los campos indicados',
+            html: lista,
             confirmButtonText: 'Entendido',
-            customClass: {
-                confirmButton: 'swal2-confirm'
-            }
+            customClass: { confirmButton: 'swal2-confirm' },
         });
+    };
+
+    const erroresNode = document.getElementById('erroresProveedorPaso3');
+    if (erroresNode) {
+        const erroresIniciales = JSON.parse(erroresNode.textContent);
+        if (erroresIniciales.length) {
+            mostrarErrores(erroresIniciales);
+        }
     }
 
-    // Validación del formulario
-    document.getElementById('proveedorForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        // Obtener valores
+    document.getElementById('agregarProductoBtn').addEventListener('click', () => {
+        const formIndex = parseInt(totalForms.value, 10);
+        const row = document.createElement('tr');
+        row.classList.add('producto-row');
+        row.innerHTML = emptyTemplate.innerHTML.replace(/__prefix__/g, formIndex);
+        tableBody.appendChild(row);
+        totalForms.value = formIndex + 1;
+    });
+
+    tableBody.addEventListener('click', (event) => {
+        if (!event.target.classList.contains('link-eliminar')) return;
+        const row = event.target.closest('tr');
+        const deleteField = row.querySelector('input[name$="-DELETE"]');
+        if (deleteField) {
+            deleteField.checked = true;
+            row.style.display = 'none';
+        }
+    });
+
+    const validarFormulario = () => {
+        const errores = [];
         const leadTime = document.getElementById('lead_time').value.trim();
         const pedidoMinimo = document.getElementById('pedido_minimo').value.trim();
-        const estado = document.getElementById('estado').value;
-        
-        // Validar Lead Time si está presente
+
         if (leadTime && parseFloat(leadTime) < 0) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Lead Time inválido',
-                text: 'El Lead Time no puede ser negativo',
-                confirmButtonText: 'Corregir',
-                customClass: {
-                    confirmButton: 'swal2-confirm'
-                }
-            });
-            document.getElementById('lead_time').focus();
-            return;
+            errores.push('Lead Time (días) no puede ser negativo.');
         }
-        
-        // Validar Pedido Mínimo si está presente
         if (pedidoMinimo && parseFloat(pedidoMinimo) < 0) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Pedido Mínimo inválido',
-                text: 'El pedido mínimo no puede ser negativo',
-                confirmButtonText: 'Corregir',
-                customClass: {
-                    confirmButton: 'swal2-confirm'
-                }
-            });
-            document.getElementById('pedido_minimo').focus();
+            errores.push('Pedido mínimo no puede ser negativo.');
+        }
+
+        tableBody.querySelectorAll('.producto-row').forEach((row, index) => {
+            if (row.style.display === 'none') return;
+            const deleteField = row.querySelector('input[name$="-DELETE"]');
+            if (deleteField && deleteField.checked) return;
+
+            const select = row.querySelector('select');
+            const costo = row.querySelector(`input[name$='-costo']`);
+            const lead = row.querySelector(`input[name$='-lead_time']`);
+            const numeroFila = index + 1;
+
+            const valorProducto = select ? select.value.trim() : '';
+            const valorCosto = costo ? costo.value.trim() : '';
+            const valorLead = lead ? lead.value.trim() : '';
+
+            const filaVacia = !valorProducto &&
+                (valorCosto === '' || Number(valorCosto) === 0) &&
+                (valorLead === '' || Number(valorLead) === 0);
+
+            if (filaVacia) {
+                return;
+            }
+
+            if (!valorProducto) {
+                errores.push(`Producto #${numeroFila}: selecciona un producto.`);
+            }
+            if (valorCosto === '') {
+                errores.push(`Producto #${numeroFila}: ingresa el costo.`);
+            } else if (parseFloat(valorCosto) < 0) {
+                errores.push(`Producto #${numeroFila}: el costo no puede ser negativo.`);
+            }
+            if (valorLead && parseFloat(valorLead) < 0) {
+                errores.push(`Producto #${numeroFila}: el lead time no puede ser negativo.`);
+            }
+        });
+
+        return errores;
+    };
+
+    form.addEventListener('submit', (event) => {
+        if (form.dataset.submitting === 'true') return;
+        event.preventDefault();
+        const errores = validarFormulario();
+        if (errores.length) {
+            mostrarErrores(errores);
             return;
         }
-        
-        // Confirmación final antes de guardar
+
+        const estado = document.getElementById('estado').value;
+        const estadoDescripcion = {
+            'ACTIVO': '✅ Activo',
+            'INACTIVO': '⏸️ Inactivo',
+            'SUSPENDIDO': '🚫 Suspendido',
+        }[estado] || estado;
         Swal.fire({
             icon: 'question',
             title: '¿Guardar proveedor?',
             html: `
                 <p>Estás a punto de crear un nuevo proveedor.</p>
-                <p><strong>Estado:</strong> ${estado === 'activo' ? '✅ Activo' : estado === 'bloqueado' ? '🚫 Bloqueado' : '⏸️ Inactivo'}</p>
+                <p><strong>Estado:</strong> ${estadoDescripcion}</p>
             `,
             showCancelButton: true,
             confirmButtonText: '✓ Sí, guardar',
             cancelButtonText: 'Cancelar',
             customClass: {
                 confirmButton: 'swal2-confirm',
-                cancelButton: 'swal2-cancel'
-            }
+                cancelButton: 'swal2-cancel',
+            },
         }).then((result) => {
-            if (result.isConfirmed) {
-                // Mostrar mensaje de éxito con progreso
-                Swal.fire({
-                    icon: 'success',
-                    title: '¡Proveedor creado exitosamente!',
-                    html: 'Todos los datos han sido guardados correctamente',
-                    timer: 2000,
-                    showConfirmButton: false,
-                    timerProgressBar: true,
-                    willClose: () => {
-                        // Enviar el formulario
-                        document.getElementById('proveedorForm').submit();
-                    }
-                });
-            }
+            if (!result.isConfirmed) return;
+            form.dataset.submitting = 'true';
+            Swal.fire({
+                icon: 'success',
+                title: 'Guardando proveedor',
+                html: 'Procesando la información...',
+                timer: 1500,
+                showConfirmButton: false,
+                willClose: () => form.submit(),
+            });
         });
     });
 
-    // Validación en tiempo real para Lead Time
-    document.getElementById('lead_time').addEventListener('input', function(e) {
-        const valor = parseFloat(e.target.value);
-        if (valor < 0) {
-            e.target.value = 0;
+    document.getElementById('lead_time').addEventListener('input', (event) => {
+        if (parseFloat(event.target.value) < 0) {
+            event.target.value = 0;
         }
     });
 
-    // Validación en tiempo real para Pedido Mínimo
-    document.getElementById('pedido_minimo').addEventListener('input', function(e) {
-        const valor = parseFloat(e.target.value);
-        if (valor < 0) {
-            e.target.value = 0;
-        }
-    });
-
-    // Animación de confeti al marcar como preferente
-    document.getElementById('es_proveedor_preferente').addEventListener('change', function(e) {
-        if (e.target.checked) {
-            Swal.fire({
-                icon: 'success',
-                title: '⭐ Proveedor Preferente',
-                text: 'Este proveedor ha sido marcado como preferente',
-                timer: 1500,
-                showConfirmButton: false,
-                toast: true,
-                position: 'top-end'
-            });
+    document.getElementById('pedido_minimo').addEventListener('input', (event) => {
+        if (parseFloat(event.target.value) < 0) {
+            event.target.value = 0;
         }
     });
 </script>

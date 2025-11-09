@@ -13,11 +13,20 @@
     </div>
     <div class="card-body">
         <div class="dashboard-buttons">
+            {% if permisos_dashboard.usuarios %}
             <a href="{% url 'core:lista_usuarios' %}" class="btn-primary">Usuarios</a>
+            {% endif %}
+            {% if permisos_dashboard.productos %}
             <a href="{% url 'core:lista_productos' %}" class="btn-primary">Productos</a>
+            {% endif %}
+            {% if permisos_dashboard.proveedores %}
             <a href="{% url 'core:lista_proveedores' %}" class="btn-primary">Proveedores</a>
+            {% endif %}
+            {% if permisos_dashboard.movimientos %}
             <a href="{% url 'core:lista_movimientos' %}" class="btn-primary">Movimientos</a>
+            {% endif %}
         </div>
+       
     </div>
 </div>
 {% endblock %}

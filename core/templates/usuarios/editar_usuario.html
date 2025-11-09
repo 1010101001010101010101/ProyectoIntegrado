@@ -4,320 +4,177 @@
 
 {% block extra_css %}
 <style>
-    .page-header {
-        margin-bottom: 2rem;
-    }
+  :root{
+    --primary:#dc2626;--primary-700:#b91c1c;--ok:#16a34a;--warn:#f59e0b;--danger:#dc2626;
+    --text:#111827;--muted:#6b7280;--border:#e5e7eb;--bg:#f9fafb;--shadow:0 6px 20px rgba(0,0,0,.08)
+  }
+  .page-header{display:flex;justify-content:space-between;align-items:center;margin:0 0 1.5rem}
+  .page-title{font-size:1.6rem;font-weight:800;color:var(--text);display:flex;align-items:center;gap:.5rem}
+  .btn{display:inline-flex;align-items:center;gap:.6rem;border:none;border-radius:12px;padding:.9rem 1.3rem;font-weight:800;cursor:pointer;transition:transform .15s ease, box-shadow .2s}
+  .btn svg{width:18px;height:18px}
+  .btn-secondary{background:#fff;border:2px solid var(--border);color:var(--text)}
+  .btn-secondary:hover{background:var(--bg)}
+  .btn-primary{background:linear-gradient(135deg,var(--primary),var(--primary-700));color:#fff;box-shadow:0 10px 24px rgba(220,38,38,.25)}
+  .btn-primary:hover{transform:translateY(-1px);box-shadow:0 12px 26px rgba(220,38,38,.33)}
+  .btn-primary:active{transform:translateY(0);box-shadow:0 8px 20px rgba(220,38,38,.25)}
+  .form-card{background:#fff;border-radius:16px;box-shadow:var(--shadow);padding:2rem}
+  .info-box{background:linear-gradient(135deg,#e0f2fe,#bae6fd);border-left:4px solid #0284c7;padding:1rem 1.2rem;border-radius:10px;margin-bottom:1rem}
+  .form-section{margin-top:1.25rem;padding-top:1.25rem;border-top:2px solid var(--border)}
+  .section-title{font-size:1.05rem;font-weight:800;color:var(--text);display:flex;align-items:center;gap:.6rem;margin:0 0 1rem}
+  .section-title::before{content:'';width:4px;height:22px;background:linear-gradient(135deg,var(--primary),var(--primary-700));border-radius:2px}
+  .form-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem}
+  .form-group{display:flex;flex-direction:column}
+  .form-group label{font-weight:700;color:var(--text);margin-bottom:.4rem;display:flex;align-items:center;gap:.35rem}
+  .req-star{color:var(--danger)}
+  .opt{color:var(--muted);font-weight:500}
+  .form-control{border:2px solid var(--border);border-radius:10px;padding:.8rem 1rem;font-size:.95rem;transition:border .2s,box-shadow .2s}
+  .form-control:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 4px rgba(220,38,38,.12)}
+  .form-control:disabled{background:var(--bg);cursor:not-allowed;opacity:.7}
+  .form-control.is-invalid{border-color:var(--danger);background:#fef2f2}
+  .help-text{font-size:.8rem;color:var(--muted);margin-top:.35rem}
+  .readonly-field{background:var(--bg);padding:.8rem 1rem;border-radius:10px;border:2px dashed var(--border);font-weight:600;color:var(--text)}
 
-    .page-title {
-        font-size: 2rem;
-        color: var(--text-dark);
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-    }
-
-    .breadcrumb {
-        color: var(--text-gray);
-        font-size: 0.95rem;
-    }
-
-    .breadcrumb a {
-        color: var(--primary);
-        text-decoration: none;
-    }
-
-    .form-card {
-        background: white;
-        border-radius: 12px;
-        padding: 2.5rem;
-        box-shadow: 0 2px 12px var(--shadow);
-    }
-
-    .form-section {
-        margin-bottom: 2.5rem;
-    }
-
-    .section-title {
-        font-size: 1.3rem;
-        color: var(--text-dark);
-        font-weight: 600;
-        margin-bottom: 1.5rem;
-        padding-bottom: 0.8rem;
-        border-bottom: 2px solid var(--border);
-    }
-
-    .form-row {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 1.5rem;
-        margin-bottom: 1.5rem;
-    }
-
-    .form-group {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .form-group label {
-        margin-bottom: 0.5rem;
-        color: var(--text-dark);
-        font-weight: 500;
-        font-size: 0.95rem;
-    }
-
-    .required {
-        color: var(--danger);
-        margin-left: 0.2rem;
-    }
-
-    .form-control {
-        padding: 0.8rem 1rem;
-        border: 2px solid var(--border);
-        border-radius: 8px;
-        font-size: 1rem;
-        transition: all 0.3s ease;
-        font-family: inherit;
-    }
-
-    .form-control:focus {
-        outline: none;
-        border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(255, 107, 157, 0.1);
-    }
-
-    .form-control:disabled {
-        background-color: #F5F5F5;
-        cursor: not-allowed;
-    }
-
-    select.form-control {
-        cursor: pointer;
-    }
-
-    textarea.form-control {
-        resize: vertical;
-        min-height: 100px;
-    }
-
-    .checkbox-group {
-        display: flex;
-        align-items: center;
-        gap: 0.8rem;
-        padding: 0.8rem 0;
-    }
-
-    .checkbox-group input[type="checkbox"] {
-        width: 20px;
-        height: 20px;
-        cursor: pointer;
-    }
-
-    .checkbox-group label {
-        margin: 0;
-        cursor: pointer;
-    }
-
-    .form-actions {
-        display: flex;
-        gap: 1rem;
-        justify-content: flex-end;
-        padding-top: 2rem;
-        border-top: 2px solid var(--border);
-    }
-
-    .btn {
-        padding: 0.9rem 2rem;
-        border: none;
-        border-radius: 8px;
-        font-size: 1rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        text-decoration: none;
-        display: inline-block;
-    }
-
-    .btn-primary {
-        background: linear-gradient(135deg, #ff0000 0%, #ff0000 100%);
-        color: white;
-        box-shadow: 0 4px 12px rgba(255, 107, 157, 0.3);
-    }
-
-    .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(255, 107, 157, 0.4);
-    }
-
-    .btn-secondary {
-        background: white;
-        color: var(--text-dark);
-        border: 2px solid var(--border);
-    }
-
-    .btn-secondary:hover {
-        background: var(--bg-light);
-        border-color: var(--text-gray);
-    }
-
-    .help-text {
-        font-size: 0.85rem;
-        color: var(--text-gray);
-        margin-top: 0.3rem;
-    }
-
-    .info-box {
-        background: #E8F5E9;
-        border-left: 4px solid #4CAF50;
-        padding: 1rem;
-        border-radius: 8px;
-        margin-bottom: 2rem;
-    }
-
-    .info-box p {
-        margin: 0;
-        color: #2E7D32;
-    }
+  .errorlist{display:none}
+  @media(max-width:768px){.page-header{flex-direction:column;align-items:flex-start;gap:1rem}.form-card{padding:1.25rem}}
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="page-header">
-    <h1 class="page-title">Editar Usuario</h1>
-    <div class="breadcrumb">
-        <a href="{% url 'core:dashboard' %}">Dashboard</a> / 
-        <a href="{% url 'core:lista_usuarios' %}">Usuarios</a> / 
-        Editar
-    </div>
+  <h1 class="page-title">✏️ Editar Usuario</h1>
+  <a href="{% url 'core:lista_usuarios' %}" class="btn btn-secondary">← Volver</a>
 </div>
 
 <div class="form-card">
-    <div class="info-box">
-        <p><strong>ℹ️ Editando:</strong> Keyla Figueroa Morales (kfigueroa)</p>
+  <div class="info-box">
+    ℹ️ El <strong>username</strong> no puede modificarse. Para cambiar contraseña, contacta al administrador.
+  </div>
+
+  <form method="post" novalidate>
+    {% csrf_token %}
+
+    <div class="form-section">
+      <h2 class="section-title">👤 Datos de acceso</h2>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label>username <span class="opt">(solo lectura)</span></label>
+          <div class="readonly-field">{{ usuario.user.username }}</div>
+        </div>
+        <div class="form-group">
+          <label for="{{ form.email.id_for_label }}">email <span class="req-star">*</span></label>
+          {{ form.email }}
+          {{ form.email.errors }}
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="{{ form.first_name.id_for_label }}">nombres <span class="req-star">*</span></label>
+          {{ form.first_name }}
+          {{ form.first_name.errors }}
+        </div>
+        <div class="form-group">
+          <label for="{{ form.last_name.id_for_label }}">apellidos <span class="req-star">*</span></label>
+          {{ form.last_name }}
+          {{ form.last_name.errors }}
+        </div>
+      </div>
     </div>
 
-    <form method="post">
-        <div class="form-section">
-            <h2 class="section-title">Información de Identificación</h2>
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="username">Username <span class="required">*</span></label>
-                    <input type="text" id="username" name="username" class="form-control" value="kfigueroa" required>
-                    <span class="help-text">Debe ser único en el sistema</span>
-                </div>
-                <div class="form-group">
-                    <label for="email">Email <span class="required">*</span></label>
-                    <input type="email" id="email" name="email" class="form-control" value="keyla.figueroa@lilis.cl" required>
-                    <span class="help-text">Se usará para notificaciones</span>
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="nombres">Nombres <span class="required">*</span></label>
-                    <input type="text" id="nombres" name="nombres" class="form-control" value="Keyla" required>
-                </div>
-                <div class="form-group">
-                    <label for="apellidos">Apellidos <span class="required">*</span></label>
-                    <input type="text" id="apellidos" name="apellidos" class="form-control" value="Figueroa Morales" required>
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="telefono">Teléfono</label>
-                    <input type="tel" id="telefono" name="telefono" class="form-control" value="+56 9 8765 8596">
-                </div>
-            </div>
+    <div class="form-section">
+      <h2 class="section-title">🧩 Perfil</h2>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label>teléfono <span class="opt">(opcional)</span></label>
+          <input type="text" class="form-control" name="telefono" value="{{ usuario.telefono|default:'' }}" placeholder="+56 9 1234 5678">
         </div>
+        <div class="form-group">
+          <label>dirección <span class="opt">(opcional)</span></label>
+          <input type="text" class="form-control" name="direccion" value="{{ usuario.direccion|default:'' }}" placeholder="Calle Principal #123">
+        </div>
+      </div>
 
-        <div class="form-section">
-            <h2 class="section-title">Acceso y Seguridad</h2>
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="rol">Rol <span class="required">*</span></label>
-                    <select id="rol" name="rol" class="form-control" required>
-                        <option value="">Seleccionar rol...</option>
-                        <option value="admin" selected>Administrador</option>
-                        <option value="vendedor">Vendedor</option>
-                        <option value="almacen">Almacén</option>
-                        <option value="contador">Contador</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="estado">Estado <span class="required">*</span></label>
-                    <select id="estado" name="estado" class="form-control" required>
-                        <option value="ACTIVO" selected>Activo</option>
-                        <option value="BLOQUEADO">Bloqueado</option>
-                        <option value="INACTIVO">Inactivo</option>
-                    </select>
-                </div>
-            </div>
-            <div class="checkbox-group">
-                <input type="checkbox" id="mfa_habilitado" name="mfa_habilitado">
-                <label for="mfa_habilitado">Habilitar autenticación de dos factores (MFA)</label>
-            </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="ultimo_acceso">Último Acceso</label>
-                    <input type="text" id="ultimo_acceso" name="ultimo_acceso" class="form-control" value="20/10/2025 09:30" disabled>
-                </div>
-            </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>rol <span class="req-star">*</span></label>
+          <select name="rol" class="form-control">
+            {% for val, label in usuario.ROL_CHOICES %}
+              <option value="{{ val }}" {% if usuario.rol == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
         </div>
+        <div class="form-group">
+          <label>estado <span class="req-star">*</span></label>
+          <select name="estado" class="form-control">
+            <option value="ACTIVO" {% if usuario.user.is_active %}selected{% endif %}>ACTIVO</option>
+            <option value="INACTIVO" {% if not usuario.user.is_active %}selected{% endif %}>INACTIVO</option>
+          </select>
+        </div>
+      </div>
+    </div>
 
-        <div class="form-section">
-            <h2 class="section-title">Cambiar Contraseña (Opcional)</h2>
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="nueva_password">Nueva Contraseña</label>
-                    <input type="password" id="nueva_password" name="nueva_password" class="form-control">
-                    <span class="help-text">Dejar en blanco para mantener la actual</span>
-                </div>
-                <div class="form-group">
-                    <label for="confirmar_password">Confirmar Contraseña</label>
-                    <input type="password" id="confirmar_password" name="confirmar_password" class="form-control">
-                </div>
-            </div>
-        </div>
-
-        <div class="form-section">
-            <h2 class="section-title">Información Adicional</h2>
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="area">Área / Unidad</label>
-                    <input type="text" id="area" name="area" class="form-control" value="Administración">
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="observaciones">Observaciones</label>
-                    <textarea id="observaciones" name="observaciones" class="form-control">Usuario administrador principal del sistema</textarea>
-                </div>
-            </div>
-        </div>
-
-        <div class="form-actions">
-            <a href="{% url 'core:lista_usuarios' %}" class="btn btn-secondary">Cancelar</a>
-            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-        </div>
-    </form>
+    <div class="form-section" style="border-top:none;padding-top:0;margin-top:.5rem">
+      <div style="display:flex;justify-content:space-between;gap:1rem">
+        <a href="{% url 'core:lista_usuarios' %}" class="btn btn-secondary">✕ Cancelar</a>
+        <button type="submit" class="btn btn-primary">
+          <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M16.707 5.293a1 1 0 0 1 0 1.414l-7.778 7.778a1 1 0 0 1-1.414 0L3.293 11.264a1 1 0 1 1 1.414-1.414l3.1 3.101 7.07-7.07a1 1 0 0 1 1.414 0z"/></svg>
+          Guardar cambios
+        </button>
+      </div>
+    </div>
+  </form>
 </div>
+{% endblock %}
 
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    document.querySelector('form').addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        const nuevaPass = document.getElementById('nueva_password').value;
-        const confirmarPass = document.getElementById('confirmar_password').value;
-        
-        if (nuevaPass && nuevaPass !== confirmarPass) {
-            alert('Las contraseñas no coinciden');
-            return;
-        }
-        
-        if (nuevaPass && nuevaPass.length < 12) {
-            alert('La contraseña debe tener al menos 12 caracteres');
-            return;
-        }
-        
-        alert('Usuario actualizado exitosamente (simulación)');
-        window.location.href = "{% url 'core:lista_usuarios' %}";
-    });
+  // Validación con SweetAlert
+  document.querySelector('form').addEventListener('submit', function(e){
+    const email = document.getElementById('{{ form.email.id_for_label }}').value.trim();
+    const firstName = document.getElementById('{{ form.first_name.id_for_label }}').value.trim();
+    const lastName = document.getElementById('{{ form.last_name.id_for_label }}').value.trim();
+    const rol = document.querySelector('select[name="rol"]').value;
+    
+    const errores = [];
+    if (!email) errores.push('El email es obligatorio');
+    if (!firstName) errores.push('Los nombres son obligatorios');
+    if (!lastName) errores.push('Los apellidos son obligatorios');
+    if (!rol) errores.push('Debe seleccionar un rol');
+    
+    if (errores.length) {
+      e.preventDefault();
+      Swal.fire({
+        icon: 'error',
+        title: 'Campos incompletos',
+        html: '<ul style="text-align:left;margin:0;padding-left:1.1rem;">' + errores.map(x=>`<li>${x}</li>`).join('') + '</ul>',
+        confirmButtonText: 'Entendido',
+        confirmButtonColor: '#dc2626'
+      });
+    }
+  });
+
+  // Mostrar errores del servidor
+  {% if form.errors %}
+    try {
+      const serverErrors = JSON.parse('{{ form.errors.as_json|escapejs }}');
+      const items = [];
+      for (const k in serverErrors) {
+        const first = serverErrors[k][0]?.message || '';
+        if (first) items.push(first);
+      }
+      if (items.length) {
+        Swal.fire({
+          icon: 'error',
+          title: 'No se pudo actualizar',
+          html: '<ul style="text-align:left;margin:0;padding-left:1.1rem;">' + items.map(x=>`<li>${x}</li>`).join('') + '</ul>',
+          confirmButtonText: 'OK',
+          confirmButtonColor: '#dc2626'
+        });
+      }
+    } catch(_e) {}
+  {% endif %}
 </script>
 {% endblock %}

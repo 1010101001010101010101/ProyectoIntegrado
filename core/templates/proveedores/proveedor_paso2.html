@@ -259,7 +259,7 @@
 {% block content %}
 <div class="page-header">
     <h1 class="page-title">Crear Proveedor - Paso 2</h1>
-    <a href="{% url 'core:crear_proveedor' %}" class="btn-secondary">← Volver</a>
+    <a href="{% url 'core:lista_proveedores' %}" class="btn-secondary">← Volver</a>
 </div>
 
 <div class="steps-progress">
@@ -290,31 +290,31 @@
     
         <div class="form-row">
             <div class="form-group full-width">
-                <label for="direccion">Dirección <span class="optional"></span></label>
+                <label for="direccion">Dirección (opcional)</label>
                 <input type="text" id="direccion" name="direccion" placeholder="Av. Principal 123" value="{{ data.direccion }}">
             </div>
         </div>
 
         <div class="form-row">
             <div class="form-group">
-                <label for="ciudad">Ciudad <span class="optional"></span></label>
+                <label for="ciudad">Ciudad (opcional)</label>
                 <input type="text" id="ciudad" name="ciudad" placeholder="Santiago" value="{{ data.ciudad }}">
             </div>
             
             <div class="form-group">
-                <label for="region">Región/Estado <span class="optional"></span></label>
+                <label for="region">Región/Estado (opcional)</label>
                 <input type="text" id="region" name="region" placeholder="Región Metropolitana" value="{{ data.region }}">
             </div>
             
             <div class="form-group">
-                <label for="codigo_postal">Código Postal <span class="optional"></span></label>
+                <label for="codigo_postal">Código Postal (opcional)</label>
                 <input type="text" id="codigo_postal" name="codigo_postal" placeholder="8320000" value="{{ data.codigo_postal }}">
             </div>
         </div>
 
         <div class="form-row">
             <div class="form-group">
-                <label for="pais">País <span class="required">*</span></label>
+                <label for="pais">País (requerido)</label>
                 <select id="pais" name="pais">
                     <option value="">Seleccione un país</option>
                     <option value="chile" {% if data.pais == 'chile' %}selected{% endif %}>Chile</option>
@@ -334,12 +334,12 @@
         
         <div class="form-row">
             <div class="form-group">
-                <label for="plazo_pago">Plazo de Pago (días) <span class="optional"></span></label>
+                <label for="plazo_pago">Plazo de Pago (días) (opcional)</label>
                 <input type="number" id="plazo_pago" name="plazo_pago" placeholder="30" min="0" value="{{ data.plazo_pago }}">
             </div>
             
             <div class="form-group">
-                <label for="moneda">Moneda <span class="optional"></span></label>
+                <label for="moneda">Moneda (opcional)</label>
                 <select id="moneda" name="moneda">
                     <option value="">Seleccione moneda</option>
                     <option value="CLP" {% if data.moneda == 'CLP' %}selected{% endif %}>CLP - Peso Chileno</option>
@@ -351,14 +351,14 @@
             </div>
             
             <div class="form-group">
-                <label for="descuento">Descuento (%) <span class="optional"></span></label>
+                <label for="descuento">Descuento (%) (opcional)</label>
                 <input type="number" id="descuento" name="descuento" placeholder="5" min="0" max="100" step="0.01" value="{{ data.descuento }}">
             </div>
         </div>
 
         <div class="form-row">
             <div class="form-group full-width">
-                <label for="notas_comerciales">Notas Comerciales <span class="optional"></span></label>
+                <label for="notas_comerciales">Notas Comerciales (opcional)</label>
                 <textarea id="notas_comerciales" name="notas_comerciales" rows="4" placeholder="Condiciones especiales, acuerdos, etc.">{{ data.notas_comerciales }}</textarea>
             </div>
         </div>
@@ -376,58 +376,51 @@
 <script>
     document.getElementById('proveedorForm').addEventListener('submit', function(e) {
         e.preventDefault();
-        
-        // Obtener valores
+
         const pais = document.getElementById('pais').value.trim();
         const descuento = document.getElementById('descuento').value.trim();
         const plazoPago = document.getElementById('plazo_pago').value.trim();
-        
-        // Validar País (requerido)
+
         if (!pais) {
             Swal.fire({
                 icon: 'error',
                 title: 'Campo requerido',
-                text: 'Por favor seleccione el país del proveedor',
+                text: 'El país es obligatorio.',
                 confirmButtonText: 'Entendido'
             });
             document.getElementById('pais').focus();
             return;
         }
-        
-        // Validar descuento si está presente
+
         if (descuento && (parseFloat(descuento) < 0 || parseFloat(descuento) > 100)) {
             Swal.fire({
                 icon: 'error',
                 title: 'Descuento inválido',
-                text: 'El descuento debe estar entre 0 y 100%',
+                text: 'El descuento debe estar entre 0 y 100%.',
                 confirmButtonText: 'Entendido'
             });
             document.getElementById('descuento').focus();
             return;
         }
-        
-        // Validar plazo de pago si está presente
+
         if (plazoPago && parseFloat(plazoPago) < 0) {
             Swal.fire({
                 icon: 'error',
                 title: 'Plazo inválido',
-                text: 'El plazo de pago no puede ser negativo',
+                text: 'El plazo de pago no puede ser negativo.',
                 confirmButtonText: 'Entendido'
             });
             document.getElementById('plazo_pago').focus();
             return;
         }
-        
-        // Si pasa todas las validaciones, enviar el formulario
+
         Swal.fire({
             icon: 'success',
             title: '¡Datos válidos!',
             text: 'Continuando al siguiente paso...',
             timer: 1500,
             showConfirmButton: false
-        }).then(() => {
-            this.submit();
-        });
+        }).then(() this.submit());
     });
 </script>
 {% endblock %}

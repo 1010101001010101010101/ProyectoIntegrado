@@ -227,19 +227,19 @@
 
 <div class="stats-row">
     <div class="stat-box">
-        <div class="stat-box-value">342</div>
+        <div class="stat-box-value">{{ total_movimientos }}</div>
         <div class="stat-box-label">Total Movimientos</div>
     </div>
     <div class="stat-box">
-        <div class="stat-box-value">125</div>
+        <div class="stat-box-value">{{ total_ingresos }}</div>
         <div class="stat-box-label">Ingresos</div>
     </div>
     <div class="stat-box">
-        <div class="stat-box-value">189</div>
+        <div class="stat-box-value">{{ total_salidas }}</div>
         <div class="stat-box-label">Salidas</div>
     </div>
     <div class="stat-box">
-        <div class="stat-box-value">28</div>
+        <div class="stat-box-value">{{ total_mes }}</div>
         <div class="stat-box-label">Este Mes</div>
     </div>
 </div>
@@ -276,114 +276,54 @@
             </tr>
         </thead>
         <tbody>
+            {% for movimiento in movimientos %}
             <tr>
-                <td>2025-09-10 09:30</td>
-                <td><span class="badge badge-ingreso">ingreso</span></td>
-                <td>SKU-0001</td>
-                <td>76.543.210-5</td>
-                <td>BOD-CENTRAL</td>
-                <td><strong>+10</strong></td>
-                <td>—</td>
-                <td>—</td>
-                <td>—</td>
-                <td>OC-101</td>
+                <td>{{ movimiento.fecha|date:"Y-m-d H:i" }}</td>
+                <td>
+                    <span class="badge badge-{{ movimiento.tipo_movimiento }}">
+                        {{ movimiento.get_tipo_movimiento_display }}
+                    </span>
+                </td>
+                <td>{{ movimiento.producto.sku }}</td>
+                <td>
+                    {% if movimiento.proveedor %}
+                        {{ movimiento.proveedor.rut }}
+                    {% else %}
+                        —
+                    {% endif %}
+                </td>
+                <td>{{ movimiento.bodega.codigo }}</td>
+                <td>
+                    <strong>
+                        {% if movimiento.tipo_movimiento == 'ingreso' or movimiento.tipo_movimiento == 'devolucion' %}
+                            +{{ movimiento.cantidad }}
+                        {% else %}
+                            -{{ movimiento.cantidad }}
+                        {% endif %}
+                    </strong>
+                </td>
+                <td>{{ movimiento.lote|default:"—" }}</td>
+                <td>{{ movimiento.numero_serie|default:"—" }}</td>
+                <td>
+                    {% if movimiento.fecha_vencimiento %}
+                        {{ movimiento.fecha_vencimiento|date:"Y-m-d" }}
+                    {% else %}
+                        —
+                    {% endif %}
+                </td>
+                <td>{{ movimiento.documento_numero|default:"—" }}</td>
                 <td>
                     <div class="action-buttons">
-                        <a href="{% url 'core:editar_movimiento' 8 %}" class="btn-icon btn-edit" title="Editar">✏️</a>
-                        <button class="btn-icon btn-delete" title="Eliminar" onclick="confirmarEliminacion(8, 'Caramelos de Yogur')">🗑️</button>
+                        <a href="{% url 'core:editar_movimiento' movimiento.id %}" class="btn-icon btn-edit" title="Editar">✏️</a>
+                        <button class="btn-icon btn-delete" title="Eliminar" onclick="confirmarEliminacion({{ movimiento.id }}, '{{ movimiento.producto.nombre }}')">🗑️</button>
                     </div>
                 </td>
             </tr>
+            {% empty %}
             <tr>
-                <td>2025-09-10 15:00</td>
-                <td><span class="badge badge-salida">salida</span></td>
-                <td>SKU-0001</td>
-                <td>—</td>
-                <td>BOD-CENTRAL</td>
-                <td><strong>-2</strong></td>
-                <td>—</td>
-                <td>—</td>
-                <td>—</td>
-                <td>FAC-900</td>
-                <td>
-                    <div class="action-buttons">
-                        <a href="{% url 'core:editar_movimiento' 8 %}" class="btn-icon btn-edit" title="Editar">✏️</a>
-                        <button class="btn-icon btn-delete" title="Eliminar" onclick="confirmarEliminacion(8, 'Caramelos de Yogur')">🗑️</button>
-                    </div>
-                </td>
+                <td colspan="11" style="text-align:center;">No hay movimientos registrados.</td>
             </tr>
-            <tr>
-                <td>2025-09-09 11:45</td>
-                <td><span class="badge badge-ingreso">ingreso</span></td>
-                <td>SKU-0002</td>
-                <td>Choco Andino</td>
-                <td>BOD-CENTRAL</td>
-                <td><strong>+200</strong></td>
-                <td>L-2025-09</td>
-                <td>—</td>
-                <td>2026-09-09</td>
-                <td>OC-102</td>
-                <td>
-                    <div class="action-buttons">
-                        <a href="{% url 'core:editar_movimiento' 8 %}" class="btn-icon btn-edit" title="Editar">✏️</a>
-                        <button class="btn-icon btn-delete" title="Eliminar" onclick="confirmarEliminacion(8, 'Caramelos de Yogur')">🗑️</button>
-                    </div>
-                </td>
-            </tr>
-            <tr>
-                <td>2025-09-08 16:30</td>
-                <td><span class="badge badge-ajuste">ajuste</span></td>
-                <td>SKU-0003</td>
-                <td>—</td>
-                <td>BOD-CENTRAL</td>
-                <td><strong>-5</strong></td>
-                <td>—</td>
-                <td>—</td>
-                <td>—</td>
-                <td>AJ-012</td>
-                <td>
-                    <div class="action-buttons">
-                        <a href="{% url 'core:editar_movimiento' 8 %}" class="btn-icon btn-edit" title="Editar">✏️</a>
-                        <button class="btn-icon btn-delete" title="Eliminar" onclick="confirmarEliminacion(8, 'Caramelos de Yogur')">🗑️</button>
-                    </div>
-                </td>
-            </tr>
-            <tr>
-                <td>2025-09-08 10:15</td>
-                <td><span class="badge badge-devolucion">devolución</span></td>
-                <td>SKU-0004</td>
-                <td>Golo Global</td>
-                <td>BOD-CENTRAL</td>
-                <td><strong>+20</strong></td>
-                <td>L-2025-08</td>
-                <td>—</td>
-                <td>2026-08-08</td>
-                <td>DEV-008</td>
-                <td>
-                    <div class="action-buttons">
-                        <a href="{% url 'core:editar_movimiento' 8 %}" class="btn-icon btn-edit" title="Editar">✏️</a>
-                        <button class="btn-icon btn-delete" title="Eliminar" onclick="confirmarEliminacion(8, 'Caramelos de Yogur')">🗑️</button>
-                    </div>
-                </td>
-            </tr>
-            <tr>
-                <td>2025-09-07 14:00</td>
-                <td><span class="badge badge-transferencia">transferencia</span></td>
-                <td>SKU-0001</td>
-                <td>—</td>
-                <td>BOD-SUCURSAL-2</td>
-                <td><strong>50</strong></td>
-                <td>—</td>
-                <td>—</td>
-                <td>—</td>
-                <td>TRA-003</td>
-                <td>
-                    <div class="action-buttons">
-                        <a href="{% url 'core:editar_movimiento' 8 %}" class="btn-icon btn-edit" title="Editar">✏️</a>
-                        <button class="btn-icon btn-delete" title="Eliminar" onclick="confirmarEliminacion(8, 'Caramelos de Yogur')">🗑️</button>
-                    </div>
-                </td>
-            </tr>
+            {% endfor %}
         </tbody>
     </table>
 </div>
