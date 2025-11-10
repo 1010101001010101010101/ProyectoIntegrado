@@ -2,7 +2,14 @@
 Módulo de vistas modularizadas
 Expone todas las vistas para facilitar importaciones en urls.py
 """
+# core/views/__init__.py
+from .usuarios import *
+from .productos import *
+from .inventario import *
+from .proveedores import *
+from .dashboard import dashboard_view  # 👈 AGREGAR ESTA LÍNEA
 
+# Resto de tus imports...
 # Auth
 from .auth import (
     login_view,

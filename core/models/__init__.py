@@ -13,7 +13,7 @@ from .usuarios import Usuario
 from .productos import Categoria, UnidadMedida, Producto
 
 # Proveedores
-from .proveedores import Proveedor
+from .proveedores import Proveedor, ProveedorProducto
 
 # Inventario
 from .inventario import Bodega, MovimientoInventario, Lote
@@ -35,6 +35,7 @@ __all__ = [
     
     # Proveedores
     'Proveedor',
+    'ProveedorProducto',
     
     # Inventario
     'Bodega',

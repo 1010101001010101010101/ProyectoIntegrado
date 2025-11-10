@@ -6,7 +6,7 @@
 <style>
     .page-header {
         display: flex;
-        justify-content: space-between;
+        justify-content: space-between; /* ← corregido, sin espacio raro */
         align-items: center;
         margin-bottom: 2rem;
     }
@@ -36,44 +36,66 @@
         box-shadow: 0 6px 20px rgba(152, 216, 200, 0.4);
     }
 
+    .btn-excel {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: linear-gradient(135deg, #34d399, #059669);
+        color: #fff;
+        font-weight: 700;
+        border: none;
+        border-radius: 10px;
+        padding: 0.8rem 1.5rem;
+        box-shadow: 0 4px 12px rgba(52, 211, 153, 0.25);
+        text-decoration: none;
+        transition: transform 0.15s, box-shadow 0.2s;
+        font-size: 1rem;
+    }
+
+    .btn-excel:hover {
+        transform: translateY(-2px) scale(1.04);
+        box-shadow: 0 8px 24px rgba(52, 211, 153, 0.35);
+        background: linear-gradient(135deg, #059669, #34d399);
+        color: #fff;
+    }
+
+    .btn-excel svg {
+        width: 22px;
+        height: 22px;
+        vertical-align: middle;
+    }
+
     .filters-bar {
-        background: white;
-        padding: 1.5rem;
+        background: #fff;
+        padding: 1.2rem 1.5rem;
         border-radius: 12px;
         margin-bottom: 1.5rem;
-        box-shadow: 0 2px 12px var(--shadow);
+        box-shadow: 0 2px 12px rgba(0,0,0,0.07);
         display: flex;
         gap: 1rem;
         flex-wrap: wrap;
+        align-items: center;
     }
 
-    .search-input {
+    .filter-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+        min-width: 180px;
         flex: 1;
-        min-width: 250px;
-        padding: 0.8rem 1rem;
-        border: 2px solid var(--border);
-        border-radius: 8px;
-        font-size: 1rem;
     }
 
-    .search-input:focus {
+    .search-input, .filter-select, .date-input {
+        padding: 0.8rem 1rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border-color 0.2s;
+    }
+
+    .search-input:focus, .filter-select:focus, .date-input:focus {
+        border-color: #ff0000;
         outline: none;
-        border-color: #98D8C8;
-    }
-
-    .filter-select {
-        padding: 0.8rem 1rem;
-        border: 2px solid var(--border);
-        border-radius: 8px;
-        font-size: 1rem;
-        cursor: pointer;
-    }
-
-    .date-input {
-        padding: 0.8rem 1rem;
-        border: 2px solid var(--border);
-        border-radius: 8px;
-        font-size: 1rem;
     }
 
     .stats-row {
@@ -199,6 +221,50 @@
         color: white;
     }
 
+    /* Botón editar igual que productos */
+.btn-edit {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.45rem 1rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    color: #1f2937;
+    background: linear-gradient(135deg, #fde68a, #fbbf24);
+    box-shadow: 0 10px 24px rgba(251, 191, 36, 0.35);
+    border: none;
+    transition: transform 0.15s ease, box-shadow 0.2s ease;
+}
+.btn-edit:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 14px 30px rgba(234, 179, 8, 0.35);
+    color: #fff;
+    background: linear-gradient(135deg, #fbbf24, #fde68a);
+}
+
+/* Botón eliminar igual que productos */
+.btn-delete {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.45rem 1rem;
+    border: none;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    color: #ffffff;
+    background: linear-gradient(135deg, #f87171, #dc2626);
+    box-shadow: 0 10px 24px rgba(239, 68, 68, 0.35);
+    transition: transform 0.15s ease, box-shadow 0.2s ease;
+}
+.btn-delete:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 14px 30px rgba(220, 38, 38, 0.35);
+}
+
     @media (max-width: 768px) {
         .page-header {
             flex-direction: column;
@@ -214,15 +280,84 @@
             min-width: 1000px;
         }
     }
+
+    /* PAGINACIÓN igual que productos */
+.pagination-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.pagination-info {
+    color: var(--text-dark);
+    font-weight: 500;
+}
+
+.pagination-nav {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.pagination-nav ul {
+    display: flex;
+    gap: 0.5rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.pagination-nav a,
+.pagination-nav span {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    background: var(--bg-light);
+    color: var(--text-dark);
+    text-decoration: none;
+    transition: background 0.3s ease;
+    min-width: 40px;
+    text-align: center;
+}
+
+.pagination-nav a:hover {
+    background: var(--primary);
+    color: white;
+}
+
+.pagination-nav .current {
+    background: var(--primary);
+    color: white;
+}
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="page-header">
-    <h1 class="page-title">Movimientos de Inventario</h1>
-    <a href="{% url 'core:movimiento_paso1' %}" class="btn-primary">
-        <span>➕</span> Nuevo Movimiento
+<div class="page-header" style="margin-bottom: 2rem;">
+    <h1 class="page-title" style="font-size:2rem; color:#1f2937; font-weight:700;">
+        <span style="margin-right:8px;">📦</span> Movimientos de Inventario
+    </h1>
+    <div style="display: flex; gap: 1rem;">
+      <a
+        class="btn-excel"
+        href="{% url 'core:exportar_movimientos_excel' %}?search={{ search }}&tipo={{ tipo }}&desde={{ desde }}&hasta={{ hasta }}"
+        title="Exportar a Excel"
+      >
+        <svg viewBox="0 0 24 24" fill="none">
+          <rect x="3" y="3" width="18" height="18" rx="4" fill="#fff" stroke="#059669" stroke-width="2"/>
+          <path d="M8 8L16 16M16 8L8 16" stroke="#059669" stroke-width="2" stroke-linecap="round"/>
+          <rect x="7" y="7" width="10" height="10" rx="2" fill="#34d399" opacity="0.2"/>
+        </svg>
+        <span>Exportar Excel</span>
+      </a>
+        {% if request.user.perfil.rol == 'ADMIN' or request.user.perfil.rol == 'EDITOR' %}
+    <a href="{% url 'core:movimiento_paso1' %}" class="btn btn-primary" style="background:linear-gradient(135deg,#ff0000,#cc0000);color:white;font-weight:600;border-radius:10px;padding:0.8rem 1.5rem;box-shadow:0 4px 12px rgba(220,38,38,0.3);">
+        Nuevo Movimiento
     </a>
+{% endif %}
+    </div>
 </div>
 
 <div class="stats-row">
@@ -245,17 +380,39 @@
 </div>
 
 <div class="filters-bar">
-    <input type="text" class="search-input" placeholder="Buscar por producto, proveedor o folio...">
-    <select class="filter-select">
-        <option value="">Todos los tipos</option>
-        <option value="ingreso">Ingreso</option>
-        <option value="salida">Salida</option>
-        <option value="ajuste">Ajuste</option>
-        <option value="devolucion">Devolución</option>
-        <option value="transferencia">Transferencia</option>
-    </select>
-    <input type="date" class="date-input" placeholder="Desde">
-    <input type="date" class="date-input" placeholder="Hasta">
+    <form method="get" id="filtrosForm" style="width:100%;display:flex;gap:1rem;align-items:center;">
+        <div class="filter-item">
+            <label for="search" style="font-weight:600;">Buscar</label>
+            <input type="text" id="search" name="search" class="search-input" placeholder="Buscar por SKU, producto, proveedor..." value="{{ search }}">
+        </div>
+        <div class="filter-item">
+            <label for="tipo" style="font-weight:600;">Tipo</label>
+            <select id="tipo" name="tipo" class="filter-select">
+                <option value="">Todos los tipos</option>
+                <option value="ingreso" {% if tipo == 'ingreso' %}selected{% endif %}>Ingreso</option>
+                <option value="salida" {% if tipo == 'salida' %}selected{% endif %}>Salida</option>
+                <option value="ajuste" {% if tipo == 'ajuste' %}selected{% endif %}>Ajuste</option>
+                <option value="devolucion" {% if tipo == 'devolucion' %}selected{% endif %}>Devolución</option>
+                <option value="transferencia" {% if tipo == 'transferencia' %}selected{% endif %}>Transferencia</option>
+            </select>
+        </div>
+        <div class="filter-item">
+            <label for="desde" style="font-weight:600;">Fecha desde</label>
+            <input type="date" id="desde" name="desde" class="date-input" value="{{ desde }}">
+        </div>
+        <div class="filter-item">
+            <label for="hasta" style="font-weight:600;">Fecha hasta</label>
+            <input type="date" id="hasta" name="hasta" class="date-input" value="{{ hasta }}">
+        </div>
+        <div class="filter-item">
+            <label for="page_size" style="font-weight:600;">Registros por página</label>
+            <select id="page_size" name="page_size" class="filter-select">
+                <option value="5" {% if page_size == 5 %}selected{% endif %}>5</option>
+                <option value="15" {% if page_size == 15 %}selected{% endif %}>15</option>
+                <option value="30" {% if page_size == 30 %}selected{% endif %}>30</option>
+            </select>
+        </div>
+    </form>
 </div>
 
 <div class="table-container">
@@ -314,8 +471,14 @@
                 <td>{{ movimiento.documento_numero|default:"—" }}</td>
                 <td>
                     <div class="action-buttons">
-                        <a href="{% url 'core:editar_movimiento' movimiento.id %}" class="btn-icon btn-edit" title="Editar">✏️</a>
-                        <button class="btn-icon btn-delete" title="Eliminar" onclick="confirmarEliminacion({{ movimiento.id }}, '{{ movimiento.producto.nombre }}')">🗑️</button>
+                        {% if request.user.perfil.rol == 'ADMIN' or request.user.perfil.rol == 'EDITOR' %}
+                            <a href="{% url 'core:editar_movimiento' movimiento.id %}" class="btn-edit" title="Editar">Editar</a>
+                        {% endif %}
+                        {% if request.user.perfil.rol == 'ADMIN' %}
+                            <button class="btn-delete" title="Eliminar"
+                                data-url="{% url 'core:eliminar_movimiento' movimiento.id %}"
+                                onclick="confirmarEliminacion(this, '{{ movimiento.producto.nombre }}')">Eliminar</button>
+                        {% endif %}
                     </div>
                 </td>
             </tr>
@@ -327,40 +490,125 @@
         </tbody>
     </table>
 </div>
+
+<div class="pagination-wrapper" style="justify-content: flex-end;">
+    <nav class="pagination-nav" aria-label="Paginación">
+        <ul>
+            {% if movimientos.has_previous %}
+                <li>
+                    <a href="?{{ base_qs }}&page={{ movimientos.previous_page_number }}" style="background: #ff0000; color: white; font-weight: bold;">
+                        {{ movimientos.previous_page_number }}
+                    </a>
+                </li>
+            {% endif %}
+            <li>
+                <span class="current" style="background: #ff0000; color: white; font-weight: bold;">
+                    {{ movimientos.number }}
+                </span>
+            </li>
+            {% if movimientos.has_next %}
+                <li>
+                    <a href="?{{ base_qs }}&page={{ movimientos.next_page_number }}" style="background: #ff0000; color: white; font-weight: bold;">
+                        {{ movimientos.next_page_number }}
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>
+<form id="form-eliminar-mov" style="display:none;">
+    {% csrf_token %}
+</form>
 {% endblock %}
 
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    function confirmarEliminacion(id, nombre) {
-        Swal.fire({
-            title: '¿Estás seguro?',
-            html: `¿Deseas eliminar el producto <strong>${nombre}</strong>?<br><small style="color: #6c757d;">Esta acción no se puede deshacer</small>`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Sí, eliminar',
-            cancelButtonText: 'Cancelar',
-            reverseButtons: true,
-            customClass: {
-                confirmButton: 'swal2-confirm',
-                cancelButton: 'swal2-cancel'
-            }
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Aquí harías la petición para eliminar el producto
-                // Por ejemplo: window.location.href = `/productos/eliminar/${id}/`;
-                
-                Swal.fire({
-                    title: '¡Eliminado!',
-                    text: `El producto ${nombre} ha sido eliminado correctamente`,
-                    icon: 'success',
-                    confirmButtonText: 'Aceptar',
-                    customClass: {
-                        confirmButton: 'swal2-confirm'
-                    }
-                });
-            }
-        });
+    function confirmarEliminacion(btn, nombre) {
+    Swal.fire({
+        title: '¿Estás seguro?',
+        html: `¿Deseas eliminar el movimiento de <strong>${nombre}</strong>?<br><small style="color: #6c757d;">Esta acción no se puede deshacer</small>`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar',
+        reverseButtons: true,
+        customClass: {
+            confirmButton: 'swal2-confirm',
+            cancelButton: 'swal2-cancel'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const url = btn.getAttribute('data-url');
+            const csrf = document.querySelector('#form-eliminar-mov [name="csrfmiddlewaretoken"]').value;
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrf,
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.ok) {
+                    Swal.fire({
+                        title: '¡Eliminado!',
+                        text: `El movimiento ha sido eliminado correctamente`,
+                        icon: 'success',
+                        confirmButtonText: 'Aceptar',
+                        customClass: { confirmButton: 'swal2-confirm' }
+                    }).then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Error',
+                        text: data.error || 'No se pudo eliminar',
+                        icon: 'error',
+                        confirmButtonText: 'Aceptar'
+                    });
+                }
+            });
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('filtrosForm');
+    form.page_size.addEventListener('change', function() {
+        form.submit();
+    });
+    const tableContainer = document.querySelector('.table-container');
+    let timeout = null;
+
+    function buscarAjax() {
+        clearTimeout(timeout);
+        timeout = setTimeout(function() {
+            const formData = new FormData(form);
+            const params = new URLSearchParams(formData).toString();
+            fetch(window.location.pathname + '?' + params, {
+                headers: {'X-Requested-With': 'XMLHttpRequest'}
+            })
+            .then(response => response.text())
+            .then(html => {
+                // Extrae solo la tabla del HTML devuelto
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const nuevaTabla = doc.querySelector('.table-container');
+                if (nuevaTabla) {
+                    tableContainer.innerHTML = nuevaTabla.innerHTML;
+                }
+            });
+        }, 350);
     }
+
+    // Buscar en tiempo real al escribir
+    form.search.addEventListener('input', buscarAjax);
+
+    // Buscar al cambiar filtros
+    ['tipo', 'desde', 'hasta', 'page_size'].forEach(id => {
+        if (form[id]) form[id].addEventListener('change', buscarAjax);
+    });
+});
 </script>
 {% endblock %}

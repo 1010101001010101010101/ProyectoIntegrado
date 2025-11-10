@@ -301,75 +301,558 @@
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-  const form = document.getElementById('proveedorForm');
-  const rutInput = document.getElementById('{{ form.rut.id_for_label }}');
-  const razonInput = document.getElementById('{{ form.razon_social.id_for_label }}');
-  const emailInput = document.getElementById('{{ form.email.id_for_label }}');
+// ============================================
+// PROVEEDOR PASO 1 - VALIDACIONES Y SWEETALERTS PRO
+// ============================================
 
-  function validarRut(valor) {
+// Toast personalizado
+const Toast = Swal.mixin({
+    toast: true,
+    position: 'top-end',
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer)
+        toast.addEventListener('mouseleave', Swal.resumeTimer)
+    }
+});
+
+// Mensaje de bienvenida
+document.addEventListener('DOMContentLoaded', function() {
+    Swal.fire({
+        icon: 'info',
+        title: '🏢 Nuevo Proveedor',
+        html: '<p>Complete la información de identificación y contacto</p><small style="color: #6B7280;">Paso 1 de 3</small>',
+        timer: 3000,
+        showConfirmButton: false,
+        toast: true,
+        position: 'top-end',
+        background: '#FEE2E2',
+        iconColor: '#ff0000'
+    });
+});
+
+// Validación de RUT chileno mejorada
+function validarRut(valor) {
     if (!valor) return false;
     const limpio = valor.replace(/\./g, '').replace(/-/g, '').toUpperCase();
-    if (limpio.length < 2 || !/^\d+$/.test(limpio.slice(0, -1))) return false;
+    if (limpio.length < 2) return false;
+    const rutRegex = /^[0-9]+-[0-9K]$/;
+    if (!rutRegex.test(valor.replace(/\./g, ''))) return false;
     const cuerpo = limpio.slice(0, -1);
     const dv = limpio.slice(-1);
-    let factor = 2, suma = 0;
+    if (!/^\d+$/.test(cuerpo)) return false;
+    let suma = 0;
+    let multiplo = 2;
     for (let i = cuerpo.length - 1; i >= 0; i--) {
-      suma += parseInt(cuerpo[i], 10) * factor;
-      factor = factor === 7 ? 2 : factor + 1;
+        suma += parseInt(cuerpo[i], 10) * multiplo;
+        multiplo = multiplo === 7 ? 2 : multiplo + 1;
     }
     const resto = 11 - (suma % 11);
     const dvEsperado = resto === 11 ? '0' : resto === 10 ? 'K' : `${resto}`;
     return dvEsperado === dv;
-  }
+}
 
-  if (rutInput) {
-    rutInput.addEventListener('input', (event) => {
-      let value = event.target.value.replace(/\./g, '').replace(/-/g, '').toUpperCase();
-      if (value.length > 1) {
-        const cuerpo = value.slice(0, -1);
-        const dv = value.slice(-1);
-        const cuerpoFmt = cuerpo.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-        event.target.value = `${cuerpoFmt}-${dv}`;
-      } else {
-        event.target.value = value;
-      }
+// Formatear RUT mientras se escribe
+function formatearRut(valor) {
+    let limpio = valor.replace(/\./g, '').replace(/-/g, '').toUpperCase();
+    if (limpio.length <= 1) return limpio;
+    const cuerpo = limpio.slice(0, -1);
+    const dv = limpio.slice(-1);
+    const cuerpoFormateado = cuerpo.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    return `${cuerpoFormateado}-${dv}`;
+}
+
+// Validación de email
+function validarEmail(valor) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(valor);
+}
+
+// Validación de teléfono chileno
+function validarTelefono(valor) {
+    if (!valor) return true;
+    const telRegex = /^(\+?56)?(\s?)(0?9)(\s?)\d{4}(\s?)\d{4}$/;
+    return telRegex.test(valor);
+}
+
+// Validación de URL
+function validarURL(valor) {
+    if (!valor) return true;
+    try {
+        const url = new URL(valor);
+        return url.protocol === 'http:' || url.protocol === 'https:';
+    } catch (e) {
+        return false;
+    }
+}
+
+// Referencias a los campos
+const rutInput = document.getElementById('{{ form.rut.id_for_label }}');
+const razonInput = document.getElementById('{{ form.razon_social.id_for_label }}');
+const nombreFantasiaInput = document.getElementById('{{ form.nombre_fantasia.id_for_label }}');
+const emailInput = document.getElementById('{{ form.email.id_for_label }}');
+const telefonoInput = document.getElementById('{{ form.telefono.id_for_label }}');
+const sitioWebInput = document.getElementById('{{ form.sitio_web.id_for_label }}');
+
+// VALIDACIÓN DE RUT
+if (rutInput) {
+    rutInput.addEventListener('input', function(e) {
+        let valor = e.target.value.replace(/\./g, '').replace(/-/g, '').toUpperCase();
+        valor = valor.replace(/[^0-9K]/g, '');
+        if (valor.length > 9) valor = valor.substring(0, 9);
+        if (valor.length >= 2) {
+            e.target.value = formatearRut(valor);
+        } else {
+            e.target.value = valor;
+        }
+        if (valor.length >= 2 && validarRut(e.target.value)) {
+            e.target.style.borderColor = '#10B981';
+            e.target.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+        } else if (valor.length > 0) {
+            e.target.style.borderColor = '#F59E0B';
+            e.target.style.boxShadow = '0 0 0 3px rgba(245, 158, 11, 0.1)';
+        } else {
+            e.target.style.borderColor = 'var(--border)';
+            e.target.style.boxShadow = '';
+        }
     });
-  }
-
-  if (form) {
-    form.addEventListener('submit', (event) => {
-      if (!rutInput || !razonInput || !emailInput) return;
-
-      const rutValue = rutInput.value.trim();
-      const razonValue = razonInput.value.trim();
-      const emailValue = emailInput.value.trim();
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-      if (!rutValue) {
-        event.preventDefault();
-        Swal.fire('Campo requerido', 'Debes ingresar el RUT del proveedor.', 'error').then(() => rutInput.focus());
-        return;
-      }
-      if (!validarRut(rutValue)) {
-        event.preventDefault();
-        Swal.fire('RUT inválido', 'Revisa el formato. Ejemplo: 76.543.210-5', 'error').then(() => rutInput.focus());
-        return;
-      }
-      if (!razonValue) {
-        event.preventDefault();
-        Swal.fire('Campo requerido', 'Debes ingresar la razón social.', 'error').then(() => razonInput.focus());
-        return;
-      }
-      if (!emailValue) {
-        event.preventDefault();
-        Swal.fire('Campo requerido', 'Debes ingresar el email de contacto.', 'error').then(() => emailInput.focus());
-        return;
-      }
-      if (!emailRegex.test(emailValue)) {
-        event.preventDefault();
-        Swal.fire('Email inválido', 'Usa un formato válido, por ejemplo contacto@proveedor.cl.', 'error').then(() => emailInput.focus());
-      }
+    rutInput.addEventListener('blur', function(e) {
+        const valor = e.target.value.trim();
+        if (valor && !validarRut(valor)) {
+            Swal.fire({
+                icon: 'error',
+                title: '❌ RUT inválido',
+                html: `
+                    <div style="text-align: center; margin: 1rem 0;">
+                        <p style="margin-bottom: 1rem;">El RUT ingresado no es válido</p>
+                        <div style="background: #F3F4F6; padding: 1rem; border-radius: 8px;">
+                            <strong style="color: #1F2937;">Formato correcto:</strong>
+                            <div style="color: #10B981; font-size: 1.2rem; font-weight: bold; margin-top: 0.5rem;">
+                                12.345.678-9
+                            </div>
+                        </div>
+                    </div>
+                `,
+                confirmButtonText: 'Corregir',
+                confirmButtonColor: '#ff0000'
+            });
+            e.target.focus();
+        } else if (valor && validarRut(valor)) {
+            Toast.fire({
+                icon: 'success',
+                title: '✓ RUT válido',
+                background: '#D1FAE5'
+            });
+        }
     });
-  }
+}
+
+// VALIDACIÓN DE RAZÓN SOCIAL
+if (razonInput) {
+    razonInput.addEventListener('input', function(e) {
+        const valor = e.target.value.trim();
+        if (valor.length >= 3) {
+            e.target.style.borderColor = '#10B981';
+            e.target.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+        } else if (valor.length > 0) {
+            e.target.style.borderColor = '#F59E0B';
+        } else {
+            e.target.style.borderColor = 'var(--border)';
+            e.target.style.boxShadow = '';
+        }
+    });
+    razonInput.addEventListener('blur', function(e) {
+        const valor = e.target.value.trim();
+        if (valor && valor.length < 3) {
+            Toast.fire({
+                icon: 'warning',
+                title: '⚠️ Razón social muy corta',
+                text: 'Debe tener al menos 3 caracteres',
+                background: '#FEF3C7'
+            });
+        }
+    });
+}
+
+// VALIDACIÓN DE EMAIL
+if (emailInput) {
+    emailInput.addEventListener('input', function(e) {
+        const valor = e.target.value.trim();
+        if (validarEmail(valor)) {
+            e.target.style.borderColor = '#10B981';
+            e.target.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+        } else if (valor.length > 0) {
+            e.target.style.borderColor = '#F59E0B';
+            e.target.style.boxShadow = '0 0 0 3px rgba(245, 158, 11, 0.1)';
+        } else {
+            e.target.style.borderColor = 'var(--border)';
+            e.target.style.boxShadow = '';
+        }
+    });
+    emailInput.addEventListener('blur', function(e) {
+        const valor = e.target.value.trim();
+        if (valor && !validarEmail(valor)) {
+            Swal.fire({
+                icon: 'error',
+                title: '❌ Email inválido',
+                html: `
+                    <div style="text-align: center; margin: 1rem 0;">
+                        <p style="margin-bottom: 1rem;">El formato del email no es válido</p>
+                        <div style="background: #F3F4F6; padding: 1rem; border-radius: 8px;">
+                            <strong style="color: #1F2937;">Ejemplo:</strong>
+                            <div style="color: #10B981; font-size: 1.2rem; font-weight: bold; margin-top: 0.5rem;">
+                                contacto@proveedor.cl
+                            </div>
+                        </div>
+                    </div>
+                `,
+                confirmButtonText: 'Corregir',
+                confirmButtonColor: '#ff0000'
+            });
+            e.target.focus();
+        } else if (valor && validarEmail(valor)) {
+            Toast.fire({
+                icon: 'success',
+                title: '✓ Email válido',
+                background: '#D1FAE5'
+            });
+        }
+    });
+}
+
+// VALIDACIÓN DE TELÉFONO
+if (telefonoInput) {
+    telefonoInput.addEventListener('input', function(e) {
+        e.target.value = e.target.value.replace(/[^\d\s+()-]/g, '');
+        const valor = e.target.value.trim();
+        if (valor && validarTelefono(valor)) {
+            e.target.style.borderColor = '#10B981';
+            e.target.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+        } else if (valor.length > 0) {
+            e.target.style.borderColor = '#F59E0B';
+        } else {
+            e.target.style.borderColor = 'var(--border)';
+            e.target.style.boxShadow = '';
+        }
+    });
+    telefonoInput.addEventListener('blur', function(e) {
+        const valor = e.target.value.trim();
+        if (valor && !validarTelefono(valor)) {
+            Toast.fire({
+                icon: 'warning',
+                title: '📱 Formato de teléfono',
+                text: 'Formato sugerido: +56 9 1234 5678',
+                background: '#FEF3C7'
+            });
+        }
+    });
+}
+
+// VALIDACIÓN DE SITIO WEB
+if (sitioWebInput) {
+    sitioWebInput.addEventListener('input', function(e) {
+        const valor = e.target.value.trim();
+        if (valor && validarURL(valor)) {
+            e.target.style.borderColor = '#10B981';
+            e.target.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+        } else if (valor.length > 0) {
+            e.target.style.borderColor = '#F59E0B';
+        } else {
+            e.target.style.borderColor = 'var(--border)';
+            e.target.style.boxShadow = '';
+        }
+    });
+    sitioWebInput.addEventListener('blur', function(e) {
+        const valor = e.target.value.trim();
+        if (valor && !validarURL(valor)) {
+            Toast.fire({
+                icon: 'info',
+                title: '🌐 Formato de URL',
+                text: 'Debe comenzar con http:// o https://',
+                background: '#DBEAFE'
+            });
+        }
+    });
+}
+
+// VALIDACIÓN PRINCIPAL DEL FORMULARIO
+const form = document.getElementById('proveedorForm');
+if (form) {
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const rut = rutInput.value.trim();
+        const razon = razonInput.value.trim();
+        const email = emailInput.value.trim();
+        const telefono = telefonoInput ? telefonoInput.value.trim() : '';
+        const sitioWeb = sitioWebInput ? sitioWebInput.value.trim() : '';
+        const nombreFantasia = nombreFantasiaInput ? nombreFantasiaInput.value.trim() : '';
+        let camposFaltantes = [];
+        let primerCampoError = null;
+
+        // Validar RUT (obligatorio)
+        if (!rut) {
+            camposFaltantes.push('🆔 RUT/NIF del proveedor');
+            if (!primerCampoError) primerCampoError = rutInput;
+        } else if (!validarRut(rut)) {
+            Swal.fire({
+                icon: 'error',
+                title: '❌ RUT inválido',
+                html: `
+                    <div style="text-align: center; margin: 1.5rem 0;">
+                        <div style="background: #FEE2E2; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                            <strong style="color: #DC2626;">RUT ingresado:</strong>
+                            <div style="font-size: 1.3rem; font-weight: bold; color: #DC2626; margin-top: 0.5rem;">
+                                ${rut}
+                            </div>
+                        </div>
+                        <div style="background: #D1FAE5; padding: 1rem; border-radius: 8px;">
+                            <strong style="color: #10B981;">Formato correcto:</strong>
+                            <div style="font-size: 1.3rem; font-weight: bold; color: #10B981; margin-top: 0.5rem;">
+                                12.345.678-9
+                            </div>
+                        </div>
+                    </div>
+                `,
+                confirmButtonText: 'Corregir',
+                confirmButtonColor: '#ff0000'
+            });
+            rutInput.focus();
+            return;
+        }
+
+        // Validar Razón Social (obligatorio)
+        if (!razon) {
+            camposFaltantes.push('🏢 Razón Social');
+            if (!primerCampoError) primerCampoError = razonInput;
+        } else if (razon.length < 3) {
+            Swal.fire({
+                icon: 'error',
+                title: '❌ Razón Social inválida',
+                html: '<p>La razón social debe tener <strong>al menos 3 caracteres</strong></p>',
+                confirmButtonText: 'Corregir',
+                confirmButtonColor: '#ff0000'
+            });
+            razonInput.focus();
+            return;
+        }
+
+        // Validar Email (obligatorio)
+        if (!email) {
+            camposFaltantes.push('📧 Email de contacto');
+            if (!primerCampoError) primerCampoError = emailInput;
+        } else if (!validarEmail(email)) {
+            Swal.fire({
+                icon: 'error',
+                title: '❌ Email inválido',
+                html: `
+                    <div style="text-align: center; margin: 1.5rem 0;">
+                        <p style="margin-bottom: 1rem;">El formato del email no es correcto</p>
+                        <div style="background: #F3F4F6; padding: 1rem; border-radius: 8px;">
+                            <strong style="color: #1F2937;">Ejemplos válidos:</strong>
+                            <div style="margin-top: 0.5rem; color: #10B981;">
+                                • contacto@empresa.cl<br>
+                                • ventas@proveedor.com<br>
+                                • admin@negocio.co
+                            </div>
+                        </div>
+                    </div>
+                `,
+                confirmButtonText: 'Corregir',
+                confirmButtonColor: '#ff0000'
+            });
+            emailInput.focus();
+            return;
+        }
+
+        // Mostrar campos faltantes
+        if (camposFaltantes.length > 0) {
+            let listaCampos = '<ul style="text-align: left; margin: 1rem 0; padding-left: 1.5rem;">';
+            camposFaltantes.forEach(campo => {
+                listaCampos += `<li style="margin: 0.5rem 0;">${campo}</li>`;
+            });
+            listaCampos += '</ul>';
+            Swal.fire({
+                icon: 'error',
+                title: '❌ Campos obligatorios faltantes',
+                html: `
+                    <p style="margin-bottom: 1rem;">Complete los siguientes campos:</p>
+                    ${listaCampos}
+                    <div style="background: #FEE2E2; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                        <strong style="color: #DC2626;">Total: ${camposFaltantes.length} campo${camposFaltantes.length !== 1 ? 's' : ''}</strong>
+                    </div>
+                `,
+                confirmButtonText: 'Entendido',
+                confirmButtonColor: '#ff0000',
+                width: '600px',
+                willClose: () => {
+                    if (primerCampoError) {
+                        primerCampoError.focus();
+                        primerCampoError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }
+            });
+            return;
+        }
+
+        // Validar campos opcionales si tienen valor
+        if (telefono && !validarTelefono(telefono)) {
+            Swal.fire({
+                icon: 'warning',
+                title: '📱 Formato de teléfono',
+                html: `
+                    <div style="text-align: center; margin: 1rem 0;">
+                        <p>El formato del teléfono no es el esperado</p>
+                        <div style="background: #FEF3C7; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                            <strong>Formato sugerido:</strong>
+                            <div style="color: #F59E0B; font-weight: bold; margin-top: 0.5rem;">
+                                +56 9 1234 5678
+                            </div>
+                        </div>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Corregir',
+                cancelButtonText: 'Continuar de todas formas',
+                confirmButtonColor: '#ff0000',
+                cancelButtonColor: '#6B7280'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    telefonoInput.focus();
+                } else if (result.dismiss === Swal.DismissReason.cancel) {
+                    mostrarConfirmacionFinal(rut, razon, email, nombreFantasia, telefono, sitioWeb);
+                }
+            });
+            return;
+        }
+
+        if (sitioWeb && !validarURL(sitioWeb)) {
+            Swal.fire({
+                icon: 'warning',
+                title: '🌐 URL del sitio web',
+                html: `
+                    <div style="text-align: center; margin: 1rem 0;">
+                        <p>La URL debe comenzar con http:// o https://</p>
+                        <div style="background: #DBEAFE; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                            <strong>Ejemplos:</strong>
+                            <div style="color: #2563EB; font-weight: bold; margin-top: 0.5rem;">
+                                https://www.proveedor.cl<br>
+                                http://empresa.com
+                            </div>
+                        </div>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Corregir',
+                cancelButtonText: 'Continuar de todas formas',
+                confirmButtonColor: '#ff0000',
+                cancelButtonColor: '#6B7280'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    sitioWebInput.focus();
+                } else if (result.dismiss === Swal.DismissReason.cancel) {
+                    mostrarConfirmacionFinal(rut, razon, email, nombreFantasia, telefono, sitioWeb);
+                }
+            });
+            return;
+        }
+
+        // Todo correcto
+        mostrarConfirmacionFinal(rut, razon, email, nombreFantasia, telefono, sitioWeb);
+    });
+}
+
+// CONFIRMACIÓN FINAL
+function mostrarConfirmacionFinal(rut, razon, email, nombreFantasia, telefono, sitioWeb) {
+    let resumenHTML = `
+        <div style="text-align: left; margin: 1.5rem 0; font-size: 0.95rem;">
+            <div style="background: #F9FAFB; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                <p style="margin: 0.5rem 0;"><strong>🆔 RUT:</strong> ${rut}</p>
+                <p style="margin: 0.5rem 0;"><strong>🏢 Razón Social:</strong> ${razon}</p>
+                ${nombreFantasia ? `<p style="margin: 0.5rem 0;"><strong>🏷️ Nombre Fantasía:</strong> ${nombreFantasia}</p>` : ''}
+            </div>
+            <div style="display: grid; gap: 0.75rem;">
+                <div style="background: #DBEAFE; padding: 0.75rem; border-radius: 6px; border-left: 3px solid #2563EB;">
+                    <strong style="color: #1F2937;">📧 Email:</strong>
+                    <span style="color: #2563EB; font-weight: bold;">${email}</span>
+                </div>
+    `;
+    if (telefono) {
+        resumenHTML += `
+                <div style="background: #D1FAE5; padding: 0.75rem; border-radius: 6px; border-left: 3px solid #10B981;">
+                    <strong style="color: #1F2937;">📱 Teléfono:</strong>
+                    <span style="color: #10B981; font-weight: bold;">${telefono}</span>
+                </div>
+        `;
+    }
+    if (sitioWeb) {
+        resumenHTML += `
+                <div style="background: #FEF3C7; padding: 0.75rem; border-radius: 6px; border-left: 3px solid #F59E0B;">
+                    <strong style="color: #1F2937;">🌐 Sitio Web:</strong>
+                    <span style="color: #F59E0B; font-weight: bold; font-size: 0.85em;">${sitioWeb}</span>
+                </div>
+        `;
+    }
+    resumenHTML += `
+            </div>
+        </div>
+    `;
+    Swal.fire({
+        icon: 'question',
+        title: '¿Guardar y continuar al Paso 2?',
+        html: `
+            <p style="color: #6B7280; margin-bottom: 1rem;">
+                Se guardará la información de identificación y contacto
+            </p>
+            ${resumenHTML}
+        `,
+        showCancelButton: true,
+        confirmButtonText: '✓ Continuar al Paso 2 →',
+        cancelButtonText: '← Revisar datos',
+        confirmButtonColor: '#ff0000',
+        cancelButtonColor: '#6B7280',
+        width: '600px',
+        backdrop: `rgba(255, 0, 0, 0.1)`
+    }).then((result) => {
+        if (result.isConfirmed) {
+            guardarPaso1();
+        }
+    });
+}
+
+function guardarPaso1() {
+    let progreso = 0;
+    Swal.fire({
+        title: '💾 Guardando Paso 1...',
+        html: `
+            <div style="margin: 1.5rem 0;">
+                <p style="color: #6B7280; margin-bottom: 1rem;">Procesando información del proveedor</p>
+                <div style="background: #F3F4F6; height: 8px; border-radius: 4px; overflow: hidden;">
+                    <div id="progressBar" style="background: linear-gradient(90deg, #ff0000, #cc0000); height: 100%; width: 0%; transition: width 0.3s ease;"></div>
+                </div>
+                <p id="progressText" style="color: #ff0000; margin-top: 0.5rem; font-weight: bold;">0%</p>
+            </div>
+        `,
+        showConfirmButton: false,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => {
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            const interval = setInterval(() => {
+                progreso += 10;
+                progressBar.style.width = progreso + '%';
+                progressText.textContent = progreso + '%';
+                if (progreso >= 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        form.submit();
+                    }, 500);
+                }
+            }, 100);
+        }
+    });
+}
 </script>
 {% endblock %}

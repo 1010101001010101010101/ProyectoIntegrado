@@ -429,7 +429,7 @@
             
             <div class="form-group">
                 <label for="serie">Número de Serie <span class="label-optional">(opcional)</span></label>
-                <input type="text" id="serie" name="serie" class="form-control" 
+                <input type="text" id="numero_serie" name="numero_serie" class="form-control" 
                        value="{{ data.numero_serie }}" 
                        placeholder="Ej: SN123456789" 
                        disabled>
@@ -460,219 +460,433 @@
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    // Función para alternar checkbox
-    function toggleCheckbox(id) {
-        const checkbox = document.getElementById(id);
-        checkbox.checked = !checkbox.checked;
-        updateCheckboxLabel(id);
-        updateCheckboxContainer(id);
-        habilitarCamposRelacionados();
-        event.stopPropagation();
-    }
+// ============================================
+// PASO 2 - VALIDACIONES Y SWEETALERTS
+// ============================================
 
-    // Actualizar etiqueta del checkbox
-    function updateCheckboxLabel(id) {
-        const checkbox = document.getElementById(id);
-        const label = document.getElementById(id + '-label');
-        
-        switch(id) {
-            case 'manejo_lotes':
-                label.textContent = checkbox.checked ? '✓ Con manejo por lotes' : 'Sin manejo por lotes';
-                break;
-            case 'manejo_series':
-                label.textContent = checkbox.checked ? '✓ Con manejo por series' : 'Sin manejo por series';
-                break;
-            case 'perecible':
-                label.textContent = checkbox.checked ? '⚠️ Producto perecedero' : 'No perecedero';
-                break;
+// Toast personalizado
+const Toast = Swal.mixin({
+    toast: true,
+    position: 'top-end',
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer)
+        toast.addEventListener('mouseleave', Swal.resumeTimer)
+    }
+});
+
+// Función para alternar checkbox con animación
+function toggleCheckbox(id) {
+    const checkbox = document.getElementById(id);
+    checkbox.checked = !checkbox.checked;
+    updateCheckboxLabel(id);
+    updateCheckboxContainer(id);
+    habilitarCamposRelacionados();
+    
+    // Animación
+    const container = document.getElementById(id + '-container');
+    container.style.transform = 'scale(0.95)';
+    setTimeout(() => container.style.transform = 'scale(1)', 150);
+    
+    event.stopPropagation();
+}
+
+// Actualizar etiqueta del checkbox con iconos animados
+function updateCheckboxLabel(id) {
+    const checkbox = document.getElementById(id);
+    const label = document.getElementById(id + '-label');
+    
+    const configs = {
+        'manejo_lotes': {
+            checked: '✓ Con manejo por lotes',
+            unchecked: 'Sin manejo por lotes',
+            icon: '📦'
+        },
+        'manejo_series': {
+            checked: '✓ Con manejo por series',
+            unchecked: 'Sin manejo por series',
+            icon: '🔢'
+        },
+        'perecible': {
+            checked: '⚠️ Producto perecedero',
+            unchecked: 'No perecedero',
+            icon: '📅'
         }
+    };
+    
+    const config = configs[id];
+    label.textContent = checkbox.checked ? config.checked : config.unchecked;
+    
+    // Mostrar toast informativo
+    if (checkbox.checked) {
+        Toast.fire({
+            icon: 'success',
+            title: `${config.icon} ${config.checked}`,
+            background: '#D1FAE5'
+        });
     }
+}
 
-    // Actualizar contenedor del checkbox
-    function updateCheckboxContainer(id) {
-        const checkbox = document.getElementById(id);
-        const container = document.getElementById(id + '-container');
-        
-        if (checkbox.checked) {
-            container.classList.add('checked');
-        } else {
-            container.classList.remove('checked');
-        }
+// Actualizar contenedor del checkbox con efectos visuales
+function updateCheckboxContainer(id) {
+    const checkbox = document.getElementById(id);
+    const container = document.getElementById(id + '-container');
+    
+    if (checkbox.checked) {
+        container.classList.add('checked');
+        container.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.2)';
+    } else {
+        container.classList.remove('checked');
+        container.style.boxShadow = '';
     }
+}
 
-    // Habilitar/deshabilitar campos relacionados
-    function habilitarCamposRelacionados() {
-        const manejoLotes = document.getElementById('manejo_lotes').checked;
-        const manejoSeries = document.getElementById('manejo_series').checked;
-        const perecible = document.getElementById('perecible').checked;
-        
-        // Campo Lote
-        const loteInput = document.getElementById('lote');
-        loteInput.disabled = !manejoLotes;
-        if (!manejoLotes) loteInput.value = '';
-        
-        // Campo Serie
-        const serieInput = document.getElementById('serie');
-        serieInput.disabled = !manejoSeries;
-        if (!manejoSeries) serieInput.value = '';
-        
-        // Campo Fecha Vencimiento
-        const vencimientoInput = document.getElementById('fecha_vencimiento');
-        vencimientoInput.disabled = !perecible;
-        if (!perecible) vencimientoInput.value = '';
+// Habilitar/deshabilitar campos con validación visual
+function habilitarCamposRelacionados() {
+    const manejoLotes = document.getElementById('manejo_lotes').checked;
+    const manejoSeries = document.getElementById('manejo_series').checked;
+    const perecible = document.getElementById('perecible').checked;
+    
+    // Campo Lote
+    const loteInput = document.getElementById('lote');
+    loteInput.disabled = !manejoLotes;
+    loteInput.style.transition = 'all 0.3s ease';
+    if (!manejoLotes) {
+        loteInput.value = '';
+        loteInput.style.backgroundColor = '#F3F4F6';
+    } else {
+        loteInput.style.backgroundColor = '#FEF2F2';
+        loteInput.focus();
     }
+    
+    // Campo Serie
+    const serieInput = document.getElementById('numero_serie');
+    serieInput.disabled = !manejoSeries;
+    if (!manejoSeries) {
+        serieInput.value = '';
+        serieInput.style.backgroundColor = '#F3F4F6';
+    } else {
+        serieInput.style.backgroundColor = '#FEF2F2';
+    }
+    
+    // Campo Fecha Vencimiento
+    const vencimientoInput = document.getElementById('fecha_vencimiento');
+    vencimientoInput.disabled = !perecible;
+    if (!perecible) {
+        vencimientoInput.value = '';
+        vencimientoInput.style.backgroundColor = '#F3F4F6';
+    } else {
+        vencimientoInput.style.backgroundColor = '#FEF2F2';
+    }
+}
 
-    // Inicializar estados al cargar
-    document.addEventListener('DOMContentLoaded', function() {
-        updateCheckboxLabel('manejo_lotes');
-        updateCheckboxLabel('manejo_series');
-        updateCheckboxLabel('perecible');
-        updateCheckboxContainer('manejo_lotes');
-        updateCheckboxContainer('manejo_series');
-        updateCheckboxContainer('perecible');
-        habilitarCamposRelacionados();
+// Inicializar estados al cargar
+document.addEventListener('DOMContentLoaded', function() {
+    updateCheckboxLabel('manejo_lotes');
+    updateCheckboxLabel('manejo_series');
+    updateCheckboxLabel('perecible');
+    updateCheckboxContainer('manejo_lotes');
+    updateCheckboxContainer('manejo_series');
+    updateCheckboxContainer('perecible');
+    habilitarCamposRelacionados();
+    
+    // Mensaje de bienvenida
+    Swal.fire({
+        icon: 'info',
+        title: '⚙️ Control Avanzado',
+        html: '<p>Configure opciones adicionales de trazabilidad</p><small style="color: #6B7280;">Todos los campos son opcionales</small>',
+        timer: 3000,
+        showConfirmButton: false,
+        toast: true,
+        position: 'top-end',
+        background: '#EFF6FF',
+        iconColor: '#2563EB'
     });
+});
 
-    // Validación del formulario
-    document.getElementById('movimientoForm').addEventListener('submit', function(e) {
-        e.preventDefault();
+// Validación del formulario
+document.getElementById('movimientoForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const manejoLotes = document.getElementById('manejo_lotes').checked;
+    const manejoSeries = document.getElementById('manejo_series').checked;
+    const perecible = document.getElementById('perecible').checked;
+    const lote = document.getElementById('lote').value.trim();
+    const serie = document.getElementById('numero_serie').value.trim();
+    const fechaVencimiento = document.getElementById('fecha_vencimiento').value.trim();
+    
+    // Validar Lote si está habilitado
+    if (manejoLotes && !lote) {
+        Swal.fire({
+            icon: 'warning',
+            title: '📦 Lote requerido',
+            html: '<p>Ha activado el <strong>manejo por lotes</strong></p><p style="color: #6B7280; margin-top: 0.5rem;">Debe ingresar el número de lote correspondiente</p>',
+            confirmButtonText: 'Entendido',
+            confirmButtonColor: '#DC2626',
+            backdrop: `rgba(245, 158, 11, 0.1)`,
+            didOpen: () => {
+                document.getElementById('lote').focus();
+            }
+        });
+        return;
+    }
+    
+    // Validar formato de lote
+    if (lote && lote.length < 3) {
+        Swal.fire({
+            icon: 'error',
+            title: '❌ Formato de lote inválido',
+            html: '<p>El número de lote debe tener <strong>al menos 3 caracteres</strong></p>',
+            confirmButtonText: 'Corregir',
+            confirmButtonColor: '#DC2626'
+        });
+        document.getElementById('lote').focus();
+        return;
+    }
+    
+    // Validar Serie si está habilitado
+    if (manejoSeries && !serie) {
+        Swal.fire({
+            icon: 'warning',
+            title: '🔢 Serie requerida',
+            html: '<p>Ha activado el <strong>manejo por series</strong></p><p style="color: #6B7280; margin-top: 0.5rem;">Debe ingresar el número de serie correspondiente</p>',
+            confirmButtonText: 'Entendido',
+            confirmButtonColor: '#DC2626',
+            backdrop: `rgba(245, 158, 11, 0.1)`,
+            didOpen: () => {
+                document.getElementById('numero_serie').focus();
+            }
+        });
+        return;
+    }
+    
+    // Validar formato de serie
+    if (serie && serie.length < 5) {
+        Swal.fire({
+            icon: 'error',
+            title: '❌ Formato de serie inválido',
+            html: '<p>El número de serie debe tener <strong>al menos 5 caracteres</strong></p>',
+            confirmButtonText: 'Corregir',
+            confirmButtonColor: '#DC2626'
+        });
+        document.getElementById('numero_serie').focus();
+        return;
+    }
+    
+    // Validar Fecha de Vencimiento si está habilitado
+    if (perecible && !fechaVencimiento) {
+        Swal.fire({
+            icon: 'warning',
+            title: '📅 Fecha de vencimiento requerida',
+            html: '<p>Ha marcado el producto como <strong>perecedero</strong></p><p style="color: #6B7280; margin-top: 0.5rem;">Debe ingresar la fecha de vencimiento</p>',
+            confirmButtonText: 'Entendido',
+            confirmButtonColor: '#DC2626',
+            backdrop: `rgba(245, 158, 11, 0.1)`,
+            didOpen: () => {
+                document.getElementById('fecha_vencimiento').focus();
+            }
+        });
+        return;
+    }
+    
+    // Validar que la fecha de vencimiento no sea pasada
+    if (fechaVencimiento) {
+        const fechaVenc = new Date(fechaVencimiento);
+        const fechaActual = new Date();
+        fechaActual.setHours(0, 0, 0, 0);
         
-        // Obtener valores
-        const manejoLotes = document.getElementById('manejo_lotes').checked;
-        const manejoSeries = document.getElementById('manejo_series').checked;
-        const perecible = document.getElementById('perecible').checked;
-        const lote = document.getElementById('lote').value.trim();
-        const serie = document.getElementById('serie').value.trim();
-        const fechaVencimiento = document.getElementById('fecha_vencimiento').value.trim();
-        
-        // Validar Lote si está habilitado
-        if (manejoLotes && !lote) {
+        if (fechaVenc < fechaActual) {
             Swal.fire({
-                icon: 'warning',
-                title: 'Lote requerido',
-                text: 'Si habilita el manejo por lotes, debe ingresar el número de lote',
-                confirmButtonText: 'Entendido',
-                customClass: {
-                    confirmButton: 'swal2-confirm'
-                }
-            });
-            document.getElementById('lote').focus();
-            return;
-        }
-        
-        // Validar Serie si está habilitado
-        if (manejoSeries && !serie) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Serie requerida',
-                text: 'Si habilita el manejo por series, debe ingresar el número de serie',
-                confirmButtonText: 'Entendido',
-                customClass: {
-                    confirmButton: 'swal2-confirm'
-                }
-            });
-            document.getElementById('serie').focus();
-            return;
-        }
-        
-        // Validar Fecha de Vencimiento si está habilitado
-        if (perecible && !fechaVencimiento) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Fecha de vencimiento requerida',
-                text: 'Si marca el producto como perecedero, debe ingresar la fecha de vencimiento',
-                confirmButtonText: 'Entendido',
-                customClass: {
-                    confirmButton: 'swal2-confirm'
-                }
+                icon: 'error',
+                title: '🚫 Fecha inválida',
+                html: '<p>La fecha de vencimiento no puede ser <strong>anterior a hoy</strong></p>',
+                confirmButtonText: 'Corregir',
+                confirmButtonColor: '#DC2626',
+                backdrop: `rgba(220, 38, 38, 0.1)`
             });
             document.getElementById('fecha_vencimiento').focus();
             return;
         }
         
-        // Validar que la fecha de vencimiento no sea pasada
-        if (fechaVencimiento) {
-            const fechaVenc = new Date(fechaVencimiento);
-            const fechaActual = new Date();
-            fechaActual.setHours(0, 0, 0, 0);
-            
-            if (fechaVenc < fechaActual) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Fecha de vencimiento inválida',
-                    text: 'La fecha de vencimiento no puede ser anterior a hoy',
-                    confirmButtonText: 'Corregir',
-                    customClass: {
-                        confirmButton: 'swal2-confirm'
-                    }
-                });
-                document.getElementById('fecha_vencimiento').focus();
-                return;
-            }
-            
-            // Advertencia si vence pronto (menos de 30 días)
-            const diasRestantes = Math.ceil((fechaVenc - fechaActual) / (1000 * 60 * 60 * 24));
-            if (diasRestantes <= 30) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: '⚠️ Producto próximo a vencer',
-                    html: `El producto vence en <strong>${diasRestantes}</strong> día${diasRestantes !== 1 ? 's' : ''}.<br><br>¿Desea continuar?`,
-                    showCancelButton: true,
-                    confirmButtonText: 'Sí, continuar',
-                    cancelButtonText: 'Revisar',
-                    customClass: {
-                        confirmButton: 'swal2-confirm',
-                        cancelButton: 'swal2-cancel'
-                    }
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        guardarMovimiento();
-                    }
-                });
-                return;
-            }
+        // Advertencia si vence pronto (menos de 7 días)
+        const diasRestantes = Math.ceil((fechaVenc - fechaActual) / (1000 * 60 * 60 * 24));
+        
+        if (diasRestantes <= 7) {
+            Swal.fire({
+                icon: 'error',
+                title: '🚨 Producto vence muy pronto',
+                html: `
+                    <div style="text-align: center; margin: 1rem 0;">
+                        <div style="font-size: 2.5rem; font-weight: bold; color: #DC2626;">
+                            ${diasRestantes}
+                        </div>
+                        <p style="color: #6B7280;">día${diasRestantes !== 1 ? 's' : ''} restante${diasRestantes !== 1 ? 's' : ''}</p>
+                        <div style="background: #FEE2E2; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                            <strong style="color: #991B1B;">⚠️ Este producto está por vencer</strong>
+                            <p style="color: #6B7280; font-size: 0.9em; margin-top: 0.5rem;">No se recomienda ingresar productos próximos a vencer</p>
+                        </div>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Continuar de todas formas',
+                cancelButtonText: '← Revisar fecha',
+                confirmButtonColor: '#DC2626',
+                cancelButtonColor: '#6B7280',
+                backdrop: `rgba(220, 38, 38, 0.15)`
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    guardarMovimiento();
+                }
+            });
+            return;
+        } else if (diasRestantes <= 30) {
+            Swal.fire({
+                icon: 'warning',
+                title: '⚠️ Producto próximo a vencer',
+                html: `
+                    <div style="text-align: center; margin: 1rem 0;">
+                        <div style="font-size: 2rem; font-weight: bold; color: #F59E0B;">
+                            ${diasRestantes}
+                        </div>
+                        <p style="color: #6B7280;">días restantes</p>
+                        <p style="margin-top: 1rem;">¿Desea continuar con este registro?</p>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: '✓ Sí, continuar',
+                cancelButtonText: '← Revisar',
+                confirmButtonColor: '#F59E0B',
+                cancelButtonColor: '#6B7280',
+                backdrop: `rgba(245, 158, 11, 0.1)`
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    guardarMovimiento();
+                }
+            });
+            return;
         }
-        
-        // Si pasa todas las validaciones, guardar
-        guardarMovimiento();
-    });
-    
-    function guardarMovimiento() {
-        // Preparar resumen de configuración
-        const manejoLotes = document.getElementById('manejo_lotes').checked;
-        const manejoSeries = document.getElementById('manejo_series').checked;
-        const perecible = document.getElementById('perecible').checked;
-        
-        let configuracion = [];
-        if (manejoLotes) configuracion.push('✓ Lotes');
-        if (manejoSeries) configuracion.push('✓ Series');
-        if (perecible) configuracion.push('⚠️ Perecedero');
-        
-        const textoConfig = configuracion.length > 0 
-            ? configuracion.join(', ') 
-            : 'Sin controles adicionales';
-        
-        Swal.fire({
-            icon: 'success',
-            title: '✓ Paso 2 completado',
-            html: `<p>Control configurado: <strong>${textoConfig}</strong></p><p>Avanzando al último paso...</p>`,
-            timer: 2000,
-            showConfirmButton: false,
-            timerProgressBar: true,
-            willClose: () => {
-                // Enviar el formulario
-                document.getElementById('movimientoForm').submit();
-            }
-        });
     }
     
-    // Validación en tiempo real para campos de texto
-    document.getElementById('lote').addEventListener('input', function(e) {
-        e.target.value = e.target.value.toUpperCase().replace(/\s+/g, '-');
-    });
+    // Si pasa todas las validaciones
+    guardarMovimiento();
+});
+
+function guardarMovimiento() {
+    const manejoLotes = document.getElementById('manejo_lotes').checked;
+    const manejoSeries = document.getElementById('manejo_series').checked;
+    const perecible = document.getElementById('perecible').checked;
     
-    document.getElementById('serie').addEventListener('input', function(e) {
-        e.target.value = e.target.value.toUpperCase().replace(/\s+/g, '');
+    let configuracion = [];
+    if (manejoLotes) configuracion.push('📦 Control por Lotes');
+    if (manejoSeries) configuracion.push('🔢 Control por Series');
+    if (perecible) configuracion.push('📅 Control de Vencimiento');
+    
+    const textoConfig = configuracion.length > 0 
+        ? configuracion.join('<br>') 
+        : '<span style="color: #6B7280;">Sin controles adicionales</span>';
+    
+    let timerInterval;
+    Swal.fire({
+        icon: 'success',
+        title: '✓ Paso 2 completado',
+        html: `
+            <div style="margin: 1.5rem 0;">
+                <div style="background: #D1FAE5; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                    <strong style="color: #059669;">Controles configurados:</strong>
+                    <div style="margin-top: 0.5rem; text-align: left; font-size: 0.9em;">
+                        ${textoConfig}
+                    </div>
+                </div>
+                <div class="swal2-progress" style="background: #FEE2E2; height: 6px; border-radius: 3px; overflow: hidden; margin-top: 1rem;">
+                    <div style="background: linear-gradient(90deg, #DC2626, #991B1B); height: 100%; width: 0%; animation: progress 2s ease-out forwards;"></div>
+                </div>
+                <p style="margin-top: 1rem; color: #6B7280;">Avanzando a referencias y documentos...</p>
+            </div>
+        `,
+        timer: 2000,
+        showConfirmButton: false,
+        timerProgressBar: true,
+        didOpen: () => {
+            const style = document.createElement('style');
+            style.textContent = '@keyframes progress { to { width: 100%; } }';
+            document.head.appendChild(style);
+        },
+        willClose: () => {
+            document.getElementById('movimientoForm').submit();
+        }
     });
+}
+
+// Validación en tiempo real para lote
+document.getElementById('lote').addEventListener('input', function(e) {
+    e.target.value = e.target.value.toUpperCase().replace(/\s+/g, '-');
+    
+    if (e.target.value.length >= 3) {
+        e.target.style.borderColor = '#10B981';
+        e.target.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+    } else if (e.target.value.length > 0) {
+        e.target.style.borderColor = '#F59E0B';
+    } else {
+        e.target.style.borderColor = 'var(--border)';
+        e.target.style.boxShadow = '';
+    }
+});
+
+// Validación en tiempo real para serie
+document.getElementById('numero_serie').addEventListener('input', function(e) {
+    e.target.value = e.target.value.toUpperCase().replace(/\s+/g, '');
+    
+    if (e.target.value.length >= 5) {
+        e.target.style.borderColor = '#10B981';
+        e.target.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+    } else if (e.target.value.length > 0) {
+        e.target.style.borderColor = '#F59E0B';
+    } else {
+        e.target.style.borderColor = 'var(--border)';
+        e.target.style.boxShadow = '';
+    }
+});
+
+// Validación en tiempo real para fecha de vencimiento
+document.getElementById('fecha_vencimiento').addEventListener('change', function(e) {
+    if (!e.target.value) return;
+    
+    const fechaVenc = new Date(e.target.value);
+    const fechaActual = new Date();
+    fechaActual.setHours(0, 0, 0, 0);
+    
+    const diasRestantes = Math.ceil((fechaVenc - fechaActual) / (1000 * 60 * 60 * 24));
+    
+    if (diasRestantes < 0) {
+        e.target.style.borderColor = '#DC2626';
+        e.target.style.boxShadow = '0 0 0 3px rgba(220, 38, 38, 0.1)';
+    } else if (diasRestantes <= 7) {
+        e.target.style.borderColor = '#DC2626';
+        e.target.style.boxShadow = '0 0 0 3px rgba(220, 38, 38, 0.1)';
+        Toast.fire({
+            icon: 'error',
+            title: `🚨 Vence en ${diasRestantes} días`,
+            background: '#FEE2E2'
+        });
+    } else if (diasRestantes <= 30) {
+        e.target.style.borderColor = '#F59E0B';
+        e.target.style.boxShadow = '0 0 0 3px rgba(245, 158, 11, 0.1)';
+        Toast.fire({
+            icon: 'warning',
+            title: `⚠️ Vence en ${diasRestantes} días`,
+            background: '#FEF3C7'
+        });
+    } else {
+        e.target.style.borderColor = '#10B981';
+        e.target.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+        Toast.fire({
+            icon: 'success',
+            title: `✓ Vence en ${diasRestantes} días`,
+            background: '#D1FAE5'
+        });
+    }
+});
 </script>
 {% endblock %}

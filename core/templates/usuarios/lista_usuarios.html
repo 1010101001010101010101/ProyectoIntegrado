@@ -420,9 +420,18 @@
 {% block content %}
 <div class="page-header">
     <h1 class="page-title">👥 Gestión de Usuarios</h1>
-    <a href="{% url 'core:crear_usuario' %}" class="btn btn-primary">
-        ➕ Nuevo Usuario
-    </a>
+    <div style="display: flex; gap: 1rem;">
+        <a href="{% url 'core:exportar_usuarios_excel' %}?{{ base_qs }}" class="btn btn-success">
+             Exportar Excel
+        </a>
+
+        {# Solo ADMIN, EDITOR, BODEGA pueden crear #}
+        {% if request.user.perfil.rol in 'ADMIN EDITOR BODEGA' %}
+            <a href="{% url 'core:crear_usuario' %}" class="btn btn-primary">
+                 Nuevo Usuario
+            </a>
+        {% endif %}
+    </div>
 </div>
 
 {% if messages %}
@@ -536,19 +545,19 @@
                 </td>
                 <td>
                     <div class="action-buttons">
+                     {% if request.user.perfil.rol == 'ADMIN' or request.user.perfil.rol == 'EDITOR' or request.user.perfil.rol == 'BODEGA' %}
                         <a href="{% url 'core:editar_usuario' usuario.id %}" class="btn btn-sm btn-success">
-                            ✏️ Editar
+                            Editar
                         </a>
-                        
-                        {% if not usuario.user.is_superuser and usuario.user != request.user %}
+                    {% endif %}
+                                            
+                        {% if request.user.perfil.rol == 'ADMIN' and not usuario.user.is_superuser and usuario.user != request.user %}
                             <button 
                                 type="button" 
                                 class="btn btn-sm btn-danger btn-eliminar"
                                 data-id="{{ usuario.id }}"
-                                data-username="{{ usuario.user.username }}"
-                                data-movimientos="0"
-                                data-ventas="0">
-                                🗑️ Eliminar
+                                data-username="{{ usuario.user.username }}">
+                                Eliminar
                             </button>
                         {% endif %}
                     </div>

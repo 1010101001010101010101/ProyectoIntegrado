@@ -6,6 +6,8 @@ from . import views
 from .views import usuarios as user_views
 from .views import productos as product_views
 from .views import inventario as inventario_views
+from core.views.inventario import exportar_movimientos_excel, eliminar_movimiento
+from core.views.usuarios import exportar_usuarios_excel
 
 app_name = 'core'
 
@@ -25,6 +27,7 @@ urlpatterns = [
     path('usuarios/<int:id>/editar/', user_views.editar_usuario, name='editar_usuario'),
     path('usuarios/<int:id>/eliminar/', user_views.eliminar_usuario, name='eliminar_usuario'),
     path('usuarios/<int:id>/reactivar/', user_views.reactivar_usuario, name='reactivar_usuario'),
+    path('usuarios/exportar-excel/', exportar_usuarios_excel, name='exportar_usuarios_excel'),  # <-- aquí, dentro de urlpatterns
 
     # ===== PRODUCTOS =====
     path('productos/', views.lista_productos, name='lista_productos'),
@@ -52,11 +55,12 @@ urlpatterns = [
     # ===== INVENTARIO =====
     path('movimientos/', inventario_views.lista_movimientos, name='lista_movimientos'),
     path('movimientos/<int:pk>/editar/', inventario_views.editar_movimiento, name='editar_movimiento'),
-    path('movimientos/<int:pk>/editar/paso-1/', inventario_views.movimiento_editar_paso1, name='movimiento_editar_paso1'),
     path('movimientos/crear/', inventario_views.crear_movimiento, name='crear_movimiento'),
     path('movimientos/crear/paso1/', inventario_views.movimiento_paso1, name='movimiento_paso1'),
     path('movimientos/crear/paso2/', inventario_views.movimiento_paso2, name='movimiento_paso2'),
     path('movimientos/crear/paso3/', inventario_views.movimiento_paso3, name='movimiento_paso3'),
+    path('movimientos/exportar/', exportar_movimientos_excel, name='exportar_movimientos_excel'),
+    path('movimientos/eliminar/<int:pk>/', eliminar_movimiento, name='eliminar_movimiento'),
 
     # ===== VENTAS =====
     path('ventas/', views.lista_ventas, name='lista_ventas'),

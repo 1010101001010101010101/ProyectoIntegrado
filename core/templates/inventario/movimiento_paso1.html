@@ -362,34 +362,35 @@
         <p><strong>Información:</strong> Registre los datos básicos del movimiento de inventario. Todos los campos marcados son obligatorios.</p>
     </div>
 
-    <form method="post" id="movimientoForm" novalidate>
+    <form method="post" id="movimientoForm">
         {% csrf_token %}
         
         <h3 class="section-title">Información del Movimiento</h3>
         <div class="form-row">
             <div class="form-group">
                 <label for="fecha">Fecha y Hora *</label>
-                <input type="datetime-local" id="fecha" name="fecha" class="form-control" required>
+                <input type="datetime-local" id="fecha" name="fecha" class="form-control">
             </div>
             <div class="form-group">
                 <label for="tipo">Tipo de Movimiento *</label>
-                <select id="tipo" name="tipo" class="form-control" required>
+                <select id="tipo" name="tipo" class="form-control">
                     <option value="">Seleccione...</option>
-                    <option value="ENTRADA">Entrada</option>
-                    <option value="SALIDA">Salida</option>
-                    <option value="AJUSTE">Ajuste</option>
-                    <option value="TRANSFERENCIA">Transferencia</option>
+                    <option value="ingreso">Ingreso</option>
+                    <option value="salida">Salida</option>
+                    <option value="ajuste">Ajuste</option>
+                    <option value="transferencia">Transferencia</option>
+                    <option value="devolucion">Devolución</option>
                 </select>
             </div>
             <div class="form-group">
                 <label for="cantidad">Cantidad *</label>
-                <input type="number" id="cantidad" name="cantidad" class="form-control" step="0.01" min="0.01" required>
+                <input type="number" id="cantidad" name="cantidad" class="form-control" step="1" min="1">
             </div>
         </div>
         <div class="form-row">
             <div class="form-group">
                 <label for="producto">Producto (SKU) *</label>
-                <select id="producto" name="producto" class="form-control" required>
+                <select id="producto" name="producto" class="form-control">
                     <option value="">Seleccione...</option>
                     {% for prod in productos %}
                         <option value="{{ prod.sku }}" {% if data.producto == prod.sku %}selected{% endif %}>
@@ -411,7 +412,7 @@
             </div>
             <div class="form-group">
                 <label for="bodega">Bodega *</label>
-                <select id="bodega" name="bodega" class="form-control" required>
+                <select id="bodega" name="bodega" class="form-control">
                     <option value="">Seleccione...</option>
                     {% for bod in bodegas %}
                         <option value="{{ bod.codigo }}" {% if data.bodega == bod.codigo %}selected{% endif %}>
@@ -430,348 +431,394 @@
         </div>
     </form>
 </div>
+
+{% if error_db %}
+<script>
+    Swal.fire({
+        icon: 'error',
+        title: 'Error al guardar',
+        text: '{{ error_db|escapejs }}',
+        confirmButtonText: 'Entendido',
+        customClass: { confirmButton: 'swal2-confirm' }
+    });
+</script>
+{% endif %}
 {% endblock %}
 
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    // Inicializar fecha y hora actual si no existe
-    (function(){
-        const fechaInput = document.getElementById('fecha');
-        if (!fechaInput) return;
+// PASO 1 - VALIDACIONES Y SWEETALERTS MEJORADOS
 
-        const isoRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/;
-        const val = fechaInput.value && fechaInput.value.toString().trim();
-        
-        if (!val || !isoRegex.test(val)) {
-            fechaInput.value = new Date().toISOString().slice(0,16);
-        }
-    })();
+// Configuración global de SweetAlert2
+const Toast = Swal.mixin({
+    toast: true,
+    position: 'top-end',
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer)
+        toast.addEventListener('mouseleave', Swal.resumeTimer)
+    }
+});
+
+// Inicializar fecha y hora actual
+(function(){
+    const fechaInput = document.getElementById('fecha');
+    if (!fechaInput) return;
+
+    const isoRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/;
+    const val = fechaInput.value && fechaInput.value.toString().trim();
     
-    // Mensaje de bienvenida
-    document.addEventListener('DOMContentLoaded', function() {
-        Swal.fire({
-            icon: 'info',
-            title: 'Nuevo Movimiento',
-            text: 'Complete los datos básicos del movimiento de inventario',
-            timer: 2000,
-            showConfirmButton: false,
-            toast: true,
-            position: 'top-end'
+    if (!val || !isoRegex.test(val)) {
+        fechaInput.value = new Date().toISOString().slice(0,16);
+    }
+})();
+
+// Mensaje de bienvenida animado
+document.addEventListener('DOMContentLoaded', function() {
+    Swal.fire({
+        icon: 'info',
+        title: '📝 Nuevo Movimiento',
+        html: '<p>Complete los datos básicos del movimiento de inventario</p><small style="color: #6B7280;">Los campos con (*) son obligatorios</small>',
+        timer: 3000,
+        showConfirmButton: false,
+        toast: true,
+        position: 'top-end',
+        background: '#FEF2F2',
+        iconColor: '#DC2626'
+    });
+});
+
+// Animación del select de tipo
+document.getElementById('tipo').addEventListener('change', function(e) {
+    const tipo = e.target.value;
+    const colores = {
+        'ingreso': '#dcfce7',
+        'salida': '#fee2e2',
+        'ajuste': '#dbeafe',
+        'transferencia': '#fef3c7',
+        'devolucion': '#fed7aa'
+    };
+    
+    if (tipo && colores[tipo]) {
+        e.target.style.backgroundColor = colores[tipo];
+        e.target.style.transform = 'scale(1.02)';
+        setTimeout(() => e.target.style.transform = 'scale(1)', 200);
+        
+        const mensajes = {
+            'ingreso': { icon: '📥', text: 'Entrada de mercancía', color: '#16A34A' },
+            'salida': { icon: '📤', text: 'Salida de mercancía', color: '#DC2626' },
+            'ajuste': { icon: '⚖️', text: 'Ajuste de inventario', color: '#2563EB' },
+            'transferencia': { icon: '🔄', text: 'Transferencia entre bodegas', color: '#CA8A04' },
+            'devolucion': { icon: '↩️', text: 'Devolución de mercancía', color: '#EA580C' }
+        };
+        
+        const msg = mensajes[tipo];
+        Toast.fire({
+            icon: 'success',
+            title: `${msg.icon} ${msg.text}`,
+            background: colores[tipo]
         });
-    });
+    } else {
+        e.target.style.backgroundColor = '';
+    }
+});
 
-    // Validación del formulario
-    document.getElementById('movimientoForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        // Obtener valores
-        const fecha = document.getElementById('fecha').value.trim();
-        const tipo = document.getElementById('tipo').value;
-        const cantidad = document.getElementById('cantidad').value.trim();
-        const producto = document.getElementById('producto').value.trim();
-        const bodega = document.getElementById('bodega').value.trim();
-        
-        // Validar Fecha
-        if (!fecha) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Campo requerido',
-                text: 'Por favor seleccione la fecha y hora del movimiento',
-                confirmButtonText: 'Entendido',
-                customClass: {
-                    confirmButton: 'swal2-confirm'
-                }
-            });
-            document.getElementById('fecha').focus();
-            return;
-        }
-        
-        // Validar que la fecha no sea futura
-        const fechaSeleccionada = new Date(fecha);
-        const fechaActual = new Date();
-        
-        if (fechaSeleccionada > fechaActual) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Fecha futura detectada',
-                text: 'No se puede registrar un movimiento con fecha futura. ¿Desea usar la fecha actual?',
-                showCancelButton: true,
-                confirmButtonText: 'Usar fecha actual',
-                cancelButtonText: 'Corregir manualmente',
-                customClass: {
-                    confirmButton: 'swal2-confirm',
-                    cancelButton: 'swal2-cancel'
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    document.getElementById('fecha').value = new Date().toISOString().slice(0,16);
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Fecha actualizada',
-                        text: 'Se ha establecido la fecha actual',
-                        timer: 1500,
-                        showConfirmButton: false
-                    });
-                }
-            });
-            return;
-        }
-        
-        // Validar Tipo
-        if (!tipo) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Campo requerido',
-                text: 'Por favor seleccione el tipo de movimiento',
-                confirmButtonText: 'Entendido',
-                customClass: {
-                    confirmButton: 'swal2-confirm'
-                }
-            });
-            document.getElementById('tipo').focus();
-            return;
-        }
-        
-        // Validar Cantidad
-        if (!cantidad) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Campo requerido',
-                text: 'Por favor ingrese la cantidad del movimiento',
-                confirmButtonText: 'Entendido',
-                customClass: {
-                    confirmButton: 'swal2-confirm'
-                }
-            });
-            document.getElementById('cantidad').focus();
-            return;
-        }
-        
-        const cantidadNum = parseFloat(cantidad);
-        
-        if (cantidadNum <= 0) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Cantidad inválida',
-                text: 'La cantidad debe ser mayor a cero',
-                confirmButtonText: 'Corregir',
-                customClass: {
-                    confirmButton: 'swal2-confirm'
-                }
-            });
-            document.getElementById('cantidad').focus();
-            return;
-        }
-        
-        // Advertencia para cantidades muy grandes
-        if (cantidadNum > 10000) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Cantidad muy alta',
-                html: `La cantidad ingresada es <strong>${cantidadNum.toLocaleString()}</strong>.<br><br>¿Está seguro de que es correcta?`,
-                showCancelButton: true,
-                confirmButtonText: 'Sí, es correcta',
-                cancelButtonText: 'Revisar',
-                customClass: {
-                    confirmButton: 'swal2-confirm',
-                    cancelButton: 'swal2-cancel'
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    validarProductoBodega();
-                }
-            });
-            return;
-        }
-        
-        validarProductoBodega();
-    });
+// Validación de cantidad en tiempo real
+document.getElementById('cantidad').addEventListener('input', function(e) {
+    const valor = parseFloat(e.target.value);
     
-    function validarProductoBodega() {
-        const producto = document.getElementById('producto').value.trim();
-        const bodega = document.getElementById('bodega').value.trim();
-        
-        // Validar Producto
-        if (!producto) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Campo requerido',
-                text: 'Por favor ingrese el SKU del producto',
-                confirmButtonText: 'Entendido',
-                customClass: {
-                    confirmButton: 'swal2-confirm'
-                }
-            });
-            document.getElementById('producto').focus();
-            return;
-        }
-        
-        if (producto.length < 3) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'SKU inválido',
-                text: 'El SKU debe tener al menos 3 caracteres',
-                confirmButtonText: 'Corregir',
-                customClass: {
-                    confirmButton: 'swal2-confirm'
-                }
-            });
-            document.getElementById('producto').focus();
-            return;
-        }
-        
-        // Validar Bodega
-        if (!bodega) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Campo requerido',
-                text: 'Por favor ingrese el código de bodega',
-                confirmButtonText: 'Entendido',
-                customClass: {
-                    confirmButton: 'swal2-confirm'
-                }
-            });
-            document.getElementById('bodega').focus();
-            return;
-        }
-        
-        if (bodega.length < 3) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Código de bodega inválido',
-                text: 'El código de bodega debe tener al menos 3 caracteres',
-                confirmButtonText: 'Corregir',
-                customClass: {
-                    confirmButton: 'swal2-confirm'
-                }
-            });
-            document.getElementById('bodega').focus();
-            return;
-        }
-        
-        // Si pasa todas las validaciones, mostrar confirmación
-        mostrarConfirmacion();
+    if (valor < 0) {
+        e.target.value = '';
+        Toast.fire({
+            icon: 'error',
+            title: '❌ Cantidad no puede ser negativa'
+        });
     }
     
-    function mostrarConfirmacion() {
-        const tipo = document.getElementById('tipo').value;
-        const cantidad = parseFloat(document.getElementById('cantidad').value);
-        const producto = document.getElementById('producto').value;
-        const bodega = document.getElementById('bodega').value;
-        const proveedor = document.getElementById('proveedor').value.trim();
-        
-        const tipoTexto = {
-            'ingreso': 'Ingreso',
-            'salida': ' Salida',
-            'ajuste': ' Ajuste',
-            'devolucion': ' Devolución'
-        };
-        
-        const tipoClase = {
-            'ingreso': 'tipo-ingreso',
-            'salida': 'tipo-salida',
-            'ajuste': 'tipo-ajuste',
-            'devolucion': 'tipo-devolucion'
-        };
-        
-        let htmlContent = `
-            <div style="text-align: left; margin-top: 1rem;">
-                <p><strong>Tipo:</strong> <span class="tipo-badge ${tipoClase[tipo]}">${tipoTexto[tipo]}</span></p>
-                <p><strong>Cantidad:</strong> ${cantidad.toLocaleString()}</p>
-                <p><strong>Producto:</strong> ${producto}</p>
-                <p><strong>Bodega:</strong> ${bodega}</p>
-        `;
-        
-        if (proveedor) {
-            htmlContent += `<p><strong>Proveedor:</strong> ${proveedor}</p>`;
-        }
-        
-        htmlContent += '</div>';
-        
+    if (valor > 0 && valor < 1 && Number.isInteger(valor) === false) {
+        e.target.style.borderColor = '#F59E0B';
+    } else if (valor > 10000) {
+        e.target.style.borderColor = '#DC2626';
+    } else if (valor > 0) {
+        e.target.style.borderColor = '#10B981';
+    } else {
+        e.target.style.borderColor = 'var(--border)';
+    }
+});
+
+// Formatear campos en mayúsculas
+document.getElementById('producto').addEventListener('input', function(e) {
+    e.target.value = e.target.value.toUpperCase();
+});
+
+document.getElementById('bodega').addEventListener('input', function(e) {
+    e.target.value = e.target.value.toUpperCase();
+});
+
+// Validación principal del formulario
+document.getElementById('movimientoForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const fecha = document.getElementById('fecha').value.trim();
+    const tipo = document.getElementById('tipo').value;
+    const cantidad = document.getElementById('cantidad').value.trim();
+    const producto = document.getElementById('producto').value.trim();
+    const bodega = document.getElementById('bodega').value.trim();
+    const proveedor = document.getElementById('proveedor').value.trim();
+    
+    // Validar fecha
+    if (!fecha) {
         Swal.fire({
-            icon: 'question',
-            title: '¿Confirmar movimiento?',
-            html: htmlContent,
+            icon: 'error',
+            title: '📅 Fecha requerida',
+            text: 'Por favor seleccione la fecha y hora del movimiento',
+            confirmButtonText: 'Entendido',
+            confirmButtonColor: '#DC2626',
+            backdrop: `rgba(220, 38, 38, 0.1)`
+        });
+        document.getElementById('fecha').focus();
+        return;
+    }
+    
+    // Validar fecha futura
+    const fechaSeleccionada = new Date(fecha);
+    const fechaActual = new Date();
+    
+    if (fechaSeleccionada > fechaActual) {
+        Swal.fire({
+            icon: 'warning',
+            title: '⚠️ Fecha futura detectada',
+            html: '<p>No se puede registrar un movimiento con fecha futura.</p><p style="color: #6B7280; font-size: 0.9em;">¿Desea usar la fecha y hora actual?</p>',
             showCancelButton: true,
-            confirmButtonText: '✓ Sí, guardar',
-            cancelButtonText: 'Revisar',
-            customClass: {
-                confirmButton: 'swal2-confirm',
-                cancelButton: 'swal2-cancel'
+            confirmButtonText: '✓ Usar fecha actual',
+            cancelButtonText: 'Corregir manualmente',
+            confirmButtonColor: '#DC2626',
+            cancelButtonColor: '#6B7280',
+            backdrop: `rgba(245, 158, 11, 0.1)`,
+            showClass: {
+                popup: 'animate__animated animate__shakeX'
             }
         }).then((result) => {
             if (result.isConfirmed) {
-                guardarMovimiento();
+                document.getElementById('fecha').value = new Date().toISOString().slice(0,16);
+                Swal.fire({
+                    icon: 'success',
+                    title: '✓ Fecha actualizada',
+                    text: 'Se ha establecido la fecha actual',
+                    timer: 1500,
+                    showConfirmButton: false,
+                    timerProgressBar: true
+                });
             }
         });
+        return;
     }
     
-    function guardarMovimiento() {
+    // Validar tipo
+    if (!tipo) {
         Swal.fire({
-            icon: 'success',
-            title: '✓ Paso 1 completado',
-            text: 'Avanzando al siguiente paso...',
-            timer: 2000,
-            showConfirmButton: false,
-            timerProgressBar: true,
-            willClose: () => {
-                document.getElementById('movimientoForm').submit();
-            }
+            icon: 'error',
+            title: '📋 Tipo requerido',
+            text: 'Por favor seleccione el tipo de movimiento',
+            confirmButtonText: 'Seleccionar',
+            confirmButtonColor: '#DC2626'
         });
+        document.getElementById('tipo').focus();
+        return;
     }
     
-    // Validaciones en tiempo real
-    document.getElementById('cantidad').addEventListener('input', function(e) {
-        const valor = parseFloat(e.target.value);
-        if (valor < 0) {
-            e.target.value = '';
+    // Validar cantidad
+    if (!cantidad) {
+        Swal.fire({
+            icon: 'error',
+            title: '🔢 Cantidad requerida',
+            text: 'Por favor ingrese la cantidad del movimiento',
+            confirmButtonText: 'Entendido',
+            confirmButtonColor: '#DC2626'
+        });
+        document.getElementById('cantidad').focus();
+        return;
+    }
+    
+    const cantidadNum = parseFloat(cantidad);
+    
+    if (cantidadNum <= 0) {
+        Swal.fire({
+            icon: 'warning',
+            title: '⚠️ Cantidad inválida',
+            html: '<p>La cantidad debe ser <strong>mayor a cero</strong></p>',
+            confirmButtonText: 'Corregir',
+            confirmButtonColor: '#DC2626',
+            backdrop: `rgba(220, 38, 38, 0.1)`
+        });
+        document.getElementById('cantidad').focus();
+        return;
+    }
+    
+    // Advertencia para cantidades muy grandes
+    if (cantidadNum > 10000) {
+        Swal.fire({
+            icon: 'warning',
+            title: '🚨 Cantidad muy alta',
+            html: `
+                <div style="text-align: center; margin: 1rem 0;">
+                    <div style="font-size: 2rem; font-weight: bold; color: #DC2626;">
+                        ${cantidadNum.toLocaleString()}
+                    </div>
+                    <p style="color: #6B7280; margin-top: 0.5rem;">unidades</p>
+                    <p style="margin-top: 1rem;">¿Está seguro de que esta cantidad es correcta?</p>
+                </div>
+            `,
+            showCancelButton: true,
+            confirmButtonText: '✓ Sí, es correcta',
+            cancelButtonText: 'Revisar',
+            confirmButtonColor: '#DC2626',
+            cancelButtonColor: '#6B7280',
+            backdrop: `rgba(220, 38, 38, 0.15)`
+        }).then((result) => {
+            if (result.isConfirmed) {
+                validarProductoBodega();
+            }
+        });
+        return;
+    }
+    
+    validarProductoBodega();
+});
+
+function validarProductoBodega() {
+    const producto = document.getElementById('producto').value.trim();
+    const bodega = document.getElementById('bodega').value.trim();
+    
+    // Validar producto
+    if (!producto) {
+        Swal.fire({
+            icon: 'error',
+            title: '📦 Producto requerido',
+            text: 'Por favor seleccione un producto',
+            confirmButtonText: 'Seleccionar',
+            confirmButtonColor: '#DC2626'
+        });
+        document.getElementById('producto').focus();
+        return;
+    }
+    
+    // Validar bodega
+    if (!bodega) {
+        Swal.fire({
+            icon: 'error',
+            title: '🏢 Bodega requerida',
+            text: 'Por favor seleccione una bodega',
+            confirmButtonText: 'Seleccionar',
+            confirmButtonColor: '#DC2626'
+        });
+        document.getElementById('bodega').focus();
+        return;
+    }
+    
+    mostrarConfirmacion();
+}
+
+function mostrarConfirmacion() {
+    const tipo = document.getElementById('tipo').value;
+    const cantidad = parseFloat(document.getElementById('cantidad').value);
+    const producto = document.getElementById('producto').options[document.getElementById('producto').selectedIndex].text;
+    const bodega = document.getElementById('bodega').options[document.getElementById('bodega').selectedIndex].text;
+    const proveedor = document.getElementById('proveedor').value.trim();
+    const proveedorText = proveedor ? document.getElementById('proveedor').options[document.getElementById('proveedor').selectedIndex].text : null;
+    
+    const tipoInfo = {
+        'ingreso': { icon: '📥', text: 'Ingreso', color: '#10B981', bg: '#D1FAE5' },
+        'salida': { icon: '📤', text: 'Salida', color: '#DC2626', bg: '#FEE2E2' },
+        'ajuste': { icon: '⚖️', text: 'Ajuste', color: '#2563EB', bg: '#DBEAFE' },
+        'transferencia': { icon: '🔄', text: 'Transferencia', color: '#CA8A04', bg: '#FEF3C7' },
+        'devolucion': { icon: '↩️', text: 'Devolución', color: '#EA580C', bg: '#FED7AA' }
+    };
+    
+    const info = tipoInfo[tipo];
+    
+    let htmlContent = `
+        <div style="text-align: left; margin: 1.5rem 0;">
+            <div style="background: ${info.bg}; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 1.2rem; font-weight: bold; color: ${info.color};">
+                    <span>${info.icon}</span>
+                    <span>${info.text}</span>
+                </div>
+            </div>
+            
+            <div style="display: grid; gap: 0.75rem; font-size: 0.95rem;">
+                <div style="display: flex; justify-content: space-between; padding: 0.5rem; background: #F9FAFB; border-radius: 6px;">
+                    <strong style="color: #374151;">Cantidad:</strong>
+                    <span style="color: ${info.color}; font-weight: bold;">${cantidad.toLocaleString()} unidades</span>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; padding: 0.5rem; background: #F9FAFB; border-radius: 6px;">
+                    <strong style="color: #374151;">Producto:</strong>
+                    <span style="color: #6B7280;">${producto}</span>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; padding: 0.5rem; background: #F9FAFB; border-radius: 6px;">
+                    <strong style="color: #374151;">Bodega:</strong>
+                    <span style="color: #6B7280;">${bodega}</span>
+                </div>
+    `;
+    
+    if (proveedorText) {
+        htmlContent += `
+                <div style="display: flex; justify-content: space-between; padding: 0.5rem; background: #F9FAFB; border-radius: 6px;">
+                    <strong style="color: #374151;">Proveedor:</strong>
+                    <span style="color: #6B7280;">${proveedorText}</span>
+                </div>
+        `;
+    }
+    
+    htmlContent += `
+            </div>
+        </div>
+    `;
+    
+    Swal.fire({
+        icon: 'question',
+        title: '¿Confirmar datos del movimiento?',
+        html: htmlContent,
+        showCancelButton: true,
+        confirmButtonText: '✓ Continuar al Paso 2',
+        cancelButtonText: '← Revisar',
+        confirmButtonColor: '#DC2626',
+        cancelButtonColor: '#6B7280',
+        backdrop: `rgba(220, 38, 38, 0.1)`,
+        customClass: {
+            confirmButton: 'animate__animated animate__pulse'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            guardarMovimiento();
         }
     });
-    
-    // Cambiar color del select según el tipo seleccionado
-    document.getElementById('tipo').addEventListener('change', function(e) {
-        const tipo = e.target.value;
-        const colores = {
-            'ingreso': '#dcfce7',
-            'salida': '#fee2e2',
-            'ajuste': '#dbeafe',
-            'devolucion': '#fed7aa'
-        };
-        
-        if (tipo && colores[tipo]) {
-            e.target.style.backgroundColor = colores[tipo];
-            
-            // Toast de confirmación
-            const mensajes = {
-                'ingreso': '📥 Movimiento de ingreso seleccionado',
-                'salida': '📤 Movimiento de salida seleccionado',
-                'ajuste': '⚖️ Movimiento de ajuste seleccionado',
-                'devolucion': '🔄 Movimiento de devolución seleccionado'
-            };
-            
-            Swal.fire({
-                icon: 'info',
-                title: mensajes[tipo],
-                timer: 1500,
-                showConfirmButton: false,
-                toast: true,
-                position: 'top-end'
-            });
-        } else {
-            e.target.style.backgroundColor = '';
+}
+
+function guardarMovimiento() {
+    let timerInterval;
+    Swal.fire({
+        icon: 'success',
+        title: '✓ Paso 1 completado',
+        html: '<div style="margin: 1rem 0;"><div class="swal2-progress" style="background: #FEE2E2; height: 6px; border-radius: 3px; overflow: hidden;"><div style="background: linear-gradient(90deg, #DC2626, #991B1B); height: 100%; width: 0%; animation: progress 2s ease-out forwards;"></div></div><p style="margin-top: 1rem; color: #6B7280;">Avanzando al control avanzado...</p></div>',
+        timer: 2000,
+        showConfirmButton: false,
+        timerProgressBar: true,
+        didOpen: () => {
+            const style = document.createElement('style');
+            style.textContent = '@keyframes progress { to { width: 100%; } }';
+            document.head.appendChild(style);
+        },
+        willClose: () => {
+            document.getElementById('movimientoForm').submit();
         }
     });
-    
-    // Formatear SKU en mayúsculas
-    document.getElementById('producto').addEventListener('input', function(e) {
-        e.target.value = e.target.value.toUpperCase();
-    });
-    
-    // Formatear código de bodega en mayúsculas
-    document.getElementById('bodega').addEventListener('input', function(e) {
-        e.target.value = e.target.value.toUpperCase();
-    });
+}
 </script>
 {% endblock %}
 {% if formulario_es_valido %}

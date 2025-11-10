@@ -57,11 +57,13 @@ class UsuarioForm(forms.ModelForm):
     # ===== PERFIL USUARIO =====
     # Acceso
     ROL_CHOICES = [
-        ('', 'Seleccionar rol'),
-        ('ADMIN', 'Administrador'),
-        ('BODEGA', 'Bodega'),
-        ('CONSULTA', 'Consulta'),
-    ]
+    ('ADMIN', 'Administrador'),
+    ('EDITOR', 'Editor'),
+    ('BODEGA', 'Bodeguero'),  # ✅ Debe existir
+    ('LECTOR', 'Lector'),
+    ('VENDEDOR', 'Vendedor'),
+    ('SUPERVISOR', 'Supervisor'),
+]
     rol = forms.ChoiceField(choices=ROL_CHOICES, required=True)
     ESTADO_CHOICES = [
         ('', 'Seleccionar estado'),

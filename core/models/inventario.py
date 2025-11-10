@@ -48,13 +48,12 @@ class Bodega(TimeStampedModel):
 
 
 class MovimientoInventario(TimeStampedModel):
-    """Movimientos de inventario"""
-    
     TIPO_CHOICES = [
-        ('ENTRADA', 'Entrada'),
-        ('SALIDA', 'Salida'),
-        ('AJUSTE', 'Ajuste'),
-        ('TRANSFERENCIA', 'Transferencia'),
+        ('ingreso', 'Ingreso'),      
+        ('salida', 'Salida'),
+        ('ajuste', 'Ajuste'),
+        ('devolucion', 'Devolución'),
+        ('transferencia', 'Transferencia'),
     ]
     
     tipo_movimiento = models.CharField(
@@ -74,10 +73,7 @@ class MovimientoInventario(TimeStampedModel):
         related_name='movimientos',
         verbose_name='Bodega'
     )
-    cantidad = models.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        validators=[MinValueValidator(Decimal('0.01'))],
+    cantidad = models.IntegerField(
         verbose_name='Cantidad'
     )
     
@@ -122,9 +118,8 @@ class MovimientoInventario(TimeStampedModel):
         verbose_name='Usuario'
     )
     fecha = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name='Fecha'
-    )
+    verbose_name='Fecha'  # ✅ Sin auto_now_add
+)
     motivo = models.TextField(
         null=True,
         blank=True,

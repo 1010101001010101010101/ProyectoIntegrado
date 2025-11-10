@@ -10,222 +10,193 @@
         align-items: center;
         margin-bottom: 2rem;
     }
-
+    
     .page-title {
         font-size: 2rem;
         color: var(--text-dark);
         font-weight: 700;
+        margin-bottom: 0.5rem;
     }
-
-    .btn-back {
-        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-        color: white;
-        padding: 0.8rem 1.5rem;
-        border-radius: 10px;
+    
+    .breadcrumb {
+        color: var(--text-gray);
+        font-size: 0.95rem;
+    }
+    
+    .breadcrumb a {
+        color: #dc2626;
         text-decoration: none;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        display: inline-block;
-        box-shadow: 0 4px 15px rgba(243, 4, 4, 0.3);
     }
-
-    .btn-back:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 25px rgba(207, 4, 4, 0.5);
-    }
-
-    .options-card {
+    
+    .form-card {
         background: white;
         border-radius: 12px;
-        padding: 3rem;
-        box-shadow: 0 2px 12px var(--shadow);
-        max-width: 900px;
+        padding: 2.5rem;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+        max-width: 1200px;
         margin: 0 auto;
     }
-
-    .movimiento-info {
-        background: linear-gradient(135deg, rgba(255, 217, 0, 0.1) 0%, rgba(211, 39, 39, 0.1) 100%);
-        border-left: 4px solid var(--primary-dark);
-        border-radius: 12px;
-        padding: 1.5rem;
-        margin-bottom: 2rem;
-    }
-
-    .movimiento-info h3 {
-        color: var(--text-dark);
+    
+    .section-title {
         font-size: 1.3rem;
+        color: var(--text-dark);
         font-weight: 700;
-        margin-bottom: 0.8rem;
-    }
-
-    .movimiento-details {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 1rem;
-    }
-
-    .detail-item {
-        display: flex;
-        flex-direction: column;
-        gap: 0.3rem;
-    }
-
-    .detail-label {
-        color: var(--text-gray);
-        font-size: 0.85rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    .detail-value {
-        color: var(--text-dark);
-        font-size: 1rem;
-        font-weight: 600;
-    }
-
-    .alert-info {
-        background: #E8F5E9;
-        border-left: 4px solid #4CAF50;
-        padding: 1rem;
-        border-radius: 8px;
-        margin-bottom: 2rem;
-    }
-
-    .options-title {
-        font-size: 1.5rem;
-        color: var(--text-dark);
-        font-weight: 600;
-        margin-bottom: 2rem;
-        text-align: center;
-    }
-
-    .steps-container {
-        display: flex;
-        flex-direction: column;
-        gap: 1.5rem;
-    }
-
-    .steps-header {
-        display: flex;
-        justify-content: center;
-        margin-bottom: 2rem;
-        gap: 1rem;
-    }
-
-    .step-indicator {
+        margin: 2rem 0 1.5rem 0;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #e5e7eb;
         display: flex;
         align-items: center;
         gap: 0.5rem;
     }
-
-    .step-number-header {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background: var(--border);
-        color: var(--text-gray);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 700;
-        font-size: 1.1rem;
+    
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
     }
-
-    .step-label {
-        font-size: 0.9rem;
-        color: var(--text-gray);
+    
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .form-group label {
         font-weight: 600;
-    }
-
-    .step-divider {
-        width: 60px;
-        height: 2px;
-        background: var(--border);
-        margin: 0 0.5rem;
-    }
-
-    .step-card {
-        background: white;
-        border: 2px solid var(--border);
-        border-radius: 12px;
-        padding: 2rem;
-        transition: all 0.3s ease;
-        cursor: pointer;
-        text-decoration: none;
-        color: var(--text-dark);
-        display: block;
-    }
-
-    .step-card:hover {
-        border-color: #ff1900;
-        box-shadow: 0 4px 16px rgba(255, 25, 0, 0.3);
-        transform: translateY(-2px);
-        background: linear-gradient(135deg, rgba(255, 217, 0, 0.05) 0%, rgba(211, 39, 39, 0.05) 100%);
-    }
-
-    .card-header {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
         margin-bottom: 0.5rem;
-    }
-
-    .card-title {
-        font-size: 1.5rem;
         color: var(--text-dark);
-        font-weight: 700;
-        margin: 0;
+        font-size: 0.95rem;
     }
-
-    .card-description {
-        color: var(--text-gray);
-        line-height: 1.6;
-        margin: 0;
+    
+    .label-required {
+        color: #dc2626;
     }
-
-    .back-button {
-        display: inline-block;
-        margin-top: 2rem;
-        padding: 0.8rem 1.5rem;
-        background: white;
-        color: var(--text-dark);
-        border: 2px solid var(--border);
+    
+    .label-optional {
+        font-weight: normal;
+        color: #6b7280;
+        font-size: 0.85rem;
+    }
+    
+    .form-control {
+        padding: 0.9rem;
+        border: 2px solid #e5e7eb;
         border-radius: 8px;
-        text-decoration: none;
-        font-weight: 600;
+        font-size: 1rem;
         transition: all 0.3s ease;
     }
-
-    .back-button:hover {
-        background: var(--bg-light);
-        border-color: var(--primary);
+    
+    .form-control:focus {
+        outline: none;
+        border-color: #dc2626;
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+    }
+    
+    textarea.form-control {
+        min-height: 100px;
+        resize: vertical;
+        font-family: inherit;
+    }
+    
+    .info-box {
+        background: #fef2f2;
+        border-left: 4px solid #dc2626;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+    }
+    
+    .info-box p {
+        margin: 0;
+        color: #991b1b;
+        font-size: 0.95rem;
+    }
+    
+    .warning-box {
+        background: #fffbeb;
+        border-left: 4px solid #f59e0b;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+    }
+    
+    .warning-box p {
+        margin: 0;
+        color: #92400e;
+        font-size: 0.95rem;
+    }
+    
+    .form-actions {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 2px solid #e5e7eb;
+        gap: 1rem;
+    }
+    
+    .btn {
+        padding: 0.9rem 1.8rem;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
+    }
+    
+    .btn-secondary {
+        background: #f5f5f5;
+        color: var(--text-dark);
+    }
+    
+    .btn-secondary:hover {
+        background: #e0e0e0;
+    }
+    
+    .btn-danger {
+        background: linear-gradient(135deg, #dc2626, #b91c1c);
+        color: white;
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+    }
+    
+    .btn-danger:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
     }
 
     @media (max-width: 768px) {
         .page-header {
             flex-direction: column;
-            gap: 1rem;
             align-items: flex-start;
+            gap: 1rem;
         }
-
-        .options-card {
-            padding: 2rem;
-        }
-
-        .steps-header {
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .step-divider {
-            width: 2px;
-            height: 40px;
-            margin: 0.5rem 0;
-        }
-
-        .movimiento-details {
+        
+        .form-row {
             grid-template-columns: 1fr;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+        }
+        
+        .btn {
+            width: 100%;
+            justify-content: center;
         }
     }
 </style>
@@ -233,60 +204,201 @@
 
 {% block content %}
 <div class="page-header">
-    <h1 class="page-title">✏️ Editar Movimiento de Inventario</h1>
-    <a href="{% url 'core:lista_movimientos' %}" class="btn-back">← Volver a la lista</a>
-</div>
-
-<div class="movimiento-info">
-    <h3>Información Actual del Movimiento</h3>
-    <div class="movimiento-details">
-        <div class="detail-item">
-            <span class="detail-label">Fecha</span>
-            <span class="detail-value">2025-09-10 09:30</span>
-        </div>
-        <div class="detail-item">
-            <span class="detail-label">Tipo</span>
-            <span class="detail-value">Ingreso</span>
-        </div>
-        <div class="detail-item">
-            <span class="detail-label">SKU</span>
-            <span class="detail-value">SKU-0001</span>
-        </div>
-        <div class="detail-item">
-            <span class="detail-label">Cantidad</span>
-            <span class="detail-value">+10 UN</span>
-        </div>
-        <div class="detail-item">
-            <span class="detail-label">Bodega</span>
-            <span class="detail-value">BOD-CENTRAL</span>
-        </div>
-        <div class="detail-item">
-            <span class="detail-label">Doc Ref</span>
-            <span class="detail-value">OC-101</span>
+    <div>
+        <h1 class="page-title">✏️ Editar Movimiento de Inventario</h1>
+        <div class="breadcrumb">
+            <a href="{% url 'core:dashboard' %}">Dashboard</a> / 
+            <a href="{% url 'core:lista_movimientos' %}">Movimientos</a> / 
+            Editar #{{ movimiento.id }}
         </div>
     </div>
+    <a href="{% url 'core:lista_movimientos' %}" class="btn btn-secondary">← Volver</a>
 </div>
 
-<div class="options-card">
-    <div class="alert-info">
-        <p><strong>ℹ️ Información:</strong> Seleccione el paso del formulario que desea editar. Los cambios se guardarán al finalizar cada paso.</p>
+<div class="form-card">
+    <div class="warning-box">
+        <p><strong>⚠️ Advertencia:</strong> Al editar este movimiento, se ajustará automáticamente el stock del producto. Asegúrese de que los datos sean correctos.</p>
     </div>
 
-    <h2 class="options-title">Seleccione un paso para editar el movimiento</h2>
-
-    <div class="steps-container">
-        <a href="{% url 'core:movimiento_editar_paso1' %}" class="step-card">
-            <div class="step-number">1</div>
-            <div class="step-content">
-                <div class="step-title">Datos del movimiento</div>
-                <div class="step-description">Edite la fecha, tipo de movimiento, cantidad, producto, proveedor y bodega</div>
+    <form method="post" id="editarMovimientoForm">
+        {% csrf_token %}
+        
+        <h3 class="section-title">📋 Información del Movimiento</h3>
+        <!-- Solo los campos que se ven al registrar el movimiento -->
+        <div class="form-row">
+            <div class="form-group">
+                <label for="fecha">Fecha y Hora <span class="label-required">*</span></label>
+                <input type="datetime-local" id="fecha" name="fecha" class="form-control" 
+                       value="{{ movimiento.fecha|date:'Y-m-d\TH:i' }}" required>
             </div>
-            <div class="step-arrow">→</div>
-        </a>
-    </div>
+            <div class="form-group">
+                <label for="tipo_movimiento">Tipo de Movimiento <span class="label-required">*</span></label>
+                <select id="tipo_movimiento" name="tipo_movimiento" class="form-control" required>
+                    <option value="">Seleccione...</option>
+                    <option value="ingreso" {% if movimiento.tipo_movimiento == 'ingreso' %}selected{% endif %}>Ingreso</option>
+                    <option value="salida" {% if movimiento.tipo_movimiento == 'salida' %}selected{% endif %}>Salida</option>
+                    <option value="ajuste" {% if movimiento.tipo_movimiento == 'ajuste' %}selected{% endif %}>Ajuste</option>
+                    <option value="transferencia" {% if movimiento.tipo_movimiento == 'transferencia' %}selected{% endif %}>Transferencia</option>
+                    <option value="devolucion" {% if movimiento.tipo_movimiento == 'devolucion' %}selected{% endif %}>Devolución</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="cantidad">Cantidad <span class="label-required">*</span></label>
+                <input type="number" id="cantidad" name="cantidad" class="form-control" 
+                       value="{{ movimiento.cantidad }}" step="0.01" min="0.01" required>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="producto">Producto (SKU) <span class="label-required">*</span></label>
+                <select id="producto" name="producto" class="form-control" required>
+                    <option value="">Seleccione...</option>
+                    {% for prod in productos %}
+                        <option value="{{ prod.sku }}" {% if movimiento.producto.sku == prod.sku %}selected{% endif %}>
+                            {{ prod.sku }} - {{ prod.nombre }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="proveedor">Proveedor <span class="label-optional">(opcional)</span></label>
+                <select id="proveedor" name="proveedor" class="form-control">
+                    <option value="">Sin proveedor</option>
+                    {% for prov in proveedores %}
+                        <option value="{{ prov.rut }}" 
+                                {% if movimiento.proveedor and movimiento.proveedor.rut == prov.rut %}selected{% endif %}>
+                            {{ prov.rut }} - {{ prov.razon_social }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="bodega">Bodega <span class="label-required">*</span></label>
+                <select id="bodega" name="bodega" class="form-control" required>
+                    <option value="">Seleccione...</option>
+                    {% for bod in bodegas %}
+                        <option value="{{ bod.codigo }}" {% if movimiento.bodega.codigo == bod.codigo %}selected{% endif %}>
+                            {{ bod.codigo }} - {{ bod.nombre }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
 
-    <div style="text-align: center;">
-        <a href="{% url 'core:lista_movimientos' %}" class="back-button">← Volver a Movimientos</a>
-    </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="lote">Número de Lote (opcional)</label>
+                <input type="text" id="lote" name="lote" class="form-control"
+                       value="{{ movimiento.lote|default:'' }}" placeholder="Ej: L-2025-001">
+            </div>
+            <div class="form-group">
+                <label for="numero_serie">Número de Serie</label>
+                <input type="text" id="numero_serie" name="numero_serie" class="form-control"
+                       value="{{ movimiento.numero_serie|default:'' }}" placeholder="Ej: SN123456789">
+            </div>
+            <div class="form-group">
+                <label for="fecha_vencimiento">Fecha de Vencimiento (opcional)</label>
+                <input type="date" id="fecha_vencimiento" name="fecha_vencimiento" class="form-control"
+                       value="{% if movimiento.fecha_vencimiento %}{{ movimiento.fecha_vencimiento|date:'Y-m-d' }}{% endif %}">
+            </div>
+        </div>
+
+        <div class="form-row">
+           
+            <div class="form-group">
+                <label for="documento_numero">Número de Documento (opcional)</label>
+                <input type="text" id="documento_numero" name="documento_numero" class="form-control"
+                       value="{{ movimiento.documento_numero|default:'' }}" placeholder="Ej: F-001-00123">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="motivo">Motivo (opcional)</label>
+                <textarea id="motivo" name="motivo" class="form-control"
+                          placeholder="Describa el motivo del movimiento">{{ movimiento.motivo|default:'' }}</textarea>
+            </div>
+            <div class="form-group">
+                <label for="observaciones">Observaciones (opcional)</label>
+                <textarea id="observaciones" name="observaciones" class="form-control"
+                          placeholder="Observaciones adicionales">{{ movimiento.observaciones|default:'' }}</textarea>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a class="btn btn-secondary" href="{% url 'core:lista_movimientos' %}">✕ Cancelar</a>
+            <div style="display: flex; gap: 1rem;">
+             
+                <button type="submit" class="btn btn-primary">
+                    ✓ Guardar Cambios
+                </button>
+            </div>
+        </div>
+    </form>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+
+
+    // Validación del formulario
+    document.getElementById('editarMovimientoForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const fecha = document.getElementById('fecha').value.trim();
+        const tipo = document.getElementById('tipo_movimiento').value;
+        const cantidad = document.getElementById('cantidad').value.trim();
+        const producto = document.getElementById('producto').value.trim();
+        const bodega = document.getElementById('bodega').value.trim();
+        
+        if (!fecha || !tipo || !cantidad || !producto || !bodega) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Campos incompletos',
+                text: 'Por favor complete todos los campos obligatorios',
+                confirmButtonText: 'Entendido'
+            });
+            return;
+        }
+        
+        const cantidadNum = parseFloat(cantidad);
+        if (cantidadNum <= 0) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Cantidad inválida',
+                text: 'La cantidad debe ser mayor a cero',
+                confirmButtonText: 'Corregir'
+            });
+            return;
+        }
+        
+        Swal.fire({
+            icon: 'question',
+            title: '¿Confirmar cambios?',
+            text: 'Se actualizará el movimiento y se ajustará el stock del producto',
+            showCancelButton: true,
+            confirmButtonText: '✓ Sí, guardar',
+            cancelButtonText: 'Revisar',
+            customClass: {
+                confirmButton: 'swal2-confirm',
+                cancelButton: 'swal2-cancel'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                this.submit();
+            }
+        });
+    });
+
+    // Formatear campos en tiempo real
+    document.getElementById('lote').addEventListener('input', function(e) {
+        e.target.value = e.target.value.toUpperCase().replace(/\s+/g, '-');
+    });
+    
+    document.getElementById('numero_serie').addEventListener('input', function(e) {
+        e.target.value = e.target.value.toUpperCase().replace(/\s+/g, '');
+    });
+</script>
 {% endblock %}

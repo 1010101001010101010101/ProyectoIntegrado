@@ -3,13 +3,16 @@ from django.contrib.auth.models import User
 from .base import TimeStampedModel
 
 
+
 class Usuario(TimeStampedModel):
     """Perfil extendido de usuario"""
     
     ROL_CHOICES = [
         ('ADMIN', 'Administrador'),
+        ('EDITOR', 'Editor'),
+        ('LECTOR', 'Lector'),
         ('VENDEDOR', 'Vendedor'),
-        ('BODEGUERO', 'Bodeguero'),
+        ('BODEGA', 'Bodeguero'),
         ('SUPERVISOR', 'Supervisor'),
     ]
     
@@ -29,7 +32,7 @@ class Usuario(TimeStampedModel):
     rol = models.CharField(
         max_length=20,
         choices=ROL_CHOICES,
-        default='VENDEDOR',
+        default='LECTOR',
         verbose_name='Rol'
     )
     

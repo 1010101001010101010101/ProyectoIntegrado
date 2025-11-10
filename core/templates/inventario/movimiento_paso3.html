@@ -334,9 +334,9 @@
             
             <div class="form-row">
                 <div class="form-group">
-                    <label for="doc_referencia">Documento de Referencia <span class="optional">(opcional)</span></label>
-                    <input type="text" id="doc_referencia" name="doc_referencia" class="form-control" 
-                           value="{{ data.doc_referencia }}" 
+                    <label for="documento_numero">Documento de Referencia <span class="optional">(opcional)</span></label>
+                    <input type="text" id="documento_numero" name="documento_numero" class="form-control" 
+                           value="{{ data.documento_numero }}" 
                            placeholder="Ej: OC-123 / FAC-456 / GUIA-789">
                 </div>
             </div>
@@ -376,106 +376,364 @@
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    // Validación y confirmación del formulario
-    document.getElementById('movimientoForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        // Obtener valores
-        const docReferencia = document.getElementById('doc_referencia').value.trim();
-        const motivo = document.getElementById('motivo').value.trim();
-        const observaciones = document.getElementById('observaciones').value.trim();
-        
-        // Preparar resumen
-        let resumenHTML = '<div style="text-align: left; margin-top: 1rem;">';
-        
-        if (docReferencia) {
-            resumenHTML += `<p><strong>Documento:</strong> ${docReferencia}</p>`;
+// ============================================
+// PASO 3 - VALIDACIONES Y SWEETALERTS (FINAL)
+// ============================================
+
+// Toast personalizado
+const Toast = Swal.mixin({
+    toast: true,
+    position: 'top-end',
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer)
+        toast.addEventListener('mouseleave', Swal.resumeTimer)
+    }
+});
+
+// Mensaje de bienvenida al paso final
+document.addEventListener('DOMContentLoaded', function() {
+    Swal.fire({
+        icon: 'success',
+        title: '🎯 Paso Final',
+        html: '<p>Complete las referencias y observaciones</p><small style="color: #6B7280;">¡Ya casi terminas!</small>',
+        timer: 3000,
+        showConfirmButton: false,
+        toast: true,
+        position: 'top-end',
+        background: '#D1FAE5',
+        iconColor: '#10B981'
+    });
+});
+
+// Contador de caracteres en tiempo real
+const observaciones = document.getElementById('observaciones');
+let contadorDiv = null;
+
+if (observaciones) {
+    contadorDiv = document.createElement('div');
+    contadorDiv.style.cssText = `
+        text-align: right;
+        margin-top: 0.5rem;
+        font-size: 0.85rem;
+        color: #6B7280;
+        transition: all 0.3s ease;
+    `;
+    observaciones.parentElement.appendChild(contadorDiv);
+
+    observaciones.addEventListener('input', function(e) {
+        const length = e.target.value.length;
+        const maxLength = 500;
+        contadorDiv.textContent = `${length} / ${maxLength} caracteres`;
+
+        if (length > maxLength) {
+            contadorDiv.style.color = '#DC2626';
+            contadorDiv.style.fontWeight = 'bold';
+            e.target.style.borderColor = '#DC2626';
+            e.target.style.boxShadow = '0 0 0 3px rgba(220, 38, 38, 0.1)';
+            Toast.fire({
+                icon: 'warning',
+                title: `⚠️ Texto muy largo (${length} caracteres)`,
+                text: 'Considera resumir la información',
+                background: '#FEF3C7'
+            });
+        } else if (length > maxLength * 0.9) {
+            contadorDiv.style.color = '#F59E0B';
+            contadorDiv.style.fontWeight = 'bold';
+            e.target.style.borderColor = '#F59E0B';
+        } else if (length > maxLength * 0.7) {
+            contadorDiv.style.color = '#6B7280';
+            contadorDiv.style.fontWeight = 'normal';
+            e.target.style.borderColor = '#10B981';
+        } else {
+            contadorDiv.style.color = '#6B7280';
+            contadorDiv.style.fontWeight = 'normal';
+            e.target.style.borderColor = 'var(--border)';
+            e.target.style.boxShadow = '';
         }
-        
-        if (motivo) {
-            resumenHTML += `<p><strong>Motivo:</strong> ${motivo}</p>`;
+    });
+
+    observaciones.dispatchEvent(new Event('input'));
+}
+
+// Validación en tiempo real para documento de referencia
+const docInput = document.getElementById('documento_numero');
+if (docInput) {
+    docInput.addEventListener('input', function(e) {
+        e.target.value = e.target.value.replace(/\s+/g, ' ').toUpperCase();
+        const formatoValido = /^[A-Z]+-\d+/.test(e.target.value);
+
+        if (e.target.value.length > 0) {
+            if (formatoValido) {
+                e.target.style.borderColor = '#10B981';
+                e.target.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+            } else if (e.target.value.length >= 3) {
+                e.target.style.borderColor = '#F59E0B';
+                e.target.style.boxShadow = '0 0 0 3px rgba(245, 158, 11, 0.1)';
+            }
+        } else {
+            e.target.style.borderColor = 'var(--border)';
+            e.target.style.boxShadow = '';
         }
-        
-        if (observaciones) {
-            const obsCorta = observaciones.length > 60 
-                ? observaciones.substring(0, 60) + '...' 
-                : observaciones;
-            resumenHTML += `<p><strong>Observaciones:</strong> ${obsCorta}</p>`;
+    });
+}
+
+// Validación en tiempo real para motivo
+const motivoInput = document.getElementById('motivo');
+if (motivoInput) {
+    motivoInput.addEventListener('input', function(e) {
+        e.target.value = e.target.value.replace(/\s+/g, ' ');
+        if (e.target.value.length >= 10) {
+            e.target.style.borderColor = '#10B981';
+            e.target.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+        } else if (e.target.value.length > 0) {
+            e.target.style.borderColor = '#F59E0B';
+        } else {
+            e.target.style.borderColor = 'var(--border)';
+            e.target.style.boxShadow = '';
         }
-        
-        if (!docReferencia && !motivo && !observaciones) {
-            resumenHTML += '<p style="color: var(--text-gray);">Sin información adicional registrada</p>';
-        }
-        
-        resumenHTML += '</div>';
-        
-        // Confirmación final antes de guardar
+    });
+}
+
+// Validación principal del formulario
+document.getElementById('movimientoForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const docReferencia = document.getElementById('documento_numero').value.trim();
+    const motivo = document.getElementById('motivo').value.trim();
+    const observaciones = document.getElementById('observaciones').value.trim();
+
+    // Validar longitud de observaciones
+    if (observaciones.length > 500) {
         Swal.fire({
-            icon: 'question',
-            title: '¿Guardar movimiento?',
+            icon: 'warning',
+            title: '📝 Texto muy extenso',
             html: `
-                <p>Estás a punto de completar el registro del movimiento.</p>
-                ${resumenHTML}
+                <div style="text-align: center; margin: 1rem 0;">
+                    <div style="font-size: 2rem; font-weight: bold; color: #F59E0B;">
+                        ${observaciones.length}
+                    </div>
+                    <p style="color: #6B7280;">caracteres (máximo recomendado: 500)</p>
+                    <div style="background: #FEF3C7; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                        <p style="color: #92400E; font-size: 0.9em;">Las observaciones son muy largas. Se recomienda resumir la información para facilitar su lectura.</p>
+                    </div>
+                </div>
             `,
             showCancelButton: true,
-            confirmButtonText: '✓ Sí, guardar',
-            cancelButtonText: 'Cancelar',
-            customClass: {
-                confirmButton: 'swal2-confirm',
-                cancelButton: 'swal2-cancel'
-            }
+            confirmButtonText: 'Continuar de todas formas',
+            cancelButtonText: '← Editar texto',
+            confirmButtonColor: '#F59E0B',
+            cancelButtonColor: '#6B7280',
+            backdrop: `rgba(245, 158, 11, 0.1)`
         }).then((result) => {
             if (result.isConfirmed) {
-                // Mostrar mensaje de éxito con progreso
-                Swal.fire({
-                    icon: 'success',
-                    title: '¡Movimiento registrado exitosamente!',
-                    html: 'Los datos han sido guardados correctamente',
-                    timer: 2000,
-                    showConfirmButton: false,
-                    timerProgressBar: true,
-                    willClose: () => {
-                        // Enviar el formulario
-                        document.getElementById('movimientoForm').submit();
-                    }
-                });
+                mostrarConfirmacionFinal();
             }
         });
-    });
-    
-    // Validación en tiempo real para campos de texto
-    const inputs = ['doc_referencia', 'motivo'];
-    inputs.forEach(inputId => {
-        const input = document.getElementById(inputId);
-        if (input) {
-            input.addEventListener('input', function(e) {
-                // Eliminar espacios múltiples
-                e.target.value = e.target.value.replace(/\s+/g, ' ');
-            });
+        return;
+    }
+
+    // Advertencia si no se ingresó ningún dato opcional
+    if (!docReferencia && !motivo && !observaciones) {
+        Swal.fire({
+            icon: 'question',
+            title: '📋 Sin información adicional',
+            html: '<p>No has ingresado ningún dato de referencia u observación.</p><p style="color: #6B7280; margin-top: 0.5rem;">¿Deseas continuar sin esta información?</p>',
+            showCancelButton: true,
+            confirmButtonText: '✓ Sí, continuar',
+            cancelButtonText: '← Agregar información',
+            confirmButtonColor: '#2563EB',
+            cancelButtonColor: '#6B7280',
+            backdrop: `rgba(37, 99, 235, 0.1)`
+        }).then((result) => {
+            if (result.isConfirmed) {
+                mostrarConfirmacionFinal();
+            }
+        });
+        return;
+    }
+
+    // Si hay información, mostrar confirmación directamente
+    mostrarConfirmacionFinal();
+});
+
+function mostrarConfirmacionFinal() {
+    const docReferencia = document.getElementById('documento_numero').value.trim();
+    const motivo = document.getElementById('motivo').value.trim();
+    const observaciones = document.getElementById('observaciones').value.trim();
+
+    let resumenHTML = '<div style="text-align: left; margin: 1.5rem 0;">';
+
+    if (docReferencia || motivo || observaciones) {
+        resumenHTML += '<div style="display: grid; gap: 0.75rem; font-size: 0.95rem;">';
+
+        if (docReferencia) {
+            resumenHTML += `
+                <div style="background: #F9FAFB; padding: 0.75rem; border-radius: 6px; border-left: 3px solid #2563EB;">
+                    <strong style="color: #1F2937;">📄 Documento:</strong>
+                    <div style="color: #4B5563; margin-top: 0.25rem;">${docReferencia}</div>
+                </div>
+            `;
+        }
+
+        if (motivo) {
+            resumenHTML += `
+                <div style="background: #F9FAFB; padding: 0.75rem; border-radius: 6px; border-left: 3px solid #7C3AED;">
+                    <strong style="color: #1F2937;">💡 Motivo:</strong>
+                    <div style="color: #4B5563; margin-top: 0.25rem;">${motivo}</div>
+                </div>
+            `;
+        }
+
+        if (observaciones) {
+            const obsCorta = observaciones.length > 100 
+                ? observaciones.substring(0, 100) + '...' 
+                : observaciones;
+            resumenHTML += `
+                <div style="background: #F9FAFB; padding: 0.75rem; border-radius: 6px; border-left: 3px solid #10B981;">
+                    <strong style="color: #1F2937;">📝 Observaciones:</strong>
+                    <div style="color: #4B5563; margin-top: 0.25rem;">${obsCorta}</div>
+                    ${observaciones.length > 100 ? '<small style="color: #9CA3AF;">(texto completo será guardado)</small>' : ''}
+                </div>
+            `;
+        }
+
+        resumenHTML += '</div>';
+    } else {
+        resumenHTML += `
+            <div style="background: #F3F4F6; padding: 1rem; border-radius: 8px; text-align: center;">
+                <p style="color: #6B7280; margin: 0;">Sin información adicional registrada</p>
+            </div>
+        `;
+    }
+
+    resumenHTML += `
+        <div style="background: linear-gradient(135deg, #FEE2E2 0%, #FEF2F2 100%); padding: 1.5rem; border-radius: 10px; margin-top: 1.5rem; border: 2px solid #DC2626;">
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                <span style="font-size: 1.5rem;">✅</span>
+                <strong style="color: #991B1B; font-size: 1.1rem;">¿Confirmar registro?</strong>
+            </div>
+            <p style="color: #6B7280; margin: 0; font-size: 0.9em;">Esta acción guardará el movimiento completo en el sistema</p>
+        </div>
+    </div>`;
+
+    Swal.fire({
+        icon: 'question',
+        title: 'Resumen del movimiento',
+        html: resumenHTML,
+        showCancelButton: true,
+        confirmButtonText: '✓ Guardar movimiento',
+        cancelButtonText: '← Revisar',
+        confirmButtonColor: '#DC2626',
+        cancelButtonColor: '#6B7280',
+        width: '600px',
+        backdrop: `rgba(220, 38, 38, 0.1)`,
+        customClass: {
+            confirmButton: 'animate__animated animate__pulse',
+            popup: 'animate__animated animate__fadeInDown'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            guardarMovimientoFinal();
         }
     });
-    
-    // Contador de caracteres para observaciones
-    const observaciones = document.getElementById('observaciones');
-    if (observaciones) {
-        observaciones.addEventListener('input', function(e) {
-            const length = e.target.value.length;
-            const maxLength = 500; // Límite sugerido
-            
-            if (length > maxLength) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Texto muy largo',
-                    text: `Las observaciones son muy extensas (${length} caracteres). Considera resumir la información.`,
-                    timer: 2000,
-                    showConfirmButton: false,
-                    toast: true,
-                    position: 'top-end'
-                });
-            }
-        });
-    }
-    
+}
 
+function guardarMovimientoFinal() {
+    // Animación de guardado con múltiples etapas
+    let etapa = 0;
+    const etapas = [
+        { icono: '📝', texto: 'Validando datos...', progreso: 25 },
+        { icono: '💾', texto: 'Guardando movimiento...', progreso: 50 },
+        { icono: '🔄', texto: 'Actualizando inventario...', progreso: 75 },
+        { icono: '✅', texto: 'Finalizando registro...', progreso: 100 }
+    ];
+
+    Swal.fire({
+        title: etapas[0].texto,
+        html: `
+            <div style="margin: 1.5rem 0;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">
+                    ${etapas[0].icono}
+                </div>
+                <div style="background: #F3F4F6; height: 8px; border-radius: 4px; overflow: hidden;">
+                    <div id="progressBar" style="background: linear-gradient(90deg, #DC2626, #991B1B); height: 100%; width: 0%; transition: width 0.5s ease;"></div>
+                </div>
+                <p style="color: #6B7280; margin-top: 1rem; font-size: 0.9em;">Por favor espere...</p>
+            </div>
+        `,
+        showConfirmButton: false,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => {
+            const progressBar = document.getElementById('progressBar');
+            let intervalo = setInterval(() => {
+                if (etapa < etapas.length) {
+                    const etapaActual = etapas[etapa];
+                    Swal.update({
+                        title: etapaActual.texto,
+                        html: `
+                            <div style="margin: 1.5rem 0;">
+                                <div style="font-size: 3rem; margin-bottom: 1rem; animation: bounce 0.5s;">
+                                    ${etapaActual.icono}
+                                </div>
+                                <div style="background: #F3F4F6; height: 8px; border-radius: 4px; overflow: hidden;">
+                                    <div id="progressBar" style="background: linear-gradient(90deg, #DC2626, #991B1B); height: 100%; width: ${etapaActual.progreso}%; transition: width 0.5s ease;"></div>
+                                </div>
+                                <p style="color: #6B7280; margin-top: 1rem; font-size: 0.9em;">${etapaActual.progreso}% completado</p>
+                            </div>
+                        `
+                    });
+                    etapa++;
+                } else {
+                    clearInterval(intervalo);
+                    mostrarExito();
+                }
+            }, 800);
+        }
+    });
+}
+
+function mostrarExito() {
+    Swal.fire({
+        icon: 'success',
+        title: '🎉 ¡Movimiento registrado!',
+        html: `
+            <div style="margin: 1.5rem 0;">
+                <div style="background: linear-gradient(135deg, #D1FAE5 0%, #ECFDF5 100%); padding: 1.5rem; border-radius: 12px; border: 2px solid #10B981;">
+                    <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">✅</div>
+                    <p style="color: #065F46; font-size: 1.1rem; margin: 0;">El movimiento ha sido guardado exitosamente</p>
+                </div>
+                <div style="margin-top: 1.5rem; padding: 1rem; background: #F9FAFB; border-radius: 8px;">
+                    <p style="color: #6B7280; margin: 0; font-size: 0.9em;">
+                        ✓ Inventario actualizado<br>
+                        ✓ Trazabilidad registrada<br>
+                        ✓ Referencias guardadas
+                    </p>
+                </div>
+            </div>
+        `,
+        confirmButtonText: '📋 Ver lista de movimientos',
+        confirmButtonColor: '#DC2626',
+        backdrop: `rgba(16, 185, 129, 0.1)`,
+        customClass: {
+            popup: 'animate__animated animate__bounceIn',
+            confirmButton: 'animate__animated animate__pulse animate__infinite'
+        },
+        willClose: () => {
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes bounce {
+                    0%, 100% { transform: translateY(0); }
+                    50% { transform: translateY(-20px); }
+                }
+            `;
+            document.head.appendChild(style);
+            document.getElementById('movimientoForm').submit();
+        }
+    });
+}
 </script>
 {% endblock %}

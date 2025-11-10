@@ -2,7 +2,7 @@
 CRUD completo de Usuarios - EVA Sumativa 3
 CORREGIDO: Paginación, Ordenamiento y Búsqueda funcionando correctamente
 """
-
+from ..decorators import admin_required, editor_o_admin_required, lector_o_superior
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth import get_user_model
@@ -10,9 +10,12 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.core.paginator import Paginator
 from django.db.models import Q
+import openpyxl
+from django.http import HttpResponse, JsonResponse
+from core.models import Usuario  # Cambia esto si tu modelo tiene otro nombre
 
 from ..decorators import admin_required
-from ..models import Usuario, Producto
+from ..models import Producto
 from ..forms import UsuarioForm, UsuarioEditForm
 
 User = get_user_model()
@@ -30,7 +33,7 @@ def _resolve_page_size(request, session_key, default=15):
     return request.session.get(session_key, default)
 
 @login_required
-@admin_required
+@lector_o_superior
 def lista_usuarios(request):
     """
     Lista de usuarios con búsqueda, filtros, orden y paginación configurable
@@ -193,11 +196,16 @@ def lista_usuarios(request):
 
 
 @login_required
-@admin_required
+@editor_o_admin_required
 def crear_usuario(request):
     """
     Crear nuevo usuario con validaciones
     """
+    usuario = request.user.perfil
+    if usuario.rol not in ['ADMIN', 'EDITOR']:
+        messages.error(request, "No tienes permiso para agregar usuarios.")
+        return redirect('core:lista_usuarios')
+    
     if request.method == 'POST':
         form = UsuarioForm(request.POST)
         
@@ -249,7 +257,7 @@ def crear_usuario(request):
 
 
 @login_required
-@admin_required
+@editor_o_admin_required
 def editar_usuario(request, id):
     usuario = get_object_or_404(Usuario, id=id)
 
@@ -405,4 +413,189 @@ def reactivar_usuario(request, id):
         )
     
     return redirect('core:lista_usuarios')
+
+# views/usuarios.py  (o donde tengas estas vistas)
+# views/usuarios.py
+from io import BytesIO
+from datetime import datetime
+import openpyxl
+from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+from openpyxl.utils import get_column_letter
+from django.http import HttpResponse
+from django.db.models import Q
+from django.contrib.auth.decorators import login_required
+from ..decorators import admin_required
+from core.models import Usuario
+
+@login_required
+@lector_o_superior
+def exportar_usuarios_excel(request):
+    # === 1) Filtros/orden iguales a la lista ===
+    buscar = request.GET.get('buscar', '').strip()
+    rol_filtro = request.GET.get('rol', '').strip()
+    estado_filtro = request.GET.get('estado', '').strip()
+    orden = request.GET.get('orden', 'creado').lower()
+    direccion = request.GET.get('dir', 'desc').lower()
+
+    orden_map = {
+        'username': 'user__username',
+        'nombre': 'user__first_name',
+        'email': 'user__email',
+        'rol': 'rol',
+        'estado': 'user__is_active',
+        'creado': 'user__date_joined',
+    }
+    field = orden_map.get(orden, 'user__date_joined')
+    dir_prefix = '' if direccion == 'asc' else '-'
+
+    qs = Usuario.objects.select_related('user').all()
+    if buscar:
+        qs = qs.filter(
+            Q(user__username__icontains=buscar) |
+            Q(user__email__icontains=buscar) |
+            Q(user__first_name__icontains=buscar) |
+            Q(user__last_name__icontains=buscar) |
+            Q(telefono__icontains=buscar)
+        )
+    if rol_filtro:
+        qs = qs.filter(rol=rol_filtro)
+    if estado_filtro:
+        if estado_filtro == 'ACTIVO':
+            qs = qs.filter(user__is_active=True)
+        elif estado_filtro == 'INACTIVO':
+            qs = qs.filter(user__is_active=False)
+
+    if orden == 'nombre':
+        qs = qs.order_by(
+            f'{dir_prefix}user__first_name',
+            f'{dir_prefix}user__last_name',
+            '-user__date_joined'
+        )
+    else:
+        qs = qs.order_by(f'{dir_prefix}{field}', '-user__date_joined')
+
+    # === 2) Construir Excel con estilo ===
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Usuarios"
+
+    # Cols que mostraremos (iguales a la tabla)
+    headers = ["SKU", "Nombre", "Email", "Rol", "Estado"]  # puedes cambiar “SKU” por “Username”
+    col_widths = [18, 34, 36, 18, 16]
+
+    # ----------------- Estilos reutilizables -----------------
+    red_header_fill = PatternFill("solid", fgColor="DC2626")   # rojo 600
+    white_font_bold = Font(color="FFFFFF", bold=True, size=11)
+    title_fill = PatternFill("solid", fgColor="B91C1C")        # rojo 700
+    title_font = Font(color="FFFFFF", bold=True, size=16)
+    subtitle_font = Font(italic=True, size=11)
+    th_align = Alignment(horizontal="center", vertical="center")
+    td_align = Alignment(vertical="center")
+    thin = Side(border_style="thin", color="CCCCCC")
+    thin_border = Border(top=thin, left=thin, right=thin, bottom=thin)
+    zebra_fill = PatternFill("solid", fgColor="FFF5F5")        # rosa muy claro
+
+    # ----------------- Título + subtítulo -----------------
+    total_cols = len(headers)
+    ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=total_cols)
+    ws["A1"].value = "REPORTE DE USUARIOS - DULCERÍA LILIS"
+    ws["A1"].fill = title_fill
+    ws["A1"].font = title_font
+    ws["A1"].alignment = th_align
+
+    ws.merge_cells(start_row=2, start_column=1, end_row=2, end_column=total_cols)
+    ws["A2"].value = f"Generado: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}"
+    ws["A2"].alignment = Alignment(horizontal="center")
+    ws["A2"].font = subtitle_font
+
+    # Fila vacía (#3) como separador
+    current_row = 4
+
+    # ----------------- Cabecera -----------------
+    for col_idx, (header, width) in enumerate(zip(headers, col_widths), start=1):
+        cell = ws.cell(row=current_row, column=col_idx, value=header)
+        cell.fill = red_header_fill
+        cell.font = white_font_bold
+        cell.alignment = th_align
+        ws.column_dimensions[get_column_letter(col_idx)].width = width
+    current_row += 1
+
+    # ----------------- Datos -----------------
+    start_data_row = current_row
+    for u in qs:
+        full_name = u.user.get_full_name() or f"{u.user.first_name} {u.user.last_name}".strip()
+        estado_txt = "Stock OK" if u.user.is_active else "Sin stock"  # Si quieres idéntico al de productos usa texto, si no, usa “ACTIVO/INACTIVO”
+        row = [
+            u.user.username,        # o tu “SKU/Username”
+            full_name or "—",
+            u.user.email,
+            u.get_rol_display(),
+            "ACTIVO" if u.user.is_active else "INACTIVO",
+        ]
+        for col_idx, val in enumerate(row, start=1):
+            c = ws.cell(row=current_row, column=col_idx, value=val)
+            c.border = thin_border
+            c.alignment = td_align
+        # Zebra
+        if (current_row - start_data_row) % 2 == 1:
+            for col_idx in range(1, total_cols + 1):
+                ws.cell(row=current_row, column=col_idx).fill = zebra_fill
+        current_row += 1
+
+    # ----------------- Fila total -----------------
+    ws.cell(row=current_row, column=1, value="TOTAL DE USUARIOS:")
+    ws.cell(row=current_row, column=1).font = Font(bold=True)
+    ws.merge_cells(start_row=current_row, start_column=1, end_row=current_row, end_column=total_cols-1)
+    total_cell = ws.cell(row=current_row, column=total_cols, value=qs.count())
+    total_cell.font = Font(bold=True)
+    for col_idx in range(1, total_cols + 1):
+        ws.cell(row=current_row, column=col_idx).border = thin_border
+    # Opcional: color verde del total
+    total_cell.fill = PatternFill("solid", fgColor="DCFCE7")
+
+    # Auto-filtro y panes congelados
+    ws.auto_filter.ref = f"A4:{get_column_letter(total_cols)}{current_row}"
+    ws.freeze_panes = "A5"  # deja título/subtítulo y cabecera fijos
+
+    # Altura de filas importantes
+    ws.row_dimensions[1].height = 26
+    ws.row_dimensions[4].height = 22
+
+    # === 3) Respuesta
+    out = BytesIO()
+    wb.save(out)
+    out.seek(0)
+    filename = f'usuarios_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xlsx'
+    resp = HttpResponse(
+        out.getvalue(),
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    resp['Content-Disposition'] = f'attachment; filename="{filename}"'
+    return resp
+
+@login_required
+def eliminar_movimiento(request, movimiento_id):
+    usuario = request.user.perfil
+    # Solo ADMIN puede eliminar movimientos
+    if usuario.rol != 'ADMIN':
+        return JsonResponse({'ok': False, 'error': 'No tienes permiso para eliminar movimientos.'})
+    # ...código para eliminar...
+
+@login_required
+def agregar_movimiento(request):
+    usuario = request.user.perfil
+    # Solo ADMIN y EDITOR pueden crear movimientos
+    if usuario.rol not in ['ADMIN', 'EDITOR']:
+        messages.error(request, "No tienes permiso para agregar movimientos.")
+        return redirect('core:lista_movimientos')
+    # ...código para agregar movimiento...
+
+@login_required
+def editar_movimiento(request, movimiento_id):
+    usuario = request.user.perfil
+    # Solo ADMIN y EDITOR pueden editar movimientos
+    if usuario.rol not in ['ADMIN', 'EDITOR']:
+        messages.error(request, "No tienes permiso para editar movimientos.")
+        return redirect('core:lista_movimientos')
+    # ...código para editar movimiento...
 

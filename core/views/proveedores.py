@@ -10,7 +10,7 @@ from openpyxl.styles import Font, PatternFill, Alignment
 from datetime import datetime
 from django.utils.http import urlencode
 from django.db import transaction
-
+from ..decorators import admin_required, editor_o_admin_required, lector_o_superior
 from ..forms.proveedores import (
     ProveedorForm,
     ProveedorPaso1Form,
@@ -23,7 +23,7 @@ from ..decorators import admin_required
 
 
 @login_required
-@admin_required
+@lector_o_superior
 def lista_proveedores(request):
     buscar = (request.GET.get('buscar') or request.GET.get('q') or '').strip()
     estado_filtro = (request.GET.get('estado') or '').strip().upper()
@@ -103,51 +103,157 @@ def lista_proveedores(request):
     return render(request, 'proveedores/lista_proveedores.html', context)
 
 
+from io import BytesIO
+import openpyxl
+from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+from openpyxl.utils import get_column_letter
+from django.db.models import Q, Count
+from datetime import datetime
+from django.http import HttpResponse
+
 @login_required
+@admin_required
 def exportar_proveedores_excel(request):
-    proveedores = Proveedor.objects.all().order_by('nombre_fantasia', 'razon_social')
-    
-    wb = Workbook()
-    ws = wb.active
-    ws.title = 'Proveedores'
-    
-    # Encabezados
-    headers = ['ID', 'Nombre', 'RUT', 'Email', 'Teléfono', 'Dirección', 'Estado']
-    header_fill = PatternFill(start_color='DC2626', end_color='DC2626', fill_type='solid')
-    header_font = Font(bold=True, color='FFFFFF')
-    
-    for col, header in enumerate(headers, start=1):
-        cell = ws.cell(row=1, column=col, value=header)
-        cell.fill = header_fill
-        cell.font = header_font
-        cell.alignment = Alignment(horizontal='center', vertical='center')
-    
-    # Datos
-    for row, proveedor in enumerate(proveedores, start=2):
-        nombre = proveedor.nombre_display
-        ws.cell(row=row, column=1, value=proveedor.id)
-        ws.cell(row=row, column=2, value=nombre)
-        ws.cell(row=row, column=3, value=proveedor.rut)
-        ws.cell(row=row, column=4, value=proveedor.email or '')
-        ws.cell(row=row, column=5, value=proveedor.telefono or '')
-        ws.cell(row=row, column=6, value=proveedor.direccion or '')
-        ws.cell(row=row, column=7, value=proveedor.get_estado_display())
-    
-    # Ajustar columnas
-    for col in ws.columns:
-        max_length = 0
-        column = col[0].column_letter
-        for cell in col:
-            if cell.value:
-                max_length = max(max_length, len(str(cell.value)))
-        ws.column_dimensions[column].width = max_length + 2
-    
-    response = HttpResponse(
-        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    # ====== Query base + filtros iguales a la lista ======
+    buscar = (request.GET.get('buscar') or request.GET.get('q') or '').strip()
+    estado_filtro = (request.GET.get('estado') or '').strip().upper()
+    orden = (request.GET.get('orden') or 'nombre').lower()
+    direccion = (request.GET.get('dir') or 'asc').lower()
+    dir_prefix = '' if direccion == 'asc' else '-'
+
+    orden_map = {
+        'nombre': 'nombre_fantasia',
+        'razon': 'razon_social',
+        'rut': 'rut',
+        'email': 'email',
+        'telefono': 'telefono',
+        'estado': 'estado',
+        'creado': 'created_at',
+    }
+    orden_field = orden_map.get(orden, 'nombre_fantasia')
+
+    qs = (
+        Proveedor.objects
+        .all()
+        .annotate(total_productos=Count('productos', distinct=True))
     )
-    response['Content-Disposition'] = 'attachment; filename=proveedores.xlsx'
-    wb.save(response)
-    return response
+
+    if buscar:
+        qs = qs.filter(
+            Q(nombre_fantasia__icontains=buscar) |
+            Q(razon_social__icontains=buscar) |
+            Q(rut__icontains=buscar) |
+            Q(email__icontains=buscar) |
+            Q(telefono__icontains=buscar) |
+            Q(direccion__icontains=buscar)
+        )
+
+    if estado_filtro in dict(Proveedor.ESTADO_CHOICES):
+        qs = qs.filter(estado=estado_filtro)
+
+    if orden_field == 'nombre_fantasia':
+        qs = qs.order_by(f'{dir_prefix}nombre_fantasia', f'{dir_prefix}razon_social')
+    else:
+        qs = qs.order_by(f'{dir_prefix}{orden_field}', 'razon_social')
+
+    # ====== Excel con formato ======
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Proveedores"
+
+    # Paleta/estilos
+    red_dark = PatternFill("solid", fgColor="B91C1C")
+    red_header = PatternFill("solid", fgColor="DC2626")
+    title_font = Font(color="FFFFFF", bold=True, size=16)
+    th_font = Font(color="FFFFFF", bold=True, size=11)
+    subtitle_font = Font(italic=True, size=11)
+    bold = Font(bold=True)
+    center = Alignment(horizontal="center", vertical="center")
+    left = Alignment(horizontal="left", vertical="center")
+    thin = Side(border_style="thin", color="CCCCCC")
+    border = Border(top=thin, left=thin, right=thin, bottom=thin)
+    zebra = PatternFill("solid", fgColor="FFF5F5")
+
+    headers = [
+        "ID", "Nombre (fantasía / razón social)", "RUT",
+        "Email", "Teléfono", "Dirección",
+        "Estado", "Productos", "Creado"
+    ]
+    col_widths = [8, 46, 16, 30, 16, 34, 12, 12, 18]
+    total_cols = len(headers)
+
+    # Título
+    ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=total_cols)
+    ws["A1"].value = "REPORTE DE PROVEEDORES - DULCERÍA LILIS"
+    ws["A1"].fill = red_dark
+    ws["A1"].font = title_font
+    ws["A1"].alignment = center
+
+    # Subtítulo (fecha)
+    ws.merge_cells(start_row=2, start_column=1, end_row=2, end_column=total_cols)
+    ws["A2"].value = f"Generado: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}"
+    ws["A2"].font = subtitle_font
+    ws["A2"].alignment = center
+
+    # Encabezados
+    r = 4
+    for i, (h, w) in enumerate(zip(headers, col_widths), start=1):
+        cell = ws.cell(row=r, column=i, value=h)
+        cell.fill = red_header
+        cell.font = th_font
+        cell.alignment = center
+        ws.column_dimensions[get_column_letter(i)].width = w
+    ws.row_dimensions[r].height = 22
+    r += 1
+    start_data = r
+
+    # Datos
+    for idx, p in enumerate(qs, start=1):
+        nombre = p.nombre_display  # asumes propiedad en tu modelo
+        row = [
+            p.id,
+            nombre,
+            p.rut,
+            p.email or "",
+            p.telefono or "",
+            p.direccion or "",
+            p.get_estado_display(),
+            getattr(p, "total_productos", 0),
+            p.created_at.strftime("%Y-%m-%d %H:%M") if getattr(p, "created_at", None) else "",
+        ]
+        for col, val in enumerate(row, start=1):
+            cell = ws.cell(row=r, column=col, value=val)
+            cell.border = border
+            cell.alignment = left if col in (2, 4, 5, 6) else center
+        # Zebra
+        if idx % 2 == 0:
+            for col in range(1, total_cols + 1):
+                ws.cell(row=r, column=col).fill = zebra
+        r += 1
+
+    # Total al final
+    ws.merge_cells(start_row=r, start_column=1, end_row=r, end_column=total_cols-1)
+    ws.cell(row=r, column=1, value="TOTAL DE PROVEEDORES:").font = bold
+    ws.cell(row=r, column=total_cols, value=qs.count()).font = bold
+    for col in range(1, total_cols + 1):
+        ws.cell(row=r, column=col).border = border
+
+    # Mejoras de usabilidad
+    ws.auto_filter.ref = f"A4:{get_column_letter(total_cols)}{r}"
+    ws.freeze_panes = "A5"
+
+    # Respuesta HTTP
+    out = BytesIO()
+    wb.save(out)
+    out.seek(0)
+    filename = f"proveedores_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+    resp = HttpResponse(
+        out.getvalue(),
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+    resp["Content-Disposition"] = f'attachment; filename="{filename}"'
+    return resp
+
 
 
 @login_required
@@ -177,8 +283,9 @@ def buscar_proveedores_ajax(request):
     return JsonResponse({'results': results})
 
 
+
 @login_required
-@admin_required
+@editor_o_admin_required
 def crear_proveedor(request):
     """Crear nuevo proveedor"""
     if request.method == 'POST':
@@ -195,8 +302,9 @@ def crear_proveedor(request):
     return render(request, 'proveedores/crear_proveedor.html', {'form': form})
 
 
+
 @login_required
-@admin_required
+@editor_o_admin_required
 def editar_proveedor(request, pk):
     proveedor = get_object_or_404(Proveedor, pk=pk)
 
@@ -309,6 +417,7 @@ def cambiar_estado_proveedor(request, pk):
 
 
 @login_required
+@admin_required
 def proveedor_eliminar(request, pk):
     proveedor = get_object_or_404(Proveedor, pk=pk)
     if proveedor.productos.exists():
@@ -325,7 +434,9 @@ def proveedor_eliminar(request, pk):
 
 
 # Vistas paso a paso (si usas wizard multi-step)
+
 @login_required
+@editor_o_admin_required
 def proveedor_paso1(request):
     wizard = request.session.get('proveedor_wizard', {})
     initial = wizard.get('paso1', {})
@@ -348,6 +459,7 @@ def proveedor_paso1(request):
 
 
 @login_required
+@editor_o_admin_required
 def proveedor_paso2(request):
     wizard = request.session.setdefault('proveedor_wizard', {})
     if 'paso1' not in wizard:
@@ -375,7 +487,9 @@ def proveedor_paso2(request):
     return render(request, 'proveedores/proveedor_paso2.html', context)
 
 
+
 @login_required
+@editor_o_admin_required
 def proveedor_paso3(request):
     wizard = request.session.setdefault('proveedor_wizard', {})
     if 'paso1' not in wizard or 'paso2' not in wizard:

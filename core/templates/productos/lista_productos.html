@@ -335,11 +335,13 @@
     <h1 class="page-title">📦 Gestión de Productos</h1>
     <div style="display: flex; gap: 1rem;">
         <a href="{% url 'core:exportar_productos_excel' %}?buscar={{ buscar }}&categoria={{ categoria_filtro }}&estado={{ estado_filtro }}&orden={{ orden }}" class="btn export-btn">
-            📊 Exportar Excel
+            Exportar Excel
         </a>
+        {% if request.user.perfil.rol == 'ADMIN' or request.user.perfil.rol == 'EDITOR' %}
         <a href="{% url 'core:producto_paso1' %}" class="btn btn-primary">
-            ➕ Nuevo Producto
+            Nuevo Producto
         </a>
+        {% endif %}
     </div>
 </div>
 
@@ -444,16 +446,20 @@
                 </td>
                 <td>
                     <div class="action-buttons">
-                        <a href="{% url 'core:editar_producto' producto.id %}" class="btn btn-sm btn-success">
-                            ✏️ Editar
-                        </a>
-                        <button
-                            type="button"
-                            class="btn btn-sm btn-danger btn-eliminar"
-                            data-id="{{ producto.id }}"
-                            data-nombre="{{ producto.nombre|escape }}">
-                            🗑️ Eliminar
-                        </button>
+                        {% if request.user.perfil.rol == 'ADMIN' or request.user.perfil.rol == 'EDITOR' %}
+                            <a href="{% url 'core:editar_producto' producto.id %}" class="btn btn-sm btn-success">
+                                Editar
+                            </a>
+                        {% endif %}
+                        {% if request.user.perfil.rol == 'ADMIN' %}
+                            <button
+                                type="button"
+                                class="btn btn-sm btn-danger btn-eliminar"
+                                data-id="{{ producto.id }}"
+                                data-nombre="{{ producto.nombre|escape }}">
+                                Eliminar
+                            </button>
+                        {% endif %}
                     </div>
                 </td>
             </tr>

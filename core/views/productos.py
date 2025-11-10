@@ -10,7 +10,7 @@ import openpyxl
 from openpyxl.styles import Font, Alignment, PatternFill
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
-
+from ..decorators import admin_required, editor_o_admin_required, lector_o_superior
 from ..decorators import vendedor_o_admin, admin_required
 from ..models import Producto, Categoria, UnidadMedida
 from ..models.proveedores import ProveedorProducto
@@ -29,8 +29,8 @@ def _resolve_page_size(request, session_key, default=15):
             pass
     return request.session.get(session_key, default)
 
-@vendedor_o_admin
 @login_required
+@lector_o_superior
 def lista_productos(request):
     """
     Lista de productos con búsqueda en tiempo real, paginación y ordenamiento
@@ -232,7 +232,7 @@ def crear_producto(request):
 
 
 @login_required
-@admin_required
+@editor_o_admin_required
 @transaction.atomic
 def producto_paso1(request):
     producto = None
@@ -272,7 +272,7 @@ def producto_paso1(request):
 
 
 @login_required
-@admin_required
+@editor_o_admin_required
 @transaction.atomic
 def producto_paso2(request):
     producto = None
@@ -311,9 +311,8 @@ def producto_paso2(request):
 
     return render(request, 'productos/producto_paso2.html', {'form': form, 'producto': producto})
 
-
 @login_required
-@admin_required
+@editor_o_admin_required
 @transaction.atomic
 def producto_paso3(request):
     producto = None
@@ -407,8 +406,8 @@ def producto_paso3(request):
         'data': data,
     })
 
-
-@admin_required
+@login_required
+@editor_o_admin_required
 def editar_producto(request, pk):
     producto = get_object_or_404(Producto, pk=pk)
     request.session.pop('producto_id', None)
@@ -416,6 +415,7 @@ def editar_producto(request, pk):
     return render(request, 'productos/editar_producto.html', {'producto': producto})
 
 
+@login_required
 @admin_required
 @require_POST
 def eliminar_producto(request, pk):

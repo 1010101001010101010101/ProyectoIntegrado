@@ -6,7 +6,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY
 SECRET_KEY = config('DJANGO_SECRET_KEY', default='django-insecure-temp-key')
-DEBUG = config('DJANGO_DEBUG', cast=bool, default=True)
+DEBUG = config('DJANGO_DEBUG', cast=bool, default=False)
 
 # Application definition
 INSTALLED_APPS = [
@@ -69,6 +69,7 @@ DATABASES = {
     }
 }
 
+
 ALLOWED_HOSTS = config(
     'DJANGO_ALLOWED_HOSTS',
     cast=Csv(),
@@ -98,7 +99,7 @@ USE_TZ = True
 
 # Static files
 # Static files
-DEBUG = True
+DEBUG = False
 
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
@@ -128,11 +129,11 @@ SESSION_COOKIE_SECURE = False # en producción con HTTPS
 # sólo enviar la cookie en el mismo sitio (protección CSRF) / Lax por defecto en Django
 SESSION_COOKIE_SAMESITE = 'Lax' # o 'Strict'/'None'(+Secure)
 
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = "tu_correo@gmail.com"
-EMAIL_HOST_PASSWORD = "clave_app"
+EMAIL_HOST_USER = "prueba1penka@gmail.com"
+EMAIL_HOST_PASSWORD = "ckfq zkgr fzsx ipdf"
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 PASSWORD_RESET_TIMEOUT = 3600

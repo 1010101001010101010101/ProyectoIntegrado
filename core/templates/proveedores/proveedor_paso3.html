@@ -519,156 +519,912 @@
 
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-{{ errores|json_script:"erroresProveedorPaso3" }}
 <script>
-    const form = document.getElementById('proveedorForm');
-    const formPrefix = 'productos';
-    const totalForms = document.querySelector(`#id_${formPrefix}-TOTAL_FORMS`);
-    const tableBody = document.querySelector('#productosTable tbody');
-    const emptyTemplate = document.getElementById('producto-empty-template');
+// ============================================
+// PROVEEDOR PASO 3 - VALIDACIONES Y SWEETALERTS PRO (FINAL)
+// ============================================
 
-    const mostrarErrores = (errores) => {
-        if (!errores.length) return;
-        const lista = `<ul class="swal-error-list">${errores.map(err => `<li>${err}</li>`).join('')}</ul>`;
-        Swal.fire({
-            icon: 'error',
-            title: 'Corrige los campos indicados',
-            html: lista,
-            confirmButtonText: 'Entendido',
-            customClass: { confirmButton: 'swal2-confirm' },
-        });
-    };
-
-    const erroresNode = document.getElementById('erroresProveedorPaso3');
-    if (erroresNode) {
-        const erroresIniciales = JSON.parse(erroresNode.textContent);
-        if (erroresIniciales.length) {
-            mostrarErrores(erroresIniciales);
-        }
+// Toast personalizado
+const Toast = Swal.mixin({
+    toast: true,
+    position: 'top-end',
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer)
+        toast.addEventListener('mouseleave', Swal.resumeTimer)
     }
+});
 
-    document.getElementById('agregarProductoBtn').addEventListener('click', () => {
+// Mensaje de bienvenida
+document.addEventListener('DOMContentLoaded', function() {
+    Swal.fire({
+        icon: 'success',
+        title: '🎯 Paso Final',
+        html: '<p>Configure las relaciones con productos</p><small style="color: #6B7280;">¡Ya casi terminas!</small>',
+        timer: 3000,
+        showConfirmButton: false,
+        toast: true,
+        position: 'top-end',
+        background: '#E8F5E9',
+        iconColor: '#4CAF50'
+    });
+});
+
+// ============================================
+// GESTIÓN DINÁMICA DE PRODUCTOS
+// ============================================
+
+const formPrefix = 'productos';
+const totalForms = document.querySelector(`#id_${formPrefix}-TOTAL_FORMS`);
+const tableBody = document.querySelector('#productosTable tbody');
+const emptyTemplate = document.getElementById('producto-empty-template');
+const agregarBtn = document.getElementById('agregarProductoBtn');
+
+// Agregar producto
+if (agregarBtn) {
+    agregarBtn.addEventListener('click', function() {
         const formIndex = parseInt(totalForms.value, 10);
         const row = document.createElement('tr');
         row.classList.add('producto-row');
         row.innerHTML = emptyTemplate.innerHTML.replace(/__prefix__/g, formIndex);
         tableBody.appendChild(row);
         totalForms.value = formIndex + 1;
+        aplicarValidacionesProducto(row, formIndex);
+        Swal.fire({
+            icon: 'success',
+            title: '✓ Producto agregado',
+            text: 'Complete los datos del producto',
+            timer: 2000,
+            showConfirmButton: false,
+            toast: true,
+            position: 'top-end',
+            background: '#D1FAE5'
+        });
+        row.style.opacity = '0';
+        row.style.transform = 'translateY(-20px)';
+        setTimeout(() => {
+            row.style.transition = 'all 0.3s ease';
+            row.style.opacity = '1';
+            row.style.transform = 'translateY(0)';
+        }, 10);
     });
+}
 
-    tableBody.addEventListener('click', (event) => {
-        if (!event.target.classList.contains('link-eliminar')) return;
-        const row = event.target.closest('tr');
-        const deleteField = row.querySelector('input[name$="-DELETE"]');
-        if (deleteField) {
-            deleteField.checked = true;
-            row.style.display = 'none';
+// Eliminar producto
+if (tableBody) {
+    tableBody.addEventListener('click', function(event) {
+        if (event.target.classList.contains('link-eliminar') || 
+            event.target.closest('.link-eliminar')) {
+            const row = event.target.closest('tr');
+            const deleteField = row.querySelector('input[name$="-DELETE"]');
+            if (deleteField) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: '¿Eliminar producto?',
+                    text: 'Esta acción no se puede deshacer',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí, eliminar',
+                    cancelButtonText: 'Cancelar',
+                    confirmButtonColor: '#DC2626',
+                    cancelButtonColor: '#6B7280'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        deleteField.checked = true;
+                        row.style.transition = 'all 0.3s ease';
+                        row.style.opacity = '0';
+                        row.style.transform = 'translateX(-20px)';
+                        setTimeout(() => {
+                            row.style.display = 'none';
+                        }, 300);
+                        Toast.fire({
+                            icon: 'info',
+                            title: 'Producto marcado para eliminar',
+                            background: '#F3F4F6'
+                        });
+                    }
+                });
+            }
         }
     });
+}
 
-    const validarFormulario = () => {
+// ============================================
+// VALIDACIONES DE PRODUCTOS
+// ============================================
+
+function aplicarValidacionesProducto(row, index) {
+    const costoInput = row.querySelector(`input[name="productos-${index}-costo"]`);
+    const leadTimeInput = row.querySelector(`input[name="productos-${index}-lead_time"]`);
+    const productoSelect = row.querySelector(`select[name="productos-${index}-producto"]`);
+    // Validación de costo
+    if (costoInput) {
+        costoInput.addEventListener('input', function(e) {
+            e.target.value = e.target.value.replace(/[^\d.]/g, '');
+            const partes = e.target.value.split('.');
+            if (partes.length > 2) {
+                e.target.value = partes[0] + '.' + partes.slice(1).join('');
+            }
+            if (partes[1] && partes[1].length > 2) {
+                e.target.value = partes[0] + '.' + partes[1].substring(0, 2);
+            }
+            const valor = parseFloat(e.target.value);
+            if (valor > 0 && valor < 1000000) {
+                e.target.style.borderColor = '#10B981';
+                e.target.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+            } else if (valor >= 1000000) {
+                e.target.style.borderColor = '#F59E0B';
+            } else {
+                e.target.style.borderColor = 'var(--border)';
+                e.target.style.boxShadow = '';
+            }
+        });
+        costoInput.addEventListener('blur', function(e) {
+            const valor = parseFloat(e.target.value);
+            if (e.target.value && valor <= 0) {
+                Toast.fire({
+                    icon: 'error',
+                    title: '❌ Costo inválido',
+                    text: 'El costo debe ser mayor a 0',
+                    background: '#FEE2E2'
+                });
+                e.target.focus();
+            } else if (valor > 10000000) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: '💰 Costo muy alto',
+                    html: `
+                        <div style="text-align: center; margin: 1rem 0;">
+                            <div style="background: #FEF3C7; padding: 1rem; border-radius: 8px;">
+                                <strong style="color: #92400E;">Costo: $${valor.toLocaleString('es-CL')}</strong>
+                                <p style="margin-top: 0.5rem; color: #6B7280;">
+                                    Verifica que el costo sea correcto
+                                </p>
+                            </div>
+                        </div>
+                    `,
+                    confirmButtonText: 'Entendido',
+                    confirmButtonColor: '#4CAF50'
+                });
+            }
+        });
+    }
+    // Validación de lead time
+    if (leadTimeInput) {
+        leadTimeInput.addEventListener('input', function(e) {
+            e.target.value = e.target.value.replace(/[^\d]/g, '');
+            const valor = parseInt(e.target.value) || 0;
+            if (valor > 0 && valor <= 30) {
+                e.target.style.borderColor = '#10B981';
+                e.target.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+            } else if (valor > 30 && valor <= 90) {
+                e.target.style.borderColor = '#F59E0B';
+            } else if (valor > 90) {
+                e.target.style.borderColor = '#DC2626';
+            } else {
+                e.target.style.borderColor = 'var(--border)';
+                e.target.style.boxShadow = '';
+            }
+        });
+        leadTimeInput.addEventListener('blur', function(e) {
+            const valor = parseInt(e.target.value) || 0;
+            if (valor > 90) {
+                Toast.fire({
+                    icon: 'warning',
+                    title: '⚠️ Lead time largo',
+                    text: `${valor} días puede afectar la disponibilidad`,
+                    background: '#FEF3C7'
+                });
+            }
+        });
+    }
+    // Notificación al seleccionar producto
+    if (productoSelect) {
+        productoSelect.addEventListener('change', function(e) {
+            if (e.target.value) {
+                const productoTexto = e.target.options[e.target.selectedIndex].text;
+                Toast.fire({
+                    icon: 'success',
+                    title: `📦 ${productoTexto}`,
+                    text: 'Producto seleccionado',
+                    background: '#D1FAE5'
+                });
+            }
+        });
+    }
+}
+
+// Aplicar validaciones a productos existentes
+document.addEventListener('DOMContentLoaded', function() {
+    const rows = tableBody.querySelectorAll('.producto-row');
+    rows.forEach((row, index) => {
+        aplicarValidacionesProducto(row, index);
+    });
+});
+
+// ============================================
+// VALIDACIONES DE CAMPOS GENERALES
+// ============================================
+
+const esPreferenteCheck = document.getElementById('es_proveedor_preferente');
+const leadTimeGeneralInput = document.getElementById('lead_time');
+const pedidoMinimoInput = document.getElementById('pedido_minimo');
+const observacionesInput = document.getElementById('observaciones');
+const estadoSelect = document.getElementById('estado');
+
+// Proveedor preferente
+if (esPreferenteCheck) {
+    esPreferenteCheck.addEventListener('change', function(e) {
+        if (e.target.checked) {
+            Swal.fire({
+                icon: 'info',
+                title: '⭐ Proveedor Preferente',
+                html: '<p>Este proveedor será priorizado en las órdenes de compra</p>',
+                timer: 3000,
+                showConfirmButton: false,
+                toast: true,
+                position: 'top-end',
+                background: '#FEF3C7',
+                iconColor: '#F59E0B'
+            });
+        }
+    });
+}
+
+// Lead time general
+if (leadTimeGeneralInput) {
+    leadTimeGeneralInput.addEventListener('input', function(e) {
+        e.target.value = e.target.value.replace(/[^\d]/g, '');
+        const valor = parseInt(e.target.value) || 0;
+        if (valor > 0 && valor <= 30) {
+            e.target.style.borderColor = '#10B981';
+        } else if (valor > 30 && valor <= 90) {
+            e.target.style.borderColor = '#F59E0B';
+        } else if (valor > 90) {
+            e.target.style.borderColor = '#DC2626';
+        } else {
+            e.target.style.borderColor = 'var(--border)';
+        }
+    });
+    leadTimeGeneralInput.addEventListener('blur', function(e) {
+        const valor = parseInt(e.target.value) || 0;
+        if (valor > 60) {
+            Toast.fire({
+                icon: 'warning',
+                title: `⏱️ ${valor} días de lead time`,
+                text: 'Considere este tiempo en sus planificaciones',
+                background: '#FEF3C7'
+            });
+        }
+    });
+}
+
+// Pedido mínimo
+if (pedidoMinimoInput) {
+    pedidoMinimoInput.addEventListener('input', function(e) {
+        e.target.value = e.target.value.replace(/[^\d.]/g, '');
+        const partes = e.target.value.split('.');
+        if (partes.length > 2) {
+            e.target.value = partes[0] + '.' + partes.slice(1).join('');
+        }
+        if (partes[1] && partes[1].length > 2) {
+            e.target.value = partes[0] + '.' + partes[1].substring(0, 2);
+        }
+        const valor = parseFloat(e.target.value);
+        if (valor > 0 && valor < 100000) {
+            e.target.style.borderColor = '#10B981';
+        } else if (valor >= 100000) {
+            e.target.style.borderColor = '#F59E0B';
+        } else {
+            e.target.style.borderColor = 'var(--border)';
+        }
+    });
+    pedidoMinimoInput.addEventListener('blur', function(e) {
+        const valor = parseFloat(e.target.value);
+        if (valor > 1000000) {
+            Toast.fire({
+                icon: 'info',
+                title: '💰 Pedido mínimo alto',
+                text: `$${valor.toLocaleString('es-CL')} es un monto considerable`,
+                background: '#DBEAFE'
+            });
+        }
+    });
+}
+
+// Estado
+if (estadoSelect) {
+    estadoSelect.addEventListener('change', function(e) {
+        const estadoIconos = {
+            'ACTIVO': { icon: '✅', color: '#10B981', bg: '#D1FAE5', texto: 'Proveedor activo' },
+            'INACTIVO': { icon: '⏸️', color: '#6B7280', bg: '#F3F4F6', texto: 'Proveedor inactivo' },
+            'SUSPENDIDO': { icon: '🚫', color: '#DC2626', bg: '#FEE2E2', texto: 'Proveedor suspendido' }
+        };
+        const info = estadoIconos[e.target.value];
+        if (info) {
+            Toast.fire({
+                icon: 'info',
+                title: `${info.icon} ${info.texto}`,
+                background: info.bg
+            });
+        }
+    });
+}
+
+// ============================================
+// VALIDACIÓN PRINCIPAL DEL FORMULARIO
+// ============================================
+
+const form = document.getElementById('proveedorForm');
+if (form) {
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const estado = estadoSelect.value;
+        const leadTime = leadTimeGeneralInput.value.trim();
+        const pedidoMinimo = pedidoMinimoInput.value.trim();
+        const esPreferente = esPreferenteCheck.checked;
         const errores = [];
-        const leadTime = document.getElementById('lead_time').value.trim();
-        const pedidoMinimo = document.getElementById('pedido_minimo').value.trim();
-
-        if (leadTime && parseFloat(leadTime) < 0) {
-            errores.push('Lead Time (días) no puede ser negativo.');
-        }
-        if (pedidoMinimo && parseFloat(pedidoMinimo) < 0) {
-            errores.push('Pedido mínimo no puede ser negativo.');
-        }
-
+        const productosValidos = [];
         tableBody.querySelectorAll('.producto-row').forEach((row, index) => {
             if (row.style.display === 'none') return;
             const deleteField = row.querySelector('input[name$="-DELETE"]');
             if (deleteField && deleteField.checked) return;
-
-            const select = row.querySelector('select');
-            const costo = row.querySelector(`input[name$='-costo']`);
-            const lead = row.querySelector(`input[name$='-lead_time']`);
+            const select = row.querySelector('select[name$="-producto"]');
+            const costo = row.querySelector('input[name$="-costo"]');
+            const lead = row.querySelector('input[name$="-lead_time"]');
             const numeroFila = index + 1;
-
             const valorProducto = select ? select.value.trim() : '';
             const valorCosto = costo ? costo.value.trim() : '';
             const valorLead = lead ? lead.value.trim() : '';
-
-            const filaVacia = !valorProducto &&
-                (valorCosto === '' || Number(valorCosto) === 0) &&
+            const filaVacia = !valorProducto && 
+                (valorCosto === '' || Number(valorCosto) === 0) && 
                 (valorLead === '' || Number(valorLead) === 0);
-
-            if (filaVacia) {
-                return;
-            }
-
+            if (filaVacia) return;
             if (!valorProducto) {
-                errores.push(`Producto #${numeroFila}: selecciona un producto.`);
+                errores.push(`Producto #${numeroFila}: selecciona un producto`);
             }
-            if (valorCosto === '') {
-                errores.push(`Producto #${numeroFila}: ingresa el costo.`);
-            } else if (parseFloat(valorCosto) < 0) {
-                errores.push(`Producto #${numeroFila}: el costo no puede ser negativo.`);
+            if (valorCosto === '' || parseFloat(valorCosto) <= 0) {
+                errores.push(`Producto #${numeroFila}: ingresa un costo válido mayor a 0`);
             }
-            if (valorLead && parseFloat(valorLead) < 0) {
-                errores.push(`Producto #${numeroFila}: el lead time no puede ser negativo.`);
+            if (valorLead && parseInt(valorLead) < 0) {
+                errores.push(`Producto #${numeroFila}: el lead time no puede ser negativo`);
+            }
+            if (valorProducto && valorCosto && parseFloat(valorCosto) > 0) {
+                const productoTexto = select.options[select.selectedIndex].text;
+                productosValidos.push({
+                    nombre: productoTexto,
+                    costo: parseFloat(valorCosto),
+                    lead: valorLead || 'No especificado'
+                });
             }
         });
-
-        return errores;
-    };
-
-    form.addEventListener('submit', (event) => {
-        if (form.dataset.submitting === 'true') return;
-        event.preventDefault();
-        const errores = validarFormulario();
-        if (errores.length) {
-            mostrarErrores(errores);
+        if (errores.length > 0) {
+            let listaErrores = '<ul style="text-align: left; margin: 1rem 0; padding-left: 1.5rem;">';
+            errores.forEach(error => {
+                listaErrores += `<li style="margin: 0.5rem 0; color: #DC2626;">${error}</li>`;
+            });
+            listaErrores += '</ul>';
+            Swal.fire({
+                icon: 'error',
+                title: '❌ Corrige los siguientes errores',
+                html: `
+                    ${listaErrores}
+                    <div style="background: #FEE2E2; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                        <strong style="color: #DC2626;">Total: ${errores.length} error${errores.length !== 1 ? 'es' : ''}</strong>
+                    </div>
+                `,
+                confirmButtonText: 'Entendido',
+                confirmButtonColor: '#4CAF50',
+                width: '600px'
+            });
             return;
         }
-
-        const estado = document.getElementById('estado').value;
-        const estadoDescripcion = {
-            'ACTIVO': '✅ Activo',
-            'INACTIVO': '⏸️ Inactivo',
-            'SUSPENDIDO': '🚫 Suspendido',
-        }[estado] || estado;
-        Swal.fire({
-            icon: 'question',
-            title: '¿Guardar proveedor?',
-            html: `
-                <p>Estás a punto de crear un nuevo proveedor.</p>
-                <p><strong>Estado:</strong> ${estadoDescripcion}</p>
-            `,
-            showCancelButton: true,
-            confirmButtonText: '✓ Sí, guardar',
-            cancelButtonText: 'Cancelar',
-            customClass: {
-                confirmButton: 'swal2-confirm',
-                cancelButton: 'swal2-cancel',
-            },
-        }).then((result) => {
-            if (!result.isConfirmed) return;
-            form.dataset.submitting = 'true';
+        if (leadTime && parseInt(leadTime) < 0) {
             Swal.fire({
-                icon: 'success',
-                title: 'Guardando proveedor',
-                html: 'Procesando la información...',
-                timer: 1500,
-                showConfirmButton: false,
-                willClose: () => form.submit(),
+                icon: 'error',
+                title: '❌ Lead time inválido',
+                text: 'El lead time no puede ser negativo',
+                confirmButtonText: 'Corregir',
+                confirmButtonColor: '#4CAF50'
             });
+            leadTimeGeneralInput.focus();
+            return;
+        }
+        if (pedidoMinimo && parseFloat(pedidoMinimo) < 0) {
+            Swal.fire({
+                icon: 'error',
+                title: '❌ Pedido mínimo inválido',
+                text: 'El pedido mínimo no puede ser negativo',
+                confirmButtonText: 'Corregir',
+                confirmButtonColor: '#4CAF50'
+            });
+            pedidoMinimoInput.focus();
+            return;
+        }
+        if (!estado) {
+            Swal.fire({
+                icon: 'error',
+                title: '❌ Estado requerido',
+                text: 'Debe seleccionar el estado del proveedor',
+                confirmButtonText: 'Entendido',
+                confirmButtonColor: '#4CAF50'
+            });
+            estadoSelect.focus();
+            return;
+        }
+        if (productosValidos.length === 0) {
+            Swal.fire({
+                icon: 'question',
+                title: '📦 Sin productos asociados',
+                html: '<p>No has agregado productos a este proveedor</p><p style="color: #6B7280; margin-top: 0.5rem;">¿Deseas continuar sin productos?</p>',
+                showCancelButton: true,
+                confirmButtonText: '✓ Sí, crear proveedor',
+                cancelButtonText: '← Agregar productos',
+                confirmButtonColor: '#4CAF50',
+                cancelButtonColor: '#6B7280',
+                backdrop: `rgba(76, 175, 80, 0.1)`
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    mostrarConfirmacionFinal(estado, leadTime, pedidoMinimo, esPreferente, productosValidos);
+                }
+            });
+            return;
+        }
+        mostrarConfirmacionFinal(estado, leadTime, pedidoMinimo, esPreferente, productosValidos);
+    });
+}
+
+// ============================================
+// CONFIRMACIÓN FINAL
+// ============================================
+
+function mostrarConfirmacionFinal(estado, leadTime, pedidoMinimo, esPreferente, productos) {
+    const estadoInfo = {
+        'ACTIVO': { icon: '✅', color: '#10B981', texto: 'Activo' },
+        'INACTIVO': { icon: '⏸️', color: '#6B7280', texto: 'Inactivo' },
+        'SUSPENDIDO': { icon: '🚫', color: '#DC2626', texto: 'Suspendido' }
+    }[estado] || { icon: '❓', color: '#6B7280', texto: estado };
+    let resumenHTML = `
+        <div style="text-align: left; margin: 1.5rem 0; font-size: 0.95rem;">
+            <h4 style="margin-bottom: 1rem; color: #1F2937;">📊 Información General</h4>
+            <div style="display: grid; gap: 0.75rem; margin-bottom: 1.5rem;">
+                <div style="background: ${estadoInfo.color}15; padding: 0.75rem; border-radius: 6px; border-left: 3px solid ${estadoInfo.color};">
+                    <strong>Estado:</strong> <span style="color: ${estadoInfo.color}; font-weight: bold;">${estadoInfo.icon} ${estadoInfo.texto}</span>
+                </div>
+    `;
+    if (esPreferente) {
+        resumenHTML += `
+                <div style="background: #FEF3C7; padding: 0.75rem; border-radius: 6px; border-left: 3px solid #F59E0B;">
+                    <strong>⭐ Proveedor Preferente</strong>
+                </div>
+        `;
+    }
+    if (leadTime) {
+        const ltNum = parseInt(leadTime);
+        const colorLT = ltNum <= 30 ? '#10B981' : ltNum <= 60 ? '#F59E0B' : '#DC2626';
+        resumenHTML += `
+                <div style="background: ${colorLT}15; padding: 0.75rem; border-radius: 6px; border-left: 3px solid ${colorLT};">
+                    <strong>⏱️ Lead Time:</strong> <span style="color: ${colorLT}; font-weight: bold;">${leadTime} días</span>
+                </div>
+        `;
+    }
+    if (pedidoMinimo) {
+        const pmNum = parseFloat(pedidoMinimo);
+        resumenHTML += `
+                <div style="background: #DBEAFE; padding: 0.75rem; border-radius: 6px; border-left: 3px solid #2563EB;">
+                    <strong>💰 Pedido Mínimo:</strong> <span style="color: #2563EB; font-weight: bold;">$${pmNum.toLocaleString('es-CL')}</span>
+                </div>
+        `;
+    }
+    resumenHTML += '</div>';
+    if (productos.length > 0) {
+        resumenHTML += `
+            <h4 style="margin-bottom: 1rem; color: #1F2937;">📦 Productos (${productos.length})</h4>
+            <div style="max-height: 200px; overflow-y: auto; background: #F9FAFB; border-radius: 6px; padding: 0.5rem;">
+        `;
+        productos.forEach((prod, index) => {
+            resumenHTML += `
+                <div style="padding: 0.5rem; margin: 0.25rem 0; background: white; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
+                    <span><strong>${index + 1}.</strong> ${prod.nombre}</span>
+                    <span style="color: #10B981; font-weight: bold;">$${prod.costo.toLocaleString('es-CL')}</span>
+                </div>
+            `;
         });
-    });
-
-    document.getElementById('lead_time').addEventListener('input', (event) => {
-        if (parseFloat(event.target.value) < 0) {
-            event.target.value = 0;
+        resumenHTML += '</div>';
+    }
+    resumenHTML += '</div>';
+    Swal.fire({
+        icon: 'question',
+        title: '🎉 ¿Crear proveedor?',
+        html: `
+            <p style="color: #6B7280; margin-bottom: 1rem;">
+                Se guardará toda la información de los 3 pasos
+            </p>
+            ${resumenHTML}
+            <div style="background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%); padding: 1.5rem; border-radius: 10px; margin-top: 1.5rem; border: 2px solid #4CAF50;">
+                <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                    <span style="font-size: 1.5rem;">✅</span>
+                    <strong style="color: #2E7D32; font-size: 1.1rem;">¿Confirmar creación?</strong>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin-top: 1rem; font-size: 0.85em;">
+                    <div style="text-align: center;">
+                        <div style="font-weight: bold; color: #4CAF50;">✓ Paso 1</div>
+                        <div style="color: #6B7280;">Identificación</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-weight: bold; color: #4CAF50;">✓ Paso 2</div>
+                        <div style="color: #6B7280;">Dirección</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-weight: bold; color: #4CAF50;">✓ Paso 3</div>
+                        <div style="color: #6B7280;">Relaciones</div>
+                    </div>
+                </div>
+            </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: '✓ Sí, crear proveedor',
+        cancelButtonText: '← Revisar datos',
+        confirmButtonColor: '#4CAF50',
+        cancelButtonColor: '#6B7280',
+        width: '700px',
+        backdrop: `rgba(76, 175, 80, 0.1)`
+    }).then((result) => {
+        if (result.isConfirmed) {
+            crearProveedorFinal();
         }
     });
+}
 
-    document.getElementById('pedido_minimo').addEventListener('input', (event) => {
-        if (parseFloat(event.target.value) < 0) {
-            event.target.value = 0;
+// ============================================
+// ANIMACIÓN DE CREACIÓN FINAL
+// ============================================
+
+function crearProveedorFinal() {
+    let etapa = 0;
+    const etapas = [
+        { icono: '📝', texto: 'Validando información completa...', progreso: 20 },
+        { icono: '💾', texto: 'Creando proveedor en el sistema...', progreso: 40 },
+        { icono: '📍', texto: 'Guardando ubicación...', progreso: 60 },
+        { icono: '📦', texto: 'Vinculando productos...', progreso: 80 },
+        { icono: '✅', texto: 'Finalizando registro...', progreso: 100 }
+    ];
+    Swal.fire({
+        title: etapas[0].texto,
+        html: `
+            <div style="margin: 1.5rem 0;">
+                <div style="font-size: 3rem; margin-bottom: 1rem; animation: bounce 0.5s;">
+                    ${etapas[0].icono}
+                </div>
+                <div style="background: #F3F4F6; height: 8px; border-radius: 4px; overflow: hidden;">
+                    <div id="progressBar" style="background: linear-gradient(90deg, #4CAF50, #388E3C); height: 100%; width: 0%; transition: width 0.5s ease;"></div>
+                </div>
+                <p style="color: #6B7280; margin-top: 1rem; font-size: 0.9em;">Por favor espere...</p>
+            </div>
+        `,
+        showConfirmButton: false,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => {
+            const progressBar = document.getElementById('progressBar');
+            const intervalo = setInterval(() => {
+                if (etapa < etapas.length) {
+                    const etapaActual = etapas[etapa];
+                    Swal.update({
+                        title: etapaActual.texto,
+                        html: `
+                            <div style="margin: 1.5rem 0;">
+                                <div style="font-size: 3rem; margin-bottom: 1rem; animation: bounce 0.5s;">
+                                    ${etapaActual.icono}
+                                </div>
+                                <div style="background: #F3F4F6; height: 8px; border-radius: 4px; overflow: hidden;">
+                                    <div style="background: linear-gradient(90deg, #4CAF50, #388E3C); height: 100%; width: ${etapaActual.progreso}%; transition: width 0.5s ease;"></div>
+                                </div>
+                                <p style="color: #6B7280; margin-top: 1rem; font-size: 0.9em;">${etapaActual.progreso}% completado</p>
+                            </div>
+                        `
+                    });
+                    etapa++;
+                } else {
+                    clearInterval(intervalo);
+                    mostrarExito();
+                }
+            }, 800);
         }
     });
+}
+
+function mostrarExito() {
+    Swal.fire({
+        icon: 'success',
+        title: '🎉 ¡Proveedor creado exitosamente!',
+        html: `
+            <div style="margin: 1.5rem 0;">
+                <div style="background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%); padding: 1.5rem; border-radius: 12px; border: 2px solid #4CAF50;">
+                    <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">✅</div>
+                    <p style="color: #2E7D32; font-size: 1.1rem; margin: 0;">El proveedor ha sido registrado correctamente</p>
+                </div>
+                <div style="margin-top: 1.5rem; padding: 1rem; background: #F9FAFB; border-radius: 8px;">
+                    <p style="color: #6B7280; margin: 0; font-size: 0.9em;">
+                        ✓ Información de identificación guardada<br>
+                        ✓ Dirección y condiciones comerciales configuradas<br>
+                        ✓ Productos vinculados correctamente<br>
+                        ✓ Proveedor listo para usar
+                    </p>
+                </div>
+            </div>
+        `,
+        confirmButtonText: '🏢 Ver lista de proveedores',
+        confirmButtonColor: '#4CAF50',
+        backdrop: `rgba(76, 175, 80, 0.1)`,
+        customClass: {
+            popup: 'animate__animated animate__bounceIn',
+            confirmButton: 'animate__animated animate__pulse animate__infinite'
+        },
+        willClose: () => {
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes bounce {
+                    0%, 100% { transform: translateY(0); }
+                    50% { transform: translateY(-20px); }
+                }
+            `;
+            document.head.appendChild(style);
+            form.submit();
+        }
+    });
+}
+
+// ============================================
+// FUNCIÓN PARA LIMPIAR FORMULARIO (OPCIONAL)
+// ============================================
+
+function limpiarFormulario() {
+    Swal.fire({
+        icon: 'warning',
+        title: '🔄 ¿Limpiar formulario?',
+        text: 'Se perderán los datos ingresados en este paso',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, limpiar',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#F59E0B',
+        cancelButtonColor: '#6B7280'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            form.reset();
+            const rows = tableBody.querySelectorAll('.producto-row');
+            rows.forEach((row, index) => {
+                if (index > 0) {
+                    row.remove();
+                }
+            });
+            if (totalForms) {
+                totalForms.value = '1';
+            }
+            [leadTimeGeneralInput, pedidoMinimoInput].forEach(input => {
+                if (input) {
+                    input.style.borderColor = 'var(--border)';
+                    input.style.boxShadow = '';
+                }
+            });
+            Toast.fire({
+                icon: 'success',
+                title: '✓ Formulario limpiado',
+                background: '#D1FAE5'
+            });
+        }
+    });
+}
+
+// ============================================
+// ATAJOS DE TECLADO (OPCIONAL)
+// ============================================
+
+document.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        form.dispatchEvent(new Event('submit'));
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        if (agregarBtn) {
+            agregarBtn.click();
+        }
+    }
+});
+
+// ============================================
+// PREVENIR PÉRDIDA DE DATOS
+// ============================================
+
+let formModificado = false;
+
+form.addEventListener('input', function() {
+    formModificado = true;
+});
+
+window.addEventListener('beforeunload', function(e) {
+    if (formModificado) {
+        e.preventDefault();
+        e.returnValue = '';
+        return '';
+    }
+});
+
+form.addEventListener('submit', function() {
+    formModificado = false;
+});
+
+// ============================================
+// VALIDACIÓN DE PRODUCTOS DUPLICADOS
+// ============================================
+
+function validarProductosDuplicados() {
+    const productosSeleccionados = new Map();
+    let hayDuplicados = false;
+    tableBody.querySelectorAll('.producto-row').forEach((row) => {
+        if (row.style.display === 'none') return;
+        const deleteField = row.querySelector('input[name$="-DELETE"]');
+        if (deleteField && deleteField.checked) return;
+        const select = row.querySelector('select[name$="-producto"]');
+        if (!select || !select.value) return;
+        const productoId = select.value;
+        const productoNombre = select.options[select.selectedIndex].text;
+        if (productosSeleccionados.has(productoId)) {
+            hayDuplicados = true;
+            select.style.borderColor = '#DC2626';
+            select.style.boxShadow = '0 0 0 3px rgba(220, 38, 38, 0.1)';
+            Toast.fire({
+                icon: 'error',
+                title: '⚠️ Producto duplicado',
+                text: `"${productoNombre}" ya está en la lista`,
+                background: '#FEE2E2'
+            });
+        } else {
+            productosSeleccionados.set(productoId, productoNombre);
+            select.style.borderColor = 'var(--border)';
+            select.style.boxShadow = '';
+        }
+    });
+    return !hayDuplicados;
+}
+
+// Validar duplicados al seleccionar un producto
+if (tableBody) {
+    tableBody.addEventListener('change', function(e) {
+        if (e.target.tagName === 'SELECT' && e.target.name.includes('producto')) {
+            setTimeout(validarProductosDuplicados, 100);
+        }
+    });
+}
+
+// ============================================
+// TOTALIZADOR DE PRODUCTOS
+// ============================================
+
+function actualizarTotalizador() {
+    let totalProductos = 0;
+    let totalCosto = 0;
+    tableBody.querySelectorAll('.producto-row').forEach((row) => {
+        if (row.style.display === 'none') return;
+        const deleteField = row.querySelector('input[name$="-DELETE"]');
+        if (deleteField && deleteField.checked) return;
+        const select = row.querySelector('select[name$="-producto"]');
+        const costoInput = row.querySelector('input[name$="-costo"]');
+        if (select && select.value && costoInput && costoInput.value) {
+            totalProductos++;
+            totalCosto += parseFloat(costoInput.value) || 0;
+        }
+    });
+    if (agregarBtn && totalProductos > 0) {
+        const textoOriginal = '➕ Agregar producto';
+        agregarBtn.innerHTML = `${textoOriginal} <span style="background: #4CAF50; color: white; padding: 0.2rem 0.5rem; border-radius: 999px; font-size: 0.85em; margin-left: 0.5rem;">${totalProductos}</span>`;
+    }
+}
+
+// Actualizar totalizador cuando cambian los campos
+if (tableBody) {
+    tableBody.addEventListener('input', actualizarTotalizador);
+    tableBody.addEventListener('change', actualizarTotalizador);
+}
+
+// Actualizar al cargar la página
+document.addEventListener('DOMContentLoaded', actualizarTotalizador);
+
+// ============================================
+// AUTO-GUARDADO (SIMULADO - LOCAL STORAGE)
+// ============================================
+
+function guardarBorrador() {
+    const datosFormulario = {
+        es_proveedor_preferente: esPreferenteCheck ? esPreferenteCheck.checked : false,
+        lead_time: leadTimeGeneralInput ? leadTimeGeneralInput.value : '',
+        pedido_minimo: pedidoMinimoInput ? pedidoMinimoInput.value : '',
+        observaciones: observacionesInput ? observacionesInput.value : '',
+        estado: estadoSelect ? estadoSelect.value : '',
+        timestamp: new Date().toISOString()
+    };
+    console.log('Borrador guardado:', datosFormulario);
+    // Aquí podrías guardar en localStorage si lo necesitas
+}
+
+// Guardar borrador cada 30 segundos
+let intervaloGuardado = setInterval(guardarBorrador, 30000);
+
+// Limpiar intervalo al enviar el formulario
+form.addEventListener('submit', function() {
+    clearInterval(intervaloGuardado);
+});
+
+// ============================================
+// MEJORAS DE ACCESIBILIDAD
+// ============================================
+
+document.querySelectorAll('input, select, textarea').forEach(campo => {
+    if (campo.hasAttribute('placeholder')) {
+        campo.setAttribute('title', campo.getAttribute('placeholder'));
+    }
+});
+
+// Enfocar primer campo con error
+function enfocarPrimerError() {
+    const primerError = document.querySelector('.form-control.error, input[style*="border-color: rgb(220, 38, 38)"]');
+    if (primerError) {
+        primerError.focus();
+        primerError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+}
+
+// ============================================
+// CONTADOR DE CARACTERES PARA OBSERVACIONES
+// ============================================
+
+if (observacionesInput) {
+    const maxCaracteres = 1000;
+    const contador = document.createElement('div');
+    contador.style.cssText = 'text-align: right; font-size: 0.85rem; color: #6B7280; margin-top: 0.25rem;';
+    observacionesInput.parentNode.appendChild(contador);
+    function actualizarContador() {
+        const longitud = observacionesInput.value.length;
+        const restantes = maxCaracteres - longitud;
+        contador.textContent = `${longitud}/${maxCaracteres} caracteres`;
+        if (restantes < 100) {
+            contador.style.color = '#F59E0B';
+        } else if (restantes < 0) {
+            contador.style.color = '#DC2626';
+            Toast.fire({
+                icon: 'warning',
+                title: '⚠️ Límite de caracteres',
+                text: 'Has excedido el límite recomendado',
+                background: '#FEE2E2'
+            });
+        } else {
+            contador.style.color = '#6B7280';
+        }
+    }
+    observacionesInput.addEventListener('input', actualizarContador);
+    actualizarContador();
+}
+
+// ============================================
+// RESUMEN FINAL AL CARGAR (SI HAY DATOS PREVIOS)
+// ============================================
+
+document.addEventListener('DOMContentLoaded', function() {
+    const productosExistentes = Array.from(tableBody.querySelectorAll('.producto-row')).filter(row => {
+        const select = row.querySelector('select[name$="-producto"]');
+        return select && select.value;
+    }).length;
+    if (productosExistentes > 0) {
+        Toast.fire({
+            icon: 'info',
+            title: `📦 ${productosExistentes} producto${productosExistentes !== 1 ? 's' : ''} configurado${productosExistentes !== 1 ? 's' : ''}`,
+            background: '#DBEAFE'
+        });
+    }
+});
+
+console.log('✅ Validaciones de Proveedor Paso 3 cargadas correctamente');
 </script>
 {% endblock %}

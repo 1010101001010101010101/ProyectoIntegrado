@@ -4,7 +4,14 @@
 {% block content %}
 <div class="page-header">
   <h1 class="page-title">🏢 Proveedores</h1>
-  <a class="btn btn-primary" href="{% url 'core:proveedor_paso1' %}">➕ Nuevo proveedor</a>
+  <div style="display: flex; gap: 1rem;">
+    <a href="{% url 'core:exportar_proveedores_excel' %}?buscar={{ buscar }}&estado={{ estado_filtro }}&orden={{ orden }}" class="btn export-btn">
+      Exportar Excel
+    </a>
+    {% if request.user.perfil.rol == 'ADMIN' or request.user.perfil.rol == 'EDITOR' %}
+    <a class="btn btn-primary" href="{% url 'core:proveedor_paso1' %}"> Nuevo proveedor</a>
+    {% endif %}
+  </div>
 </div>
 
 <div class="filters-card">
@@ -100,21 +107,25 @@
               </td>
               <td class="acciones">
                 <div class="acciones-flex">
-                  <a
-                      href="{% url 'core:editar_proveedor' proveedor.id %}"
-                      class="btn-editar"
-                  >
-                      ✏️ Editar
-                  </a>
-                  <button
-                      type="button"
-                      class="btn-eliminar"
-                      data-url="{% url 'core:eliminar_proveedor' proveedor.id %}"
-                      data-estado-url="{% url 'core:cambiar_estado_proveedor' proveedor.id %}"
-                      data-productos="{{ proveedor.total_productos }}"
-                  >
-                      🗑️ Eliminar
-                  </button>
+                    {% if request.user.perfil.rol == 'ADMIN' or request.user.perfil.rol == 'EDITOR' %}
+                        <a
+                            href="{% url 'core:editar_proveedor' proveedor.id %}"
+                            class="btn-editar"
+                        >
+                            Editar
+                        </a>
+                    {% endif %}
+                    {% if request.user.perfil.rol == 'ADMIN' %}
+                        <button
+                            type="button"
+                            class="btn-eliminar"
+                            data-url="{% url 'core:eliminar_proveedor' proveedor.id %}"
+                            data-estado-url="{% url 'core:cambiar_estado_proveedor' proveedor.id %}"
+                            data-productos="{{ proveedor.total_productos }}"
+                        >
+                            Eliminar
+                        </button>
+                    {% endif %}
                 </div>
               </td>
             </tr>
@@ -402,6 +413,24 @@
     backdrop-filter: blur(2px);
     z-index: 5;
     border-radius: 16px;
+  }
+  .export-btn {
+    background: #10B981;
+    color: white;
+    font-weight: 600;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    transition: background 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+    border: none;
+    text-decoration: none;
+    padding: 0.75rem 1.5rem;
+  }
+  .export-btn:hover {
+    background: #059669;
   }
   @media (max-width: 992px) {
     .page-header {

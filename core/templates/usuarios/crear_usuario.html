@@ -201,143 +201,763 @@
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-  const byId = id => document.getElementById(id);
+// ============================================
+// CREAR USUARIO - VALIDACIONES Y SWEETALERTS PRO
+// ============================================
 
-  // Inputs
-  const username = byId('{{ form.username.id_for_label }}');
-  const email = byId('{{ form.email.id_for_label }}');
-  const firstName = byId('{{ form.first_name.id_for_label }}');
-  const lastName = byId('{{ form.last_name.id_for_label }}');
-  const rol = byId('{{ form.rol.id_for_label }}');
-  const estado = byId('{{ form.estado.id_for_label }}');
-  const pwd = byId('{{ form.password.id_for_label }}');
-  const pwd2 = byId('{{ form.password_confirm.id_for_label }}');
+// Toast personalizado
+const Toast = Swal.mixin({
+    toast: true,
+    position: 'top-end',
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer)
+        toast.addEventListener('mouseleave', Swal.resumeTimer)
+    }
+});
 
-  // Username: minúsculas y sin espacios
-  if (username) {
-    username.addEventListener('input', e => {
-      e.target.value = e.target.value.toLowerCase().replace(/\s+/g, '');
+// Mensaje de bienvenida
+document.addEventListener('DOMContentLoaded', function() {
+    Swal.fire({
+        icon: 'info',
+        title: '👤 Nuevo Usuario',
+        html: '<p>Complete todos los campos requeridos</p><small style="color: #6B7280;">Validación en tiempo real activada</small>',
+        timer: 3000,
+        showConfirmButton: false,
+        toast: true,
+        position: 'top-end',
+        background: '#FEE2E2',
+        iconColor: '#dc2626'
     });
-  }
+});
 
-  // Password strength + colores
-  const strengthBar = byId('strength-bar');
-  const requirements = byId('password-requirements');
-  const matchText = byId('password-match');
+const byId = id => document.getElementById(id);
 
-  function updateReq(id, ok){
+// Inputs
+const username = byId('{{ form.username.id_for_label }}');
+const email = byId('{{ form.email.id_for_label }}');
+const firstName = byId('{{ form.first_name.id_for_label }}');
+const lastName = byId('{{ form.last_name.id_for_label }}');
+const telefono = byId('{{ form.telefono.id_for_label }}');
+const direccion = byId('{{ form.direccion.id_for_label }}');
+const rol = byId('{{ form.rol.id_for_label }}');
+const estado = byId('{{ form.estado.id_for_label }}');
+const pwd = byId('{{ form.password.id_for_label }}');
+const pwd2 = byId('{{ form.password_confirm.id_for_label }}');
+const mfaEnabled = byId('mfa_enabled');
+
+// Password strength + colores
+const strengthBar = byId('strength-bar');
+const requirements = byId('password-requirements');
+const matchText = byId('password-match');
+
+// VALIDACIÓN DE USERNAME
+if (username) {
+    username.addEventListener('input', function(e) {
+        let valor = e.target.value.toLowerCase().replace(/\s+/g, '');
+        valor = valor.replace(/[^a-z0-9_]/g, '');
+        e.target.value = valor;
+        if (valor.length >= 3) {
+            e.target.style.borderColor = '#10B981';
+            e.target.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+        } else if (valor.length > 0) {
+            e.target.style.borderColor = '#F59E0B';
+            e.target.style.boxShadow = '0 0 0 3px rgba(245, 158, 11, 0.1)';
+        } else {
+            e.target.style.borderColor = 'var(--border)';
+            e.target.style.boxShadow = '';
+        }
+    });
+    username.addEventListener('blur', function(e) {
+        const valor = e.target.value.trim();
+        if (valor && valor.length < 3) {
+            Swal.fire({
+                icon: 'warning',
+                title: '⚠️ Username muy corto',
+                html: '<p>El username debe tener al menos <strong>3 caracteres</strong></p>',
+                confirmButtonText: 'Entendido',
+                confirmButtonColor: '#dc2626'
+            });
+            e.target.focus();
+        } else if (valor && valor.length >= 3) {
+            Toast.fire({
+                icon: 'success',
+                title: '✓ Username válido',
+                background: '#D1FAE5'
+            });
+        }
+    });
+}
+
+// VALIDACIÓN DE EMAIL
+function validarEmail(valor) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(valor);
+}
+if (email) {
+    email.addEventListener('input', function(e) {
+        const valor = e.target.value.trim();
+        if (validarEmail(valor)) {
+            e.target.style.borderColor = '#10B981';
+            e.target.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+        } else if (valor.length > 0) {
+            e.target.style.borderColor = '#F59E0B';
+            e.target.style.boxShadow = '0 0 0 3px rgba(245, 158, 11, 0.1)';
+        } else {
+            e.target.style.borderColor = 'var(--border)';
+            e.target.style.boxShadow = '';
+        }
+    });
+    email.addEventListener('blur', function(e) {
+        const valor = e.target.value.trim();
+        if (valor && !validarEmail(valor)) {
+            Swal.fire({
+                icon: 'error',
+                title: '❌ Email inválido',
+                html: `
+                    <div style="text-align: center; margin: 1rem 0;">
+                        <p>El formato del email no es válido</p>
+                        <div style="background: #F3F4F6; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                            <strong style="color: #1F2937;">Ejemplo válido:</strong>
+                            <div style="color: #10B981; font-size: 1.2rem; font-weight: bold; margin-top: 0.5rem;">
+                                usuario@empresa.com
+                            </div>
+                        </div>
+                    </div>
+                `,
+                confirmButtonText: 'Corregir',
+                confirmButtonColor: '#dc2626'
+            });
+            e.target.focus();
+        } else if (valor && validarEmail(valor)) {
+            Toast.fire({
+                icon: 'success',
+                title: '✓ Email válido',
+                background: '#D1FAE5'
+            });
+        }
+    });
+}
+
+// VALIDACIÓN DE NOMBRES Y APELLIDOS
+function validarNombre(campo, etiqueta) {
+    if (!campo) return;
+    campo.addEventListener('input', function(e) {
+        const valor = e.target.value.trim();
+        if (valor.length >= 2) {
+            e.target.style.borderColor = '#10B981';
+            e.target.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+        } else if (valor.length > 0) {
+            e.target.style.borderColor = '#F59E0B';
+        } else {
+            e.target.style.borderColor = 'var(--border)';
+            e.target.style.boxShadow = '';
+        }
+    });
+    campo.addEventListener('blur', function(e) {
+        const valor = e.target.value.trim();
+        if (valor && valor.length < 2) {
+            Toast.fire({
+                icon: 'warning',
+                title: `⚠️ ${etiqueta} muy corto`,
+                text: 'Debe tener al menos 2 caracteres',
+                background: '#FEF3C7'
+            });
+        }
+    });
+}
+validarNombre(firstName, 'Nombres');
+validarNombre(lastName, 'Apellidos');
+
+// VALIDACIÓN DE TELÉFONO
+function validarTelefono(valor) {
+    if (!valor) return true;
+    const telRegex = /^(\+?56)?(\s?)(0?9)(\s?)\d{4}(\s?)\d{4}$/;
+    return telRegex.test(valor);
+}
+if (telefono) {
+    telefono.addEventListener('input', function(e) {
+        e.target.value = e.target.value.replace(/[^\d\s+()-]/g, '');
+        const valor = e.target.value.trim();
+        if (valor && validarTelefono(valor)) {
+            e.target.style.borderColor = '#10B981';
+            e.target.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+        } else if (valor.length > 0) {
+            e.target.style.borderColor = '#F59E0B';
+        } else {
+            e.target.style.borderColor = 'var(--border)';
+            e.target.style.boxShadow = '';
+        }
+    });
+    telefono.addEventListener('blur', function(e) {
+        const valor = e.target.value.trim();
+        if (valor && !validarTelefono(valor)) {
+            Toast.fire({
+                icon: 'info',
+                title: '📱 Formato de teléfono',
+                text: 'Formato sugerido: +56 9 1234 5678',
+                background: '#DBEAFE'
+            });
+        }
+    });
+}
+
+// VALIDACIÓN DE CONTRASEÑA
+function updateReq(id, ok){
     const el = byId(id);
     if (!el) return;
     el.classList.toggle('met', ok);
     el.classList.toggle('unmet', !ok);
     const span = el.querySelector('span');
     if (span){ span.textContent = ok ? '✓' : '○'; }
-  }
-
-  function checkMatch(){
+}
+function checkMatch(){
     if (!pwd || !pwd2) return;
     const same = pwd.value === pwd2.value && pwd2.value.length > 0;
-    matchText.textContent = same ? 'Las contraseñas coinciden' : (pwd2.value ? 'Las contraseñas no coinciden' : '');
+    matchText.textContent = same ? '✓ Las contraseñas coinciden' : (pwd2.value ? '✕ Las contraseñas no coinciden' : '');
     matchText.style.color = same ? '#16a34a' : '#dc2626';
-  }
-
-  if (pwd){
-    pwd.addEventListener('focus', ()=> requirements.classList.add('show'));
-    pwd.addEventListener('input', ()=>{
-      const v = pwd.value;
-      const len = v.length >= 8;
-      const up = /[A-Z]/.test(v);
-      const lo = /[a-z]/.test(v);
-      const num = /[0-9]/.test(v);
-      const spe = /[^A-Za-z0-9]/.test(v);
-
-      updateReq('req-length', len);
-      updateReq('req-upper', up);
-      updateReq('req-lower', lo);
-      updateReq('req-number', num);
-      updateReq('req-special', spe);
-
-      const score = [len, up, lo, num, spe].filter(Boolean).length;
-      strengthBar.className = 'password-strength-bar ' + (score<=2 ? 'strength-weak' : score<=3 ? 'strength-medium' : 'strength-strong');
-      checkMatch();
+    matchText.style.fontWeight = '600';
+    if (pwd2.value.length > 0) {
+        if (same) {
+            pwd2.style.borderColor = '#10B981';
+            pwd2.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+        } else {
+            pwd2.style.borderColor = '#DC2626';
+            pwd2.style.boxShadow = '0 0 0 3px rgba(220, 38, 38, 0.1)';
+        }
+    }
+}
+if (pwd){
+    pwd.addEventListener('focus', ()=> {
+        requirements.classList.add('show');
+        Toast.fire({
+            icon: 'info',
+            title: '🔐 Requisitos de contraseña',
+            text: 'Debe cumplir todos los requisitos',
+            background: '#DBEAFE'
+        });
     });
-  }
-  if (pwd2){ pwd2.addEventListener('input', checkMatch); }
+    pwd.addEventListener('input', ()=>{
+        const v = pwd.value;
+        const len = v.length >= 8;
+        const up = /[A-Z]/.test(v);
+        const lo = /[a-z]/.test(v);
+        const num = /[0-9]/.test(v);
+        const spe = /[^A-Za-z0-9]/.test(v);
+        updateReq('req-length', len);
+        updateReq('req-upper', up);
+        updateReq('req-lower', lo);
+        updateReq('req-number', num);
+        updateReq('req-special', spe);
+        const score = [len, up, lo, num, spe].filter(Boolean).length;
+        strengthBar.className = 'password-strength-bar ' + (score<=2 ? 'strength-weak' : score<=3 ? 'strength-medium' : 'strength-strong');
+        if (score === 5) {
+            pwd.style.borderColor = '#10B981';
+            pwd.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+        } else if (score >= 3) {
+            pwd.style.borderColor = '#F59E0B';
+            pwd.style.boxShadow = '0 0 0 3px rgba(245, 158, 11, 0.1)';
+        } else if (v.length > 0) {
+            pwd.style.borderColor = '#DC2626';
+            pwd.style.boxShadow = '0 0 0 3px rgba(220, 38, 38, 0.1)';
+        } else {
+            pwd.style.borderColor = 'var(--border)';
+            pwd.style.boxShadow = '';
+        }
+        checkMatch();
+    });
+    pwd.addEventListener('blur', function() {
+        const v = pwd.value;
+        const allMet = v.length >= 8 && /[A-Z]/.test(v) && /[a-z]/.test(v) && /[0-9]/.test(v) && /[^A-Za-z0-9]/.test(v);
+        if (v && allMet) {
+            Toast.fire({
+                icon: 'success',
+                title: '✓ Contraseña fuerte',
+                background: '#D1FAE5'
+            });
+        }
+    });
+}
+if (pwd2){ 
+    pwd2.addEventListener('input', checkMatch);
+    pwd2.addEventListener('blur', function() {
+        if (pwd2.value && pwd.value === pwd2.value) {
+            Toast.fire({
+                icon: 'success',
+                title: '✓ Contraseñas coinciden',
+                background: '#D1FAE5'
+            });
+        }
+    });
+}
 
-  // Validación cliente with SweetAlert
-  function markInvalid(inputs){
-    document.querySelectorAll('.form-control').forEach(i=> i.classList.remove('is-invalid'));
-    inputs.forEach(i=> i && i.classList.add('is-invalid'));
-  }
+// VALIDACIÓN DE ROL Y ESTADO
+if (rol) {
+    rol.addEventListener('change', function(e) {
+        if (e.target.value) {
+            const rolTexto = e.target.options[e.target.selectedIndex].text;
+            Toast.fire({
+                icon: 'success',
+                title: `👔 Rol: ${rolTexto}`,
+                background: '#D1FAE5'
+            });
+        }
+    });
+}
+if (estado) {
+    estado.addEventListener('change', function(e) {
+        const estadoIconos = {
+            'ACTIVO': { icon: '✅', color: '#10B981', bg: '#D1FAE5', texto: 'Usuario activo' },
+            'INACTIVO': { icon: '⏸️', color: '#6B7280', bg: '#F3F4F6', texto: 'Usuario inactivo' },
+            'SUSPENDIDO': { icon: '🚫', color: '#DC2626', bg: '#FEE2E2', texto: 'Usuario suspendido' }
+        };
+        const info = estadoIconos[e.target.value];
+        if (info) {
+            Toast.fire({
+                icon: 'info',
+                title: `${info.icon} ${info.texto}`,
+                background: info.bg
+            });
+        }
+    });
+}
 
-  function validarFormulario(){
+// MFA TOGGLE
+if (mfaEnabled) {
+    mfaEnabled.addEventListener('change', function(e) {
+        if (e.target.checked) {
+            Swal.fire({
+                icon: 'info',
+                title: '🔐 MFA Habilitado',
+                html: '<p>El usuario deberá configurar autenticación de dos factores</p>',
+                timer: 3000,
+                showConfirmButton: false,
+                toast: true,
+                position: 'top-end',
+                background: '#DBEAFE',
+                iconColor: '#2563EB'
+            });
+        } else {
+            Toast.fire({
+                icon: 'warning',
+                title: '⚠️ MFA deshabilitado',
+                background: '#FEF3C7'
+            });
+        }
+    });
+}
+
+// VALIDACIÓN PRINCIPAL DEL FORMULARIO
+function markInvalid(inputs){
+    document.querySelectorAll('.form-control').forEach(i=> {
+        i.classList.remove('is-invalid');
+        i.style.borderColor = 'var(--border)';
+        i.style.boxShadow = '';
+    });
+    inputs.forEach(i=> {
+        if (i) {
+            i.classList.add('is-invalid');
+            i.style.borderColor = '#DC2626';
+            i.style.boxShadow = '0 0 0 3px rgba(220, 38, 38, 0.1)';
+        }
+    });
+}
+function validarFormulario(){
     const errores = [];
     const invalids = [];
-
-    if (!username.value.trim()) { errores.push('El username es obligatorio.'); invalids.push(username); }
-    if (/\s/.test(username.value)) { errores.push('El username no puede tener espacios.'); invalids.push(username); }
-
-    const emailVal = email.value.trim();
-    if (!emailVal) { errores.push('El email es obligatorio.'); invalids.push(email); }
-    else {
-      const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!re.test(emailVal)) { errores.push('El formato de email no es válido.'); invalids.push(email); }
+    const usernameVal = username.value.trim();
+    if (!usernameVal) { 
+        errores.push('👤 El username es obligatorio'); 
+        invalids.push(username); 
+    } else if (usernameVal.length < 3) {
+        errores.push('👤 El username debe tener al menos 3 caracteres');
+        invalids.push(username);
     }
-
-    if (!firstName.value.trim()) { errores.push('Los nombres son obligatorios.'); invalids.push(firstName); }
-    if (!lastName.value.trim()) { errores.push('Los apellidos son obligatorios.'); invalids.push(lastName); }
-
-    if (!rol.value) { errores.push('Debe seleccionar un rol.'); invalids.push(rol); }
-    if (!estado.value) { errores.push('Debe seleccionar el estado.'); invalids.push(estado); }
-
+    if (/\s/.test(username.value)) { 
+        errores.push('👤 El username no puede contener espacios'); 
+        invalids.push(username); 
+    }
+    const emailVal = email.value.trim();
+    if (!emailVal) { 
+        errores.push('📧 El email es obligatorio'); 
+        invalids.push(email); 
+    } else if (!validarEmail(emailVal)) { 
+        errores.push('📧 El formato de email no es válido'); 
+        invalids.push(email); 
+    }
+    if (!firstName.value.trim()) { 
+        errores.push('✍️ Los nombres son obligatorios'); 
+        invalids.push(firstName); 
+    } else if (firstName.value.trim().length < 2) {
+        errores.push('✍️ Los nombres deben tener al menos 2 caracteres');
+        invalids.push(firstName);
+    }
+    if (!lastName.value.trim()) { 
+        errores.push('✍️ Los apellidos son obligatorios'); 
+        invalids.push(lastName); 
+    } else if (lastName.value.trim().length < 2) {
+        errores.push('✍️ Los apellidos deben tener al menos 2 caracteres');
+        invalids.push(lastName);
+    }
+    const telefonoVal = telefono ? telefono.value.trim() : '';
+    if (telefonoVal && !validarTelefono(telefonoVal)) {
+        errores.push('📱 El formato del teléfono no es válido');
+        invalids.push(telefono);
+    }
+    if (!rol.value) { 
+        errores.push('👔 Debe seleccionar un rol'); 
+        invalids.push(rol); 
+    }
+    if (!estado.value) { 
+        errores.push('📊 Debe seleccionar el estado del usuario'); 
+        invalids.push(estado); 
+    }
     const v = pwd.value || '';
-    const okLen = v.length >= 8, okUp = /[A-Z]/.test(v), okLo = /[a-z]/.test(v), okNum = /[0-9]/.test(v), okSpe = /[^A-Za-z0-9]/.test(v);
+    const okLen = v.length >= 8;
+    const okUp = /[A-Z]/.test(v);
+    const okLo = /[a-z]/.test(v);
+    const okNum = /[0-9]/.test(v);
+    const okSpe = /[^A-Za-z0-9]/.test(v);
     if (!okLen || !okUp || !okLo || !okNum || !okSpe) {
-      errores.push('La contraseña debe tener 8+ caracteres, 1 mayúscula, 1 minúscula, 1 número y 1 carácter especial.');
-      invalids.push(pwd);
+        errores.push('🔐 La contraseña no cumple todos los requisitos de seguridad');
+        invalids.push(pwd);
     }
     if (pwd.value !== pwd2.value) {
-      errores.push('Las contraseñas no coinciden.');
-      invalids.push(pwd2);
+        errores.push('🔐 Las contraseñas no coinciden');
+        invalids.push(pwd2);
     }
-
     return { errores, invalids };
-  }
-
-  document.getElementById('create-user-form').addEventListener('submit', function(e){
+}
+document.getElementById('create-user-form').addEventListener('submit', function(e){
+    e.preventDefault();
     const { errores, invalids } = validarFormulario();
     if (errores.length){
-      e.preventDefault();
-      markInvalid(invalids);
-      Swal.fire({
-        icon:'error',
-        title:'Revisa el formulario',
-        html:'<ul style="text-align:left;margin:0;padding-left:1.1rem;">' + errores.map(x=>`<li>${x}</li>`).join('') + '</ul>',
-        confirmButtonText:'Entendido',
-        confirmButtonColor:'#dc2626'
-      });
-    }
-  });
-
-  // Errores del servidor → SweetAlert
-  {% if form.errors %}
-    try{
-      const serverErrors = JSON.parse('{{ form.errors.as_json|escapejs }}');
-      const items = [];
-      for (const k in serverErrors){
-        const first = serverErrors[k][0]?.message || '';
-        if (first){ items.push(first); }
-      }
-      if (items.length){
-        Swal.fire({
-          icon:'error',
-          title:'No se pudo crear el usuario',
-          html:'<ul style="text-align:left;margin:0;padding-left:1.1rem;">' + items.map(x=>`<li>${x}</li>`).join('') + '</ul>',
-          confirmButtonText:'OK',
-          confirmButtonColor:'#dc2626'
+        markInvalid(invalids);
+        let listaErrores = '<ul style="text-align: left; margin: 1rem 0; padding-left: 1.5rem;">';
+        errores.forEach(error => {
+            listaErrores += `<li style="margin: 0.5rem 0;">${error}</li>`;
         });
-      }
-    }catch(_e){}
-  {% endif %}
+        listaErrores += '</ul>';
+        Swal.fire({
+            icon: 'error',
+            title: '❌ Errores en el formulario',
+            html: `
+                <p style="margin-bottom: 1rem;">Por favor corrija los siguientes errores:</p>
+                ${listaErrores}
+                <div style="background: #FEE2E2; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                    <strong style="color: #DC2626;">Total: ${errores.length} error${errores.length !== 1 ? 'es' : ''}</strong>
+                </div>
+            `,
+            confirmButtonText: 'Entendido',
+            confirmButtonColor: '#dc2626',
+            width: '600px',
+            willClose: () => {
+                if (invalids[0]) {
+                    invalids[0].focus();
+                    invalids[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+        });
+        return;
+    }
+    mostrarConfirmacionFinal();
+});
+
+// CONFIRMACIÓN FINAL
+function mostrarConfirmacionFinal() {
+    const usernameVal = username.value.trim();
+    const emailVal = email.value.trim();
+    const nombreCompleto = `${firstName.value.trim()} ${lastName.value.trim()}`;
+    const rolTexto = rol.options[rol.selectedIndex].text;
+    const estadoTexto = estado.options[estado.selectedIndex].text;
+    const mfaTexto = mfaEnabled && mfaEnabled.checked ? 'Habilitado' : 'Deshabilitado';
+    const estadoIconos = {
+        'ACTIVO': { icon: '✅', color: '#10B981', bg: '#D1FAE5' },
+        'INACTIVO': { icon: '⏸️', color: '#6B7280', bg: '#F3F4F6' },
+        'SUSPENDIDO': { icon: '🚫', color: '#DC2626', bg: '#FEE2E2' }
+    };
+    const estadoInfo = estadoIconos[estado.value] || { icon: '❓', color: '#6B7280', bg: '#F3F4F6' };
+    let resumenHTML = `
+        <div style="text-align: left; margin: 1.5rem 0; font-size: 0.95rem;">
+            <div style="background: #F9FAFB; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                <p style="margin: 0.5rem 0;"><strong>👤 Username:</strong> ${usernameVal}</p>
+                <p style="margin: 0.5rem 0;"><strong>✍️ Nombre completo:</strong> ${nombreCompleto}</p>
+                <p style="margin: 0.5rem 0;"><strong>📧 Email:</strong> ${emailVal}</p>
+            </div>
+            <div style="display: grid; gap: 0.75rem;">
+                <div style="background: #DBEAFE; padding: 0.75rem; border-radius: 6px; border-left: 3px solid #2563EB;">
+                    <strong style="color: #1F2937;">👔 Rol:</strong>
+                    <span style="color: #2563EB; font-weight: bold;">${rolTexto}</span>
+                </div>
+                <div style="background: ${estadoInfo.bg}; padding: 0.75rem; border-radius: 6px; border-left: 3px solid ${estadoInfo.color};">
+                    <strong style="color: #1F2937;">📊 Estado:</strong>
+                    <span style="color: ${estadoInfo.color}; font-weight: bold;">${estadoInfo.icon} ${estadoTexto}</span>
+                </div>
+                <div style="background: ${mfaEnabled && mfaEnabled.checked ? '#D1FAE5' : '#FEF3C7'}; padding: 0.75rem; border-radius: 6px; border-left: 3px solid ${mfaEnabled && mfaEnabled.checked ? '#10B981' : '#F59E0B'};">
+                    <strong style="color: #1F2937;">🔐 MFA:</strong>
+                    <span style="color: ${mfaEnabled && mfaEnabled.checked ? '#10B981' : '#F59E0B'}; font-weight: bold;">${mfaTexto}</span>
+                </div>
+            </div>
+        </div>
+    `;
+    Swal.fire({
+        icon: 'question',
+        title: '¿Crear usuario?',
+        html: `
+            <p style="color: #6B7280; margin-bottom: 1rem;">
+                Se creará el usuario con la siguiente información
+            </p>
+            ${resumenHTML}
+        `,
+        showCancelButton: true,
+        confirmButtonText: '✓ Sí, crear usuario',
+        cancelButtonText: '← Revisar datos',
+        confirmButtonColor: '#dc2626',
+        cancelButtonColor: '#6B7280',
+        width: '600px',
+        backdrop: `rgba(220, 38, 38, 0.1)`
+    }).then((result) => {
+        if (result.isConfirmed) {
+            crearUsuarioFinal();
+        }
+    });
+}
+
+// ANIMACIÓN DE CREACIÓN FINAL
+function crearUsuarioFinal() {
+    let etapa = 0;
+    const etapas = [
+        { icono: '📝', texto: 'Validando información...', progreso: 25 },
+        { icono: '🔐', texto: 'Encriptando contraseña...', progreso: 50 },
+        { icono: '💾', texto: 'Guardando en base de datos...', progreso: 75 },
+        { icono: '✅', texto: 'Finalizando registro...', progreso: 100 }
+    ];
+    Swal.fire({
+        title: etapas[0].texto,
+        html: `
+            <div style="margin: 1.5rem 0;">
+                <div style="font-size: 3rem; margin-bottom: 1rem; animation: bounce 0.5s;">
+                    ${etapas[0].icono}
+                </div>
+                <div style="background: #F3F4F6; height: 8px; border-radius: 4px; overflow: hidden;">
+                    <div id="progressBar" style="background: linear-gradient(90deg, #dc2626, #b91c1c); height: 100%; width: 0%; transition: width 0.5s ease;"></div>
+                </div>
+                <p style="color: #6B7280; margin-top: 1rem; font-size: 0.9em;">Por favor espere...</p>
+            </div>
+        `,
+        showConfirmButton: false,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => {
+            const intervalo = setInterval(() => {
+                if (etapa < etapas.length) {
+                    const etapaActual = etapas[etapa];
+                    Swal.update({
+                        title: etapaActual.texto,
+                        html: `
+                            <div style="margin: 1.5rem 0;">
+                                <div style="font-size: 3rem; margin-bottom: 1rem; animation: bounce 0.5s;">
+                                    ${etapaActual.icono}
+                                </div>
+                                <div style="background: #F3F4F6; height: 8px; border-radius: 4px; overflow: hidden;">
+                                    <div style="background: linear-gradient(90deg, #dc2626, #b91c1c); height: 100%; width: ${etapaActual.progreso}%; transition: width 0.5s ease;"></div>
+                                </div>
+                                <p style="color: #6B7280; margin-top: 1rem; font-size: 0.9em;">${etapaActual.progreso}% completado</p>
+                            </div>
+                        `
+                    });
+                    etapa++;
+                } else {
+                    clearInterval(intervalo);
+                    mostrarExito();
+                }
+            }, 600);
+        }
+    });
+}
+function mostrarExito() {
+    Swal.fire({
+        icon: 'success',
+        title: '🎉 ¡Usuario creado exitosamente!',
+        html: `
+            <div style="margin: 1.5rem 0;">
+                <div style="background: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%); padding: 1.5rem; border-radius: 12px; border: 2px solid #10B981;">
+                    <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">✅</div>
+                    <p style="color: #065F46; font-size: 1.1rem; margin: 0;">El usuario ha sido creado correctamente</p>
+                </div>
+                <div style="margin-top: 1.5rem; padding: 1rem; background: #F9FAFB; border-radius: 8px;">
+                    <p style="color: #6B7280; margin: 0; font-size: 0.9em;">
+                        ✓ Cuenta de usuario creada<br>
+                        ✓ Contraseña encriptada<br>
+                        ✓ Permisos asignados<br>
+                        ✓ Usuario listo para acceder al sistema
+                    </p>
+                </div>
+            </div>
+        `,
+        confirmButtonText: '👥 Ver lista de usuarios',
+        confirmButtonColor: '#dc2626',
+        backdrop: `rgba(220, 38, 38, 0.1)`,
+        willClose: () => {
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes bounce {
+                    0%, 100% { transform: translateY(0); }
+                    50% { transform: translateY(-20px); }
+                }
+            `;
+            document.head.appendChild(style);
+            document.getElementById('create-user-form').submit();
+        }
+    });
+}
+
+// ERRORES DEL SERVIDOR
+{% if form.errors %}
+document.addEventListener('DOMContentLoaded', function() {
+    try {
+        const serverErrors = JSON.parse('{{ form.errors.as_json|escapejs }}');
+        const items = [];
+        for (const k in serverErrors) {
+            const messages = serverErrors[k];
+            messages.forEach(msg => {
+                const text = msg.message || '';
+                if (text) { items.push(text); }
+            });
+        }
+        if (items.length) {
+            let listaErrores = '<ul style="text-align: left; margin: 1rem 0; padding-left: 1.5rem;">';
+            items.forEach(error => {
+                listaErrores += `<li style="margin: 0.5rem 0; color: #DC2626;">${error}</li>`;
+            });
+            listaErrores += '</ul>';
+            Swal.fire({
+                icon: 'error',
+                title: '❌ No se pudo crear el usuario',
+                html: `
+                    <p style="margin-bottom: 1rem;">Se encontraron los siguientes errores:</p>
+                    ${listaErrores}
+                    <div style="background: #FEE2E2; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                        <strong style="color: #DC2626;">Por favor corrija estos errores e intente nuevamente</strong>
+                    </div>
+                `,
+                confirmButtonText: 'Entendido',
+                confirmButtonColor: '#dc2626',
+                width: '600px'
+            });
+        }
+    } catch(_e) {
+        console.error('Error parsing server errors:', _e);
+    }
+});
+{% endif %}
+
+// PREVENIR PÉRDIDA DE DATOS
+let formModificado = false;
+document.getElementById('create-user-form').addEventListener('input', function() {
+    formModificado = true;
+});
+window.addEventListener('beforeunload', function(e) {
+    if (formModificado) {
+        e.preventDefault();
+        e.returnValue = '';
+        return '';
+    }
+});
+document.getElementById('create-user-form').addEventListener('submit', function() {
+    formModificado = false;
+});
+
+// ATAJOS DE TECLADO
+document.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        document.getElementById('create-user-form').dispatchEvent(new Event('submit'));
+    }
+});
+
+// MEJORAS DE ACCESIBILIDAD
+document.querySelectorAll('input, select, textarea').forEach(campo => {
+    if (campo.hasAttribute('placeholder')) {
+        campo.setAttribute('title', campo.getAttribute('placeholder'));
+    }
+});
+
+// AUTO-COMPLETAR SUGERENCIAS
+if (firstName && lastName && email) {
+    let suggestedUsername = false;
+    function sugerirUsername() {
+        if (suggestedUsername || username.value.trim().length > 0) return;
+        const nombre = firstName.value.trim().toLowerCase();
+        const apellido = lastName.value.trim().toLowerCase();
+        if (nombre && apellido) {
+            const sugerencia = `${nombre.charAt(0)}${apellido}`.replace(/\s+/g, '');
+            if (sugerencia.length >= 3) {
+                Swal.fire({
+                    icon: 'info',
+                    title: '💡 Sugerencia de username',
+                    html: `
+                        <div style="text-align: center; margin: 1rem 0;">
+                            <p>Basado en el nombre ingresado, sugerimos:</p>
+                            <div style="background: #DBEAFE; padding: 1rem; border-radius: 8px; margin: 1rem 0;">
+                                <strong style="color: #2563EB; font-size: 1.3rem;">${sugerencia}</strong>
+                            </div>
+                            <p style="color: #6B7280; font-size: 0.9em;">Puedes aceptarlo o escribir uno diferente</p>
+                        </div>
+                    `,
+                    showCancelButton: true,
+                    confirmButtonText: '✓ Usar esta sugerencia',
+                    cancelButtonText: 'Escribir otro',
+                    confirmButtonColor: '#dc2626',
+                    cancelButtonColor: '#6B7280'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        username.value = sugerencia;
+                        username.dispatchEvent(new Event('input'));
+                        suggestedUsername = true;
+                        Toast.fire({
+                            icon: 'success',
+                            title: '✓ Username asignado',
+                            background: '#D1FAE5'
+                        });
+                    }
+                });
+            }
+        }
+    }
+    firstName.addEventListener('blur', sugerirUsername);
+    lastName.addEventListener('blur', sugerirUsername);
+}
+
+// VALIDACIÓN DE DIRECCIÓN (OPCIONAL)
+if (direccion) {
+    direccion.addEventListener('input', function(e) {
+        const valor = e.target.value.trim();
+        if (valor.length >= 5) {
+            e.target.style.borderColor = '#10B981';
+            e.target.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+        } else if (valor.length > 0) {
+            e.target.style.borderColor = '#F59E0B';
+        } else {
+            e.target.style.borderColor = 'var(--border)';
+            e.target.style.boxShadow = '';
+        }
+    });
+}
+
+// INDICADOR DE CAMPOS COMPLETADOS
+function actualizarProgreso() {
+    const camposRequeridos = [username, email, firstName, lastName, rol, estado, pwd, pwd2];
+    const completados = camposRequeridos.filter(campo => campo && campo.value.trim().length > 0).length;
+    const porcentaje = Math.round((completados / camposRequeridos.length) * 100);
+    if (porcentaje === 100) {
+        console.log('✅ Todos los campos requeridos completados');
+    }
+}
+document.getElementById('create-user-form').addEventListener('input', actualizarProgreso);
+
+console.log('✅ Validaciones de Crear Usuario cargadas correctamente');
 </script>
 {% endblock %}

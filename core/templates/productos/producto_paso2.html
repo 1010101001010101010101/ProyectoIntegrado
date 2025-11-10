@@ -377,22 +377,52 @@
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-// INICIALIZACIÓN
+// ============================================
+// PRODUCTO PASO 2 - VALIDACIONES Y SWEETALERTS PRO
+// ============================================
+
+// Toast personalizado
+const Toast = Swal.mixin({
+    toast: true,
+    position: 'top-end',
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer)
+        toast.addEventListener('mouseleave', Swal.resumeTimer)
+    }
+});
+
+// Mensaje de bienvenida
 document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar checkboxes
     updateCheckbox('{{ form.es_perecedero.id_for_label }}', 'perishable');
     updateCheckbox('{{ form.requiere_lote.id_for_label }}', 'lote');
     updateCheckbox('{{ form.requiere_serie.id_for_label }}', 'serie');
+    // Toast de bienvenida
+    Swal.fire({
+        icon: 'success',
+        title: '📊 Control de Stock',
+        html: '<p>Configure los niveles de inventario</p><small style="color: #6B7280;">Paso 2 de 3</small>',
+        timer: 3000,
+        showConfirmButton: false,
+        toast: true,
+        position: 'top-end',
+        background: '#D1FAE5',
+        iconColor: '#10B981'
+    });
 });
 
+// ============================================
 // FUNCIONES DE CHECKBOXES
+// ============================================
 function toggleCheckbox(id) {
     const checkbox = document.getElementById(id);
     checkbox.checked = !checkbox.checked;
-    
     const prefix = id.includes('perecedero') ? 'perishable' : 
                    id.includes('lote') ? 'lote' : 'serie';
     updateCheckbox(id, prefix);
-    
     event.stopPropagation();
 }
 
@@ -400,21 +430,54 @@ function updateCheckbox(id, prefix) {
     const checkbox = document.getElementById(id);
     const container = document.getElementById(prefix + '-container');
     const label = document.getElementById(prefix + '-label');
-    
+    // Animación
+    container.style.transform = 'scale(0.95)';
+    setTimeout(() => container.style.transform = 'scale(1)', 150);
     if (checkbox.checked) {
         container.classList.add('checked');
-        if (prefix === 'perishable') label.textContent = '✓ Producto perecedero';
-        if (prefix === 'lote') label.textContent = '✓ Con control por lote';
-        if (prefix === 'serie') label.textContent = '✓ Con control por serie';
+        container.style.boxShadow = '0 4px 12px rgba(34, 197, 94, 0.2)';
+        if (prefix === 'perishable') {
+            label.textContent = '✓ Producto perecedero';
+            Toast.fire({
+                icon: 'warning',
+                title: '⚠️ Producto perecedero activado',
+                text: 'Se controlará fecha de vencimiento',
+                background: '#FEF3C7'
+            });
+        }
+        if (prefix === 'lote') {
+            label.textContent = '✓ Con control por lote';
+            Toast.fire({
+                icon: 'success',
+                title: '📦 Control por lote activado',
+                background: '#D1FAE5'
+            });
+        }
+        if (prefix === 'serie') {
+            label.textContent = '✓ Con control por serie';
+            Toast.fire({
+                icon: 'success',
+                title: '🔢 Control por serie activado',
+                background: '#D1FAE5'
+            });
+        }
     } else {
         container.classList.remove('checked');
+        container.style.boxShadow = '';
         if (prefix === 'perishable') label.textContent = 'No perecedero';
         if (prefix === 'lote') label.textContent = 'Sin control por lote';
         if (prefix === 'serie') label.textContent = 'Sin control por serie';
     }
 }
 
-// VALIDACIONES
+// ============================================
+// VALIDACIONES DE STOCK EN TIEMPO REAL
+// ============================================
+const stockMinInput = document.getElementById('{{ form.stock_minimo.id_for_label }}');
+const stockMaxInput = document.getElementById('{{ form.stock_maximo.id_for_label }}');
+const puntoReordenInput = document.getElementById('{{ form.punto_reorden.id_for_label }}');
+const stockActualInput = document.getElementById('{{ form.stock_actual.id_for_label }}');
+
 function validarEntero(input) {
     input.addEventListener('input', function(e) {
         e.target.value = e.target.value.replace(/[^\d]/g, '');
@@ -422,54 +485,347 @@ function validarEntero(input) {
             e.target.value = e.target.value.replace(/^0+/, '');
         }
         e.target.classList.remove('error');
+        const valor = parseInt(e.target.value) || 0;
+        if (valor > 0) {
+            e.target.style.borderColor = '#10B981';
+            e.target.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+        } else {
+            e.target.style.borderColor = 'var(--border)';
+            e.target.style.boxShadow = '';
+        }
+    });
+    input.addEventListener('blur', function(e) {
+        validarRelacionesStock();
     });
 }
 
-validarEntero(document.getElementById('{{ form.stock_minimo.id_for_label }}'));
-validarEntero(document.getElementById('{{ form.stock_maximo.id_for_label }}'));
-validarEntero(document.getElementById('{{ form.punto_reorden.id_for_label }}'));
-validarEntero(document.getElementById('{{ form.stock_actual.id_for_label }}'));
+validarEntero(stockMinInput);
+validarEntero(stockMaxInput);
+validarEntero(puntoReordenInput);
+validarEntero(stockActualInput);
 
-// ENVÍO DEL FORMULARIO
+// Validar relaciones entre stocks
+function validarRelacionesStock() {
+    const stockMin = parseInt(stockMinInput.value) || 0;
+    const stockMax = parseInt(stockMaxInput.value) || 0;
+    const puntoReorden = parseInt(puntoReordenInput.value) || 0;
+    const stockActual = parseInt(stockActualInput.value) || 0;
+
+    // Validar Stock Máximo > Stock Mínimo
+    if (stockMax > 0 && stockMin > 0 && stockMax < stockMin) {
+        stockMaxInput.style.borderColor = '#DC2626';
+        stockMaxInput.style.boxShadow = '0 0 0 3px rgba(220, 38, 38, 0.1)';
+        Toast.fire({
+            icon: 'error',
+            title: '❌ Stock máximo menor al mínimo',
+            text: 'El stock máximo debe ser mayor al mínimo',
+            background: '#FEE2E2'
+        });
+    }
+
+    // Validar Punto de Reorden
+    if (puntoReorden > 0 && stockMin > 0) {
+        if (puntoReorden < stockMin) {
+            puntoReordenInput.style.borderColor = '#F59E0B';
+            Toast.fire({
+                icon: 'info',
+                title: '💡 Punto de reorden bajo',
+                text: 'Se recomienda que esté entre el mínimo y máximo',
+                background: '#FEF3C7'
+            });
+        } else if (stockMax > 0 && puntoReorden > stockMax) {
+            puntoReordenInput.style.borderColor = '#F59E0B';
+            Toast.fire({
+                icon: 'info',
+                title: '💡 Punto de reorden alto',
+                text: 'Se recomienda que esté entre el mínimo y máximo',
+                background: '#FEF3C7'
+            });
+        }
+    }
+
+    // Advertencia si stock actual < mínimo
+    if (stockActual > 0 && stockMin > 0 && stockActual < stockMin) {
+        stockActualInput.style.borderColor = '#F59E0B';
+        Toast.fire({
+            icon: 'warning',
+            title: '⚠️ Stock inicial bajo',
+            html: `Stock actual (${stockActual}) es menor al mínimo (${stockMin})`,
+            background: '#FEF3C7'
+        });
+    }
+}
+
+// ============================================
+// VALIDACIÓN PRINCIPAL DEL FORMULARIO
+// ============================================
 document.getElementById('productoForm').addEventListener('submit', function(e) {
     e.preventDefault();
-    
-    const stockMin = document.getElementById('{{ form.stock_minimo.id_for_label }}').value.trim();
-    
-    if (!stockMin) {
+
+    const stockMin = parseInt(stockMinInput.value) || 0;
+    const stockMax = parseInt(stockMaxInput.value) || 0;
+    const puntoReorden = parseInt(puntoReordenInput.value) || 0;
+    const stockActual = parseInt(stockActualInput.value) || 0;
+
+    // Validar stock mínimo (obligatorio)
+    if (stockMin <= 0) {
         Swal.fire({
             icon: 'error',
-            title: 'Campo obligatorio',
-            text: 'El stock mínimo es obligatorio'
+            title: '❌ Stock mínimo requerido',
+            html: '<p>Debe ingresar un <strong>stock mínimo</strong> mayor a 0</p>',
+            confirmButtonText: 'Entendido',
+            confirmButtonColor: '#2563EB'
+        });
+        stockMinInput.focus();
+        return;
+    }
+
+    // Validar stock actual (obligatorio)
+    if (stockActual < 0) {
+        Swal.fire({
+            icon: 'error',
+            title: '❌ Stock actual inválido',
+            text: 'El stock actual no puede ser negativo',
+            confirmButtonText: 'Corregir',
+            confirmButtonColor: '#2563EB'
+        });
+        stockActualInput.focus();
+        return;
+    }
+
+    // Validar relación stock máximo < mínimo
+    if (stockMax > 0 && stockMax < stockMin) {
+        Swal.fire({
+            icon: 'error',
+            title: '🚫 Configuración inválida',
+            html: `
+                <div style="text-align: center; margin: 1rem 0;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div style="background: #FEE2E2; padding: 1rem; border-radius: 8px;">
+                            <strong style="color: #DC2626;">Stock Mínimo</strong>
+                            <div style="font-size: 1.5rem; font-weight: bold; color: #DC2626;">${stockMin}</div>
+                        </div>
+                        <div style="background: #FEE2E2; padding: 1rem; border-radius: 8px;">
+                            <strong style="color: #DC2626;">Stock Máximo</strong>
+                            <div style="font-size: 1.5rem; font-weight: bold; color: #DC2626;">${stockMax}</div>
+                        </div>
+                    </div>
+                    <p style="margin-top: 1rem; color: #DC2626; font-weight: bold;">
+                        El stock máximo debe ser mayor al mínimo
+                    </p>
+                </div>
+            `,
+            confirmButtonText: 'Corregir',
+            confirmButtonColor: '#2563EB'
+        });
+        stockMaxInput.focus();
+        return;
+    }
+
+    // Advertencia si stock inicial muy bajo
+    if (stockActual > 0 && stockActual < stockMin) {
+        Swal.fire({
+            icon: 'warning',
+            title: '⚠️ Stock inicial bajo',
+            html: `
+                <div style="text-align: center; margin: 1rem 0;">
+                    <p>El stock actual (<strong>${stockActual}</strong>) es menor al stock mínimo (<strong>${stockMin}</strong>)</p>
+                    <div style="background: #FEF3C7; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                        <p style="color: #92400E; margin: 0;">Esto activará una alerta de bajo stock inmediatamente</p>
+                    </div>
+                </div>
+            `,
+            showCancelButton: true,
+            confirmButtonText: 'Continuar de todas formas',
+            cancelButtonText: 'Ajustar stock',
+            confirmButtonColor: '#2563EB',
+            cancelButtonColor: '#6B7280'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                mostrarConfirmacionFinal(stockMin, stockMax, stockActual);
+            } else {
+                stockActualInput.focus();
+            }
         });
         return;
     }
-    
-    Swal.fire({
-        icon: 'success',
-        title: '✓ Guardando...',
-        timer: 1000,
-        showConfirmButton: false,
-        willClose: () => {
-            this.submit();
-        }
-    });
+
+    // Todo correcto
+    mostrarConfirmacionFinal(stockMin, stockMax, stockActual);
 });
 
+// ============================================
+// CONFIRMACIÓN FINAL
+// ============================================
+function mostrarConfirmacionFinal(stockMin, stockMax, stockActual) {
+    const perecedero = document.getElementById('{{ form.es_perecedero.id_for_label }}').checked;
+    const requiereLote = document.getElementById('{{ form.requiere_lote.id_for_label }}').checked;
+    const requiereSerie = document.getElementById('{{ form.requiere_serie.id_for_label }}').checked;
+
+    let controles = [];
+    if (perecedero) controles.push('⚠️ Perecedero');
+    if (requiereLote) controles.push('📦 Control por Lote');
+    if (requiereSerie) controles.push('🔢 Control por Serie');
+
+    const textoControles = controles.length > 0 
+        ? controles.join('<br>') 
+        : '<span style="color: #6B7280;">Sin controles adicionales</span>';
+
+    // Calcular nivel de alerta
+    let nivelAlerta = 'success';
+    let textoAlerta = 'Normal';
+    let iconoAlerta = '✓';
+
+    if (stockActual < stockMin) {
+        nivelAlerta = 'error';
+        textoAlerta = 'Bajo Stock';
+        iconoAlerta = '🚨';
+    } else if (stockActual <= stockMin * 1.5) {
+        nivelAlerta = 'warning';
+        textoAlerta = 'Stock Justo';
+        iconoAlerta = '⚠️';
+    }
+
+    const bgAlerta = nivelAlerta === 'error' ? '#FEE2E2' : 
+                     nivelAlerta === 'warning' ? '#FEF3C7' : '#D1FAE5';
+    const colorAlerta = nivelAlerta === 'error' ? '#DC2626' : 
+                        nivelAlerta === 'warning' ? '#F59E0B' : '#10B981';
+
+    Swal.fire({
+        icon: 'question',
+        title: '¿Guardar configuración de stock?',
+        html: `
+            <div style="text-align: left; margin: 1.5rem 0;">
+                <div style="display: grid; gap: 0.75rem; margin-bottom: 1rem;">
+                    <div style="background: #F9FAFB; padding: 0.75rem; border-radius: 6px; display: flex; justify-content: space-between;">
+                        <strong>📉 Stock Mínimo:</strong>
+                        <span style="color: #DC2626; font-weight: bold;">${stockMin}</span>
+                    </div>
+                    ${stockMax > 0 ? `
+                        <div style="background: #F9FAFB; padding: 0.75rem; border-radius: 6px; display: flex; justify-content: space-between;">
+                            <strong>📈 Stock Máximo:</strong>
+                            <span style="color: #10B981; font-weight: bold;">${stockMax}</span>
+                        </div>
+                    ` : ''}
+                    <div style="background: ${bgAlerta}; padding: 0.75rem; border-radius: 6px; display: flex; justify-content: space-between;">
+                        <strong>📦 Stock Actual:</strong>
+                        <span style="color: ${colorAlerta}; font-weight: bold;">${stockActual} ${iconoAlerta}</span>
+                    </div>
+                </div>
+                <div style="background: #EFF6FF; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                    <strong style="color: #1F2937;">🎛️ Controles activados:</strong>
+                    <div style="margin-top: 0.5rem; font-size: 0.9em;">
+                        ${textoControles}
+                    </div>
+                </div>
+                <div style="background: ${bgAlerta}; padding: 0.75rem; border-radius: 6px; margin-top: 1rem; text-align: center;">
+                    <strong style="color: ${colorAlerta};">${iconoAlerta} Estado: ${textoAlerta}</strong>
+                </div>
+            </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: '✓ Continuar al Paso 3 →',
+        cancelButtonText: '← Revisar',
+        confirmButtonColor: '#2563EB',
+        cancelButtonColor: '#6B7280',
+        width: '600px',
+        backdrop: `rgba(37, 99, 235, 0.1)`
+    }).then((result) => {
+        if (result.isConfirmed) {
+            guardarPaso2();
+        }
+    });
+}
+
+function guardarPaso2() {
+    let progreso = 0;
+    const etapas = [
+        { texto: 'Validando niveles de stock...', icon: '📊' },
+        { texto: 'Configurando controles...', icon: '🎛️' },
+        { texto: 'Preparando Paso 3...', icon: '🚀' }
+    ];
+    let etapaActual = 0;
+
+    Swal.fire({
+        title: etapas[0].texto,
+        html: `
+            <div style="margin: 1.5rem 0;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">${etapas[0].icon}</div>
+                <div style="background: #F3F4F6; height: 8px; border-radius: 4px; overflow: hidden;">
+                    <div id="progressBar" style="background: linear-gradient(90deg, #2563EB, #1E40AF); height: 100%; width: 0%; transition: width 0.3s ease;"></div>
+                </div>
+                <p id="progressText" style="color: #2563EB; margin-top: 0.5rem; font-weight: bold;">0%</p>
+            </div>
+        `,
+        showConfirmButton: false,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => {
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            const interval = setInterval(() => {
+                progreso += 5;
+                progressBar.style.width = progreso + '%';
+                progressText.textContent = progreso + '%';
+                // Cambiar etapa
+                if (progreso === 33 || progreso === 66) {
+                    etapaActual++;
+                    Swal.update({
+                        title: etapas[etapaActual].texto,
+                        html: `
+                            <div style="margin: 1.5rem 0;">
+                                <div style="font-size: 3rem; margin-bottom: 1rem;">${etapas[etapaActual].icon}</div>
+                                <div style="background: #F3F4F6; height: 8px; border-radius: 4px; overflow: hidden;">
+                                    <div style="background: linear-gradient(90deg, #2563EB, #1E40AF); height: 100%; width: ${progreso}%; transition: width 0.3s ease;"></div>
+                                </div>
+                                <p style="color: #2563EB; margin-top: 0.5rem; font-weight: bold;">${progreso}%</p>
+                            </div>
+                        `
+                    });
+                }
+                if (progreso >= 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        document.getElementById('productoForm').submit();
+                    }, 500);
+                }
+            }, 50);
+        }
+    });
+}
+
+// ============================================
+// LIMPIAR FORMULARIO
+// ============================================
 function limpiarFormulario() {
     Swal.fire({
         icon: 'warning',
-        title: '¿Limpiar formulario?',
-        text: 'Se perderán todos los datos ingresados',
+        title: '🔄 ¿Limpiar configuración?',
+        text: 'Se perderán los datos de stock y controles',
         showCancelButton: true,
         confirmButtonText: 'Sí, limpiar',
-        cancelButtonText: 'Cancelar'
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#F59E0B',
+        cancelButtonColor: '#6B7280'
     }).then((result) => {
         if (result.isConfirmed) {
             document.getElementById('productoForm').reset();
+            // Resetear checkboxes
             updateCheckbox('{{ form.es_perecedero.id_for_label }}', 'perishable');
             updateCheckbox('{{ form.requiere_lote.id_for_label }}', 'lote');
             updateCheckbox('{{ form.requiere_serie.id_for_label }}', 'serie');
+            // Resetear estilos
+            [stockMinInput, stockMaxInput, puntoReordenInput, stockActualInput].forEach(input => {
+                if (input) {
+                    input.style.borderColor = 'var(--border)';
+                    input.style.boxShadow = '';
+                }
+            });
+            Toast.fire({
+                icon: 'success',
+                title: '✓ Configuración limpiada',
+                background: '#D1FAE5'
+            });
         }
     });
 }
