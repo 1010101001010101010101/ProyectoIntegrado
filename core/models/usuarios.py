@@ -67,3 +67,21 @@ class Usuario(TimeStampedModel):
     
     def __str__(self):
         return f"{self.user.get_full_name() or self.user.username} ({self.get_rol_display()})"
+
+
+
+
+# ...existing code...
+
+# Señal para crear el perfil extendido automáticamente
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.contrib.auth.models import User
+
+@receiver(post_save, sender=User)
+def crear_usuario_perfil(sender, instance, created, **kwargs):
+    if created and not hasattr(instance, 'perfil'):
+        Usuario.objects.create(
+            user=instance,
+            rol='ADMIN' if instance.is_superuser else 'EDITOR'
+        )
