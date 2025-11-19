@@ -49,7 +49,10 @@ __all__ = [
     'Cliente',
     'Venta',
     'DetalleVenta',
+<<<<<<< HEAD
     
     # Auditoria
     'EventoAuditoria',
+=======
+>>>>>>> cb95a2fee0a357e2525c382891a20c417d34d6a4
 ]

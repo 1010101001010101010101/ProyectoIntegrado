@@ -32,17 +32,21 @@ def login_view(request):
         UserModel = get_user_model()
         user_obj = UserModel.objects.filter(email__iexact=email).first()
 
+<<<<<<< HEAD
         perfil = getattr(user_obj, 'perfil', None)
         if perfil and perfil.bloqueado:
             messages.error(request, 'Tu cuenta está bloqueada por múltiples intentos fallidos. Contacta al administrador.')
             return render(request, 'auth/login.html', {'username': email})
 
+=======
+>>>>>>> cb95a2fee0a357e2525c382891a20c417d34d6a4
         if user_obj:
             user = authenticate(request, username=user_obj.username, password=password)
         else:
             user = None
 
         if user is not None:
+<<<<<<< HEAD
             # Login exitoso: resetear intentos fallidos
             if perfil:
                 perfil.intentos_fallidos = 0
@@ -50,17 +54,29 @@ def login_view(request):
             login(request, user)
             request.session.set_expiry(1209600 if remember else 0)
 
+=======
+            login(request, user)
+            request.session.set_expiry(1209600 if remember else 0)
+
+            perfil = getattr(user, 'perfil', None)
+>>>>>>> cb95a2fee0a357e2525c382891a20c417d34d6a4
             if perfil:
                 perfil.ultimo_acceso = timezone.now()
                 perfil.save()
                 if perfil.must_change_password:
+<<<<<<< HEAD
                     request.session['force_password_change'] = user.id
                     messages.warning(request, 'Por seguridad, cambia tu contraseña antes de continuar.')
+=======
+                    messages.warning(request, 'Por seguridad, cambia tu contraseña antes de continuar.')
+                    request.session['force_password_change'] = user.id
+>>>>>>> cb95a2fee0a357e2525c382891a20c417d34d6a4
                     return redirect('core:cambiar_password_inicial')
 
             messages.success(request, f'¡Bienvenido, {user.get_full_name() or user.email}!')
             return redirect('core:dashboard')
         else:
+<<<<<<< HEAD
             # Fallo: aumentar intentos y bloquear si supera el límite
             if perfil:
                 perfil.intentos_fallidos += 1
@@ -72,6 +88,9 @@ def login_view(request):
                 perfil.save()
             else:
                 messages.error(request, 'Correo o contraseña incorrectos')
+=======
+            messages.error(request, 'Correo o contraseña incorrectos')
+>>>>>>> cb95a2fee0a357e2525c382891a20c417d34d6a4
             return render(request, 'auth/login.html', {'username': email})
 
     return render(request, 'auth/login.html')

@@ -6,10 +6,15 @@ from . import views
 from .views import usuarios as user_views
 from .views import productos as product_views
 from .views import inventario as inventario_views
+
 from core.views.inventario import exportar_movimientos_excel, eliminar_movimiento, productos_por_proveedor, proveedor_por_producto, proveedores_por_producto
 from core.views.usuarios import exportar_usuarios_excel
 from core.views.bodegas import crear_bodega_ajax
  # ...existing code...
+
+from core.views.inventario import exportar_movimientos_excel, eliminar_movimiento
+from core.views.usuarios import exportar_usuarios_excel
+
 
 app_name = 'core'
 
@@ -22,10 +27,14 @@ urlpatterns = [
     path('recuperar-password/', views.recuperar_password, name='recuperar_password'),
     path('validar-token/<str:token>/', views.validar_token, name='validar_token'),
     path('nueva-password/', views.nueva_password, name='nueva_password'),
+
     path('cambiar-password/', views.cambiar_password, name='cambiar_password'),
 
     # ===== REPORTES =====
     path('reportes/', views.reportes_view, name='reportes'),
+
+
+
     # ===== USUARIOS =====
     path('usuarios/', user_views.lista_usuarios, name='lista_usuarios'),
     path('usuarios/crear/', user_views.crear_usuario, name='crear_usuario'),
@@ -66,15 +75,19 @@ urlpatterns = [
     path('movimientos/crear/paso3/', inventario_views.movimiento_paso3, name='movimiento_paso3'),
     path('movimientos/exportar/', exportar_movimientos_excel, name='exportar_movimientos_excel'),
     path('movimientos/eliminar/<int:pk>/', eliminar_movimiento, name='eliminar_movimiento'),
+
     path('ajax/productos_por_proveedor/', productos_por_proveedor, name='productos_por_proveedor'),
     path('ajax/proveedor_por_producto/', proveedor_por_producto, name='proveedor_por_producto'),
     path('ajax/proveedores_por_producto/', proveedores_por_producto, name='proveedores_por_producto'),
     path('movimientos/buscar-ajax/', inventario_views.buscar_movimientos_ajax, name='buscar_movimientos_ajax'),
 
+
+
     # ===== VENTAS =====
     path('ventas/', views.lista_ventas, name='lista_ventas'),
     path('ventas/crear/', views.crear_venta, name='crear_venta'),
     path('ventas/<int:pk>/', views.detalle_venta, name='detalle_venta'),
+
     path('bodegas/crear/', crear_bodega_ajax, name='crear_bodega_ajax'),
 
     # ===== USUARIOS AJAX =====

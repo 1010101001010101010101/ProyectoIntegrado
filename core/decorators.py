@@ -1,3 +1,4 @@
+
 # Decorador: solo ADMIN y BODEGA pueden crear/editar inventario
 def admin_o_bodega_required(view_func):
     """Solo ADMIN y BODEGA pueden crear/editar inventario"""
