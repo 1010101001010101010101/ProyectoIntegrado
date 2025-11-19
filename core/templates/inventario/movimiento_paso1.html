@@ -1,0 +1,859 @@
+{% extends 'base.html' %}
+
+{% block title %}Registrar Movimiento - Paso 1{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+    
+    .page-title {
+        font-size: 2rem;
+        color: var(--text-dark);
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    
+    .breadcrumb {
+        color: var(--text-gray);
+        font-size: 0.95rem;
+    }
+    
+    .breadcrumb a {
+        color: #dc2626;
+        text-decoration: none;
+        transition: color 0.3s;
+    }
+    
+    .breadcrumb a:hover {
+        color: #991b1b;
+    }
+    
+    .form-card {
+        background: white;
+        border-radius: 12px;
+        padding: 2.5rem;
+        box-shadow: 0 2px 12px var(--shadow);
+    }
+    
+    .steps-progress {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 12px var(--shadow);
+        margin-bottom: 2rem;
+    }
+
+    .steps-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+    }
+
+    .step-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        flex: 1;
+        position: relative;
+        z-index: 2;
+    }
+
+    .step-number {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        background: var(--border);
+        color: var(--text-gray);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.2rem;
+        transition: all 0.3s ease;
+    }
+
+    .step-item.active .step-number {
+        background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+        }
+        50% {
+            box-shadow: 0 4px 20px rgba(220, 38, 38, 0.6);
+        }
+    }
+
+    .step-label {
+        font-size: 0.85rem;
+        color: var(--text-gray);
+        font-weight: 600;
+        text-align: center;
+    }
+
+    .step-item.active .step-label {
+        color: #dc2626;
+        font-weight: 700;
+    }
+
+    .progress-line {
+        position: absolute;
+        top: 22px;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--border);
+        z-index: 1;
+    }
+
+    .progress-line-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #dc2626 0%, #991b1b 100%);
+        width: 0%;
+        transition: width 0.5s ease;
+    }
+    
+    .section-title {
+        font-size: 1.3rem;
+        color: var(--text-dark);
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        margin-top: 2rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--border);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .form-group label {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--text-dark);
+        font-size: 0.95rem;
+    }
+    
+    .label-required {
+        color: #dc2626;
+    }
+    
+    .label-optional {
+        font-weight: normal;
+        color: var(--text-gray);
+        font-size: 0.85rem;
+    }
+    
+    .form-control {
+        padding: 0.9rem;
+        border: 2px solid var(--border);
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: #dc2626;
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+    }
+    
+    textarea.form-control {
+        min-height: 100px;
+        resize: vertical;
+        font-family: inherit;
+    }
+    
+    .info-box {
+        background: #fef2f2;
+        border-left: 4px solid #dc2626;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+    }
+    
+    .info-box p {
+        margin: 0;
+        color: #991b1b;
+        font-size: 0.95rem;
+    }
+    
+    .tipo-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-left: 0.5rem;
+    }
+    
+    .tipo-ingreso {
+        background: #dcfce7;
+        color: #166534;
+    }
+    
+    .tipo-salida {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+    
+    .tipo-ajuste {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+    
+    .tipo-devolucion {
+        background: #fed7aa;
+        color: #9a3412;
+    }
+    
+    .form-actions {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 2px solid var(--border);
+    }
+    
+    .btn {
+        padding: 0.9rem 1.8rem;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
+    }
+    
+    .btn-secondary {
+        background: #f5f5f5;
+        color: var(--text-dark);
+    }
+    
+    .btn-secondary:hover {
+        background: #e0e0e0;
+    }
+
+    /* Estilos personalizados para SweetAlert2 */
+    .swal2-popup {
+        border-radius: 16px;
+        font-family: inherit;
+    }
+    
+    .swal2-title {
+        color: var(--text-dark);
+        font-size: 1.5rem;
+    }
+    
+    .swal2-html-container {
+        color: var(--text-gray);
+    }
+    
+    .swal2-confirm {
+        background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%) !important;
+        border-radius: 8px;
+        padding: 0.6rem 2rem;
+        font-weight: 600;
+    }
+    
+    .swal2-cancel {
+        background: #f5f5f5 !important;
+        color: var(--text-dark) !important;
+        border-radius: 8px;
+        padding: 0.6rem 2rem;
+        font-weight: 600;
+    }
+
+    @media (max-width: 768px) {
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+        
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Registrar Movimiento - Paso 1</h1>
+        <div class="breadcrumb">
+            <a href="{% url 'core:dashboard' %}">Dashboard</a> / 
+            <a href="{% url 'core:lista_movimientos' %}">Movimientos</a> / 
+            Nuevo
+        </div>
+    </div>
+    <a href="{% url 'core:lista_movimientos' %}" class="btn btn-secondary">← Volver</a>
+</div>
+
+<div class="steps-progress">
+    <div class="steps-header">
+        <div class="progress-line">
+            <div class="progress-line-fill"></div>
+        </div>
+        <div class="step-item active">
+            <div class="step-number">1</div>
+            <div class="step-label">Datos del Movimiento</div>
+        </div>
+        <div class="step-item">
+            <div class="step-number">2</div>
+            <div class="step-label">Control Avanzado</div>
+        </div>
+        <div class="step-item">
+            <div class="step-number">3</div>
+            <div class="step-label">Referencias</div>
+        </div>
+    </div>
+</div>
+
+<div class="form-card">
+    <div class="info-box">
+        <p><strong>Información:</strong> Registre los datos básicos del movimiento de inventario. Todos los campos marcados son obligatorios.</p>
+    </div>
+
+    <form method="post" id="movimientoForm">
+        {% csrf_token %}
+        
+        <h3 class="section-title">Información del Movimiento</h3>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="fecha">Fecha y Hora *</label>
+                <input type="datetime-local" id="fecha" name="fecha" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="tipo">Tipo de Movimiento *</label>
+                <select id="tipo" name="tipo" class="form-control">
+                    <option value="">Seleccione...</option>
+                    <option value="ingreso">Ingreso</option>
+                    <option value="salida">Salida</option>
+                    <option value="ajuste">Ajuste</option>
+                    <option value="transferencia">Transferencia</option>
+                    <option value="devolucion">Devolución</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="cantidad">Cantidad *</label>
+                <input type="number" id="cantidad" name="cantidad" class="form-control" step="1" min="1">
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="producto">Producto (SKU) *</label>
+                <select id="producto" name="producto" class="form-control">
+                    <option value="">Seleccione...</option>
+                    {% for prod in productos %}
+                        <option value="{{ prod.sku }}" {% if data.producto == prod.sku %}selected{% endif %}>
+                            {{ prod.sku }} - {{ prod.nombre }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="proveedor">Proveedor (opcional)</label>
+                <select id="proveedor" name="proveedor" class="form-control">
+                    <option value="">Sin proveedor</option>
+                    {% for prov in proveedores %}
+                        <option value="{{ prov.rut }}" {% if data.proveedor == prov.rut %}selected{% endif %}>
+                            {{ prov.rut }} - {{ prov.razon_social }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="bodega">Bodega *</label>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <select id="bodega" name="bodega" class="form-control">
+                        <option value="">Seleccione...</option>
+                        {% for bod in bodegas %}
+                            <option value="{{ bod.codigo }}" {% if data.bodega == bod.codigo %}selected{% endif %}>
+                                {{ bod.codigo }} - {{ bod.nombre }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <a href="#" id="crearBodegaBtn" class="btn btn-secondary" style="padding:0.5rem 1rem; font-size:0.95rem;">+ Nueva</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a class="btn btn-secondary" href="{% url 'core:lista_movimientos' %}">✕ Cancelar</a>
+            <button type="submit" class="btn btn-primary">
+                Siguiente →
+            </button>
+        </div>
+    </form>
+</div>
+
+{% if error_db %}
+<script>
+    Swal.fire({
+        icon: 'error',
+        title: 'Error al guardar',
+        text: '{{ error_db|escapejs }}',
+        confirmButtonText: 'Entendido',
+        customClass: { confirmButton: 'swal2-confirm' }
+    });
+</script>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+// PASO 1 - VALIDACIONES Y SWEETALERTS MEJORADOS
+
+// Configuración global de SweetAlert2
+const Toast = Swal.mixin({
+    toast: true,
+    position: 'top-end',
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer)
+        toast.addEventListener('mouseleave', Swal.resumeTimer)
+    }
+});
+
+// Inicializar fecha y hora actual de Chile en el campo
+(function(){
+    const fechaInput = document.getElementById('fecha');
+    if (!fechaInput) return;
+
+    // Obtener la fecha y hora actual de Chile
+    try {
+        const nowChile = new Date(
+            new Date().toLocaleString('en-US', { timeZone: 'America/Santiago' })
+        );
+        // Formato para input datetime-local: 'YYYY-MM-DDTHH:mm'
+        const yyyy = nowChile.getFullYear();
+        const mm = String(nowChile.getMonth() + 1).padStart(2, '0');
+        const dd = String(nowChile.getDate()).padStart(2, '0');
+        const hh = String(nowChile.getHours()).padStart(2, '0');
+        const min = String(nowChile.getMinutes()).padStart(2, '0');
+        const chileDatetime = `${yyyy}-${mm}-${dd}T${hh}:${min}`;
+        fechaInput.value = chileDatetime;
+    } catch (e) {
+        // Fallback: usar hora local del navegador
+        fechaInput.value = new Date().toISOString().slice(0,16);
+    }
+})();
+
+// Mensaje de bienvenida animado
+document.addEventListener('DOMContentLoaded', function() {
+    Swal.fire({
+        icon: 'info',
+        title: '📝 Nuevo Movimiento',
+        html: '<p>Complete los datos básicos del movimiento de inventario</p><small style="color: #6B7280;">Los campos con (*) son obligatorios</small>',
+        timer: 3000,
+        showConfirmButton: false,
+        toast: true,
+        position: 'top-end',
+        background: '#FEF2F2',
+        iconColor: '#DC2626'
+    });
+});
+
+// Animación del select de tipo
+document.getElementById('tipo').addEventListener('change', function(e) {
+    const tipo = e.target.value;
+    const colores = {
+        'ingreso': '#dcfce7',
+        'salida': '#fee2e2',
+        'ajuste': '#dbeafe',
+        'transferencia': '#fef3c7',
+        'devolucion': '#fed7aa'
+    };
+    
+    if (tipo && colores[tipo]) {
+        e.target.style.backgroundColor = colores[tipo];
+        e.target.style.transform = 'scale(1.02)';
+        setTimeout(() => e.target.style.transform = 'scale(1)', 200);
+        
+        const mensajes = {
+            'ingreso': { icon: '📥', text: 'Entrada de mercancía', color: '#16A34A' },
+            'salida': { icon: '📤', text: 'Salida de mercancía', color: '#DC2626' },
+            'ajuste': { icon: '⚖️', text: 'Ajuste de inventario', color: '#2563EB' },
+            'transferencia': { icon: '🔄', text: 'Transferencia entre bodegas', color: '#CA8A04' },
+            'devolucion': { icon: '↩️', text: 'Devolución de mercancía', color: '#EA580C' }
+        };
+        
+        const msg = mensajes[tipo];
+        Toast.fire({
+            icon: 'success',
+            title: `${msg.icon} ${msg.text}`,
+            background: colores[tipo]
+        });
+    } else {
+        e.target.style.backgroundColor = '';
+    }
+});
+
+// Validación de cantidad en tiempo real
+document.getElementById('cantidad').addEventListener('input', function(e) {
+    const valor = e.target.value;
+    // Permitir solo números enteros positivos
+    if (valor && (!/^\d+$/.test(valor) || parseInt(valor) <= 0)) {
+        e.target.value = valor.replace(/\D/g, '');
+        Swal.fire({
+            icon: 'warning',
+            title: 'Cantidad inválida',
+            text: 'Solo se permiten números enteros positivos en la cantidad.',
+            timer: 2200,
+            showConfirmButton: false
+        });
+        e.target.style.borderColor = '#DC2626';
+        return;
+    }
+    
+    // ...resto de tu lógica visual...
+    if (valor > 10000) {
+        e.target.style.borderColor = '#DC2626';
+    } else if (valor > 0) {
+        e.target.style.borderColor = '#10B981';
+    } else {
+        e.target.style.borderColor = 'var(--border)';
+    }
+});
+
+// Formatear campos en mayúsculas
+document.getElementById('producto').addEventListener('input', function(e) {
+    e.target.value = e.target.value.toUpperCase();
+});
+
+document.getElementById('bodega').addEventListener('input', function(e) {
+    e.target.value = e.target.value.toUpperCase();
+});
+
+// Validación principal del formulario
+document.getElementById('movimientoForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    // Captura los campos obligatorios
+    const fecha = document.getElementById('fecha').value.trim();
+    const tipo = document.getElementById('tipo').value.trim();
+    const cantidad = document.getElementById('cantidad').value.trim();
+    const producto = document.getElementById('producto').value.trim();
+    const bodega = document.getElementById('bodega').value.trim();
+
+    // Validación de campos obligatorios
+    if (!fecha || !tipo || !cantidad || !producto || !bodega) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Campos obligatorios faltantes',
+            text: 'Por favor completa todos los campos marcados como obligatorios (*)',
+            confirmButtonText: 'Entendido',
+            confirmButtonColor: '#DC2626'
+        });
+        return;
+    }
+
+    // Validación de cantidad (solo enteros positivos)
+    if (!/^\d+$/.test(cantidad) || parseInt(cantidad) <= 0) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Cantidad inválida',
+            text: 'Solo se permiten números enteros positivos en la cantidad.',
+            confirmButtonText: 'Corregir',
+            confirmButtonColor: '#DC2626'
+        });
+        document.getElementById('cantidad').focus();
+        return;
+    }
+
+    mostrarConfirmacion();
+});
+
+function validarProductoBodega() {
+    const producto = document.getElementById('producto').value.trim();
+    const bodega = document.getElementById('bodega').value.trim();
+    
+    // Validar producto
+    if (!producto) {
+        Swal.fire({
+            icon: 'error',
+            title: '📦 Producto requerido',
+            text: 'Por favor seleccione un producto',
+            confirmButtonText: 'Seleccionar',
+            confirmButtonColor: '#DC2626'
+        });
+        document.getElementById('producto').focus();
+        return;
+    }
+    
+    // Validar bodega
+    if (!bodega) {
+        Swal.fire({
+            icon: 'error',
+            title: '🏢 Bodega requerida',
+            text: 'Por favor seleccione una bodega',
+            confirmButtonText: 'Seleccionar',
+            confirmButtonColor: '#DC2626'
+        });
+        document.getElementById('bodega').focus();
+        return;
+    }
+    
+    mostrarConfirmacion();
+}
+
+function mostrarConfirmacion() {
+    const tipo = document.getElementById('tipo').value;
+    const cantidad = parseFloat(document.getElementById('cantidad').value);
+    const producto = document.getElementById('producto').options[document.getElementById('producto').selectedIndex].text;
+    const bodega = document.getElementById('bodega').options[document.getElementById('bodega').selectedIndex].text;
+    const proveedor = document.getElementById('proveedor').value.trim();
+    const proveedorText = proveedor ? document.getElementById('proveedor').options[document.getElementById('proveedor').selectedIndex].text : null;
+    
+    const tipoInfo = {
+        'ingreso': { icon: '📥', text: 'Ingreso', color: '#10B981', bg: '#D1FAE5' },
+        'salida': { icon: '📤', text: 'Salida', color: '#DC2626', bg: '#FEE2E2' },
+        'ajuste': { icon: '⚖️', text: 'Ajuste', color: '#2563EB', bg: '#DBEAFE' },
+        'transferencia': { icon: '🔄', text: 'Transferencia', color: '#CA8A04', bg: '#FEF3C7' },
+        'devolucion': { icon: '↩️', text: 'Devolución', color: '#EA580C', bg: '#FED7AA' }
+    };
+    
+    const info = tipoInfo[tipo];
+    
+    let htmlContent = `
+        <div style="text-align: left; margin: 1.5rem 0;">
+            <div style="background: ${info.bg}; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 1.2rem; font-weight: bold; color: ${info.color};">
+                    <span>${info.icon}</span>
+                    <span>${info.text}</span>
+                </div>
+            </div>
+            
+            <div style="display: grid; gap: 0.75rem; font-size: 0.95rem;">
+                <div style="display: flex; justify-content: space-between; padding: 0.5rem; background: #F9FAFB; border-radius: 6px;">
+                    <strong style="color: #374151;">Cantidad:</strong>
+                    <span style="color: ${info.color}; font-weight: bold;">${cantidad.toLocaleString()} unidades</span>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; padding: 0.5rem; background: #F9FAFB; border-radius: 6px;">
+                    <strong style="color: #374151;">Producto:</strong>
+                    <span style="color: #6B7280;">${producto}</span>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; padding: 0.5rem; background: #F9FAFB; border-radius: 6px;">
+                    <strong style="color: #374151;">Bodega:</strong>
+                    <span style="color: #6B7280;">${bodega}</span>
+                </div>
+    `;
+    
+    if (proveedorText) {
+        htmlContent += `
+                <div style="display: flex; justify-content: space-between; padding: 0.5rem; background: #F9FAFB; border-radius: 6px;">
+                    <strong style="color: #374151;">Proveedor:</strong>
+                    <span style="color: #6B7280;">${proveedorText}</span>
+                </div>
+        `;
+    }
+    
+    htmlContent += `
+            </div>
+        </div>
+    `;
+    
+    Swal.fire({
+        icon: 'question',
+        title: '¿Confirmar datos del movimiento?',
+        html: htmlContent,
+        showCancelButton: true,
+        confirmButtonText: '✓ Continuar al Paso 2',
+        cancelButtonText: '← Revisar',
+        confirmButtonColor: '#DC2626',
+        cancelButtonColor: '#6B7280',
+        backdrop: `rgba(220, 38, 38, 0.1)`,
+        customClass: {
+            confirmButton: 'animate__animated animate__pulse'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            guardarMovimiento();
+        }
+    });
+}
+
+function guardarMovimiento() {
+    let timerInterval;
+    Swal.fire({
+        icon: 'success',
+        title: '✓ Paso 1 completado',
+        html: '<div style="margin: 1rem 0;"><div class="swal2-progress" style="background: #FEE2E2; height: 6px; border-radius: 3px; overflow: hidden;"><div style="background: linear-gradient(90deg, #DC2626, #991B1B); height: 100%; width: 0%; animation: progress 2s ease-out forwards;"></div></div><p style="margin-top: 1rem; color: #6B7280;">Avanzando al control avanzado...</p></div>',
+        timer: 2000,
+        showConfirmButton: false,
+        timerProgressBar: true,
+        didOpen: () => {
+            const style = document.createElement('style');
+            style.textContent = '@keyframes progress { to { width: 100%; } }';
+            document.head.appendChild(style);
+        },
+        willClose: () => {
+            document.getElementById('movimientoForm').submit();
+        }
+    });
+}
+
+document.getElementById('crearBodegaBtn').addEventListener('click', function(e) {
+    e.preventDefault();
+    Swal.fire({
+        title: 'Crear nueva bodega',
+        html: `
+            <div style="text-align:left;">
+                <label style="font-weight:600;">Código de bodega *</label>
+                <input id="swal-codigo" class="swal2-input" placeholder="Ej: BOD-001" maxlength="20" style="text-transform:uppercase;">
+                <label style="font-weight:600; margin-top:1rem;">Nombre *</label>
+                <input id="swal-nombre" class="swal2-input" placeholder="Ej: Bodega Principal" maxlength="80">
+            </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'Crear',
+        cancelButtonText: 'Cancelar',
+        focusConfirm: false,
+        preConfirm: () => {
+            const codigo = document.getElementById('swal-codigo').value.trim().toUpperCase();
+            const nombre = document.getElementById('swal-nombre').value.trim();
+            if (!codigo || codigo.length < 3) {
+                Swal.showValidationMessage('El código debe tener al menos 3 caracteres');
+                return false;
+            }
+            if (!nombre || nombre.length < 3) {
+                Swal.showValidationMessage('El nombre debe tener al menos 3 caracteres');
+                return false;
+            }
+            return { codigo, nombre };
+        }
+    }).then((result) => {
+        if (result.isConfirmed && result.value) {
+            // Enviar por AJAX al backend
+            fetch('/bodegas/crear/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify(result.value)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.ok) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Bodega creada',
+                        text: 'La bodega ha sido registrada exitosamente',
+                        timer: 1800,
+                        showConfirmButton: false
+                    });
+                    // Agregar la nueva bodega al select
+                    const select = document.getElementById('bodega');
+                    const option = document.createElement('option');
+                    option.value = data.codigo;
+                    option.textContent = `${data.codigo} - ${data.nombre}`;
+                    select.appendChild(option);
+                    select.value = data.codigo;
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: data.error || 'No se pudo crear la bodega'
+                    });
+                }
+            });
+        }
+    });
+});
+
+// Mostrar proveedores asociados al seleccionar un producto
+document.getElementById('producto').addEventListener('change', function(e) {
+    const sku = e.target.value;
+    const proveedorSelect = document.getElementById('proveedor');
+    proveedorSelect.innerHTML = '<option value="">Cargando...</option>';
+    if (!sku) {
+        proveedorSelect.innerHTML = '<option value="">Sin proveedor</option>';
+        return;
+    }
+    fetch(`/ajax/proveedores_por_producto/?producto=${encodeURIComponent(sku)}`)
+        .then(res => res.json())
+        .then(data => {
+            proveedorSelect.innerHTML = '';
+            if (data.proveedores.length > 0) {
+                proveedorSelect.innerHTML = '<option value="">Seleccione proveedor...</option>';
+                data.proveedores.forEach(function(prov) {
+                    const option = document.createElement('option');
+                    option.value = prov.rut;
+                    option.textContent = `${prov.rut} - ${prov.razon_social}`;
+                    proveedorSelect.appendChild(option);
+                });
+            } else {
+                proveedorSelect.innerHTML = '<option value="">Sin proveedores asociados</option>';
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Sin proveedores',
+                    text: 'El producto seleccionado no tiene proveedores asociados.',
+                    timer: 2200,
+                    showConfirmButton: false
+                });
+            }
+        });
+});
+</script>
+{% endblock %}
+{% if formulario_es_valido %}
+    # Guardar datos del paso 1
+    movimiento = MovimientoInventario.objects.create(...)
+    request.session['movimiento_id'] = movimiento.id
+    return redirect('core:movimiento_paso2')  # <-- Redirige al paso 2
+{% endif %}

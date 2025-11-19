@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar Usuario - Dulcería Lilis{% endblock %}
+
+{% block extra_css %}
+<style>
+  :root{
+    --primary:#dc2626;--primary-700:#b91c1c;--ok:#16a34a;--warn:#f59e0b;--danger:#dc2626;
+    --text:#111827;--muted:#6b7280;--border:#e5e7eb;--bg:#f9fafb;--shadow:0 6px 20px rgba(0,0,0,.08)
+  }
+  .page-header{display:flex;justify-content:space-between;align-items:center;margin:0 0 1.5rem}
+  .page-title{font-size:1.6rem;font-weight:800;color:var(--text);display:flex;align-items:center;gap:.5rem}
+  .btn{display:inline-flex;align-items:center;gap:.6rem;border:none;border-radius:12px;padding:.9rem 1.3rem;font-weight:800;cursor:pointer;transition:transform .15s ease, box-shadow .2s}
+  .btn svg{width:18px;height:18px}
+  .btn-secondary{background:#fff;border:2px solid var(--border);color:var(--text)}
+  .btn-secondary:hover{background:var(--bg)}
+  .btn-primary{background:linear-gradient(135deg,var(--primary),var(--primary-700));color:#fff;box-shadow:0 10px 24px rgba(220,38,38,.25)}
+  .btn-primary:hover{transform:translateY(-1px);box-shadow:0 12px 26px rgba(220,38,38,.33)}
+  .btn-primary:active{transform:translateY(0);box-shadow:0 8px 20px rgba(220,38,38,.25)}
+  .form-card{background:#fff;border-radius:16px;box-shadow:var(--shadow);padding:2rem}
+  .info-box{background:linear-gradient(135deg,#e0f2fe,#bae6fd);border-left:4px solid #0284c7;padding:1rem 1.2rem;border-radius:10px;margin-bottom:1rem}
+  .form-section{margin-top:1.25rem;padding-top:1.25rem;border-top:2px solid var(--border)}
+  .section-title{font-size:1.05rem;font-weight:800;color:var(--text);display:flex;align-items:center;gap:.6rem;margin:0 0 1rem}
+  .section-title::before{content:'';width:4px;height:22px;background:linear-gradient(135deg,var(--primary),var(--primary-700));border-radius:2px}
+  .form-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem}
+  .form-group{display:flex;flex-direction:column}
+  .form-group label{font-weight:700;color:var(--text);margin-bottom:.4rem;display:flex;align-items:center;gap:.35rem}
+  .req-star{color:var(--danger)}
+  .opt{color:var(--muted);font-weight:500}
+  .form-control{border:2px solid var(--border);border-radius:10px;padding:.8rem 1rem;font-size:.95rem;transition:border .2s,box-shadow .2s}
+  .form-control:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 4px rgba(220,38,38,.12)}
+  .form-control:disabled{background:var(--bg);cursor:not-allowed;opacity:.7}
+  .form-control.is-invalid{border-color:var(--danger);background:#fef2f2}
+  .help-text{font-size:.8rem;color:var(--muted);margin-top:.35rem}
+  .readonly-field{background:var(--bg);padding:.8rem 1rem;border-radius:10px;border:2px dashed var(--border);font-weight:600;color:var(--text)}
+
+  .errorlist{display:none}
+  @media(max-width:768px){.page-header{flex-direction:column;align-items:flex-start;gap:1rem}.form-card{padding:1.25rem}}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">✏️ Editar Usuario</h1>
+  <a href="{% url 'core:lista_usuarios' %}" class="btn btn-secondary">← Volver</a>
+</div>
+
+<div class="form-card">
+  <div class="info-box">
+    ℹ️ El <strong>username</strong> no puede modificarse. Para cambiar contraseña, contacta al administrador.
+  </div>
+
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {% if request.user.perfil.rol == 'ADMIN' and usuario.bloqueado %}
+      <div class="form-section">
+        <button type="submit" name="desbloquear" class="btn btn-primary" style="margin-bottom:1rem;">🔓 Desbloquear usuario</button>
+        <span style="color:#dc2626;font-weight:700;">Este usuario está bloqueado por intentos fallidos.</span>
+      </div>
+    {% endif %}
+    <div class="form-section">
+      <h2 class="section-title">👤 Datos de acceso</h2>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label>username <span class="opt">(solo lectura)</span></label>
+          <div class="readonly-field">{{ usuario.user.username }}</div>
+        </div>
+        <div class="form-group">
+          <label for="{{ form.email.id_for_label }}">email <span class="req-star">*</span></label>
+          {{ form.email }}
+          {{ form.email.errors }}
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="{{ form.first_name.id_for_label }}">nombres <span class="req-star">*</span></label>
+          {{ form.first_name }}
+          {{ form.first_name.errors }}
+        </div>
+        <div class="form-group">
+          <label for="{{ form.last_name.id_for_label }}">apellidos <span class="req-star">*</span></label>
+          {{ form.last_name }}
+          {{ form.last_name.errors }}
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h2 class="section-title">🧩 Perfil</h2>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label>teléfono <span class="opt">(opcional)</span></label>
+          <input type="text" class="form-control" name="telefono" value="{{ usuario.telefono|default:'' }}" placeholder="+56 9 1234 5678">
+        </div>
+        <div class="form-group">
+          <label>dirección <span class="opt">(opcional)</span></label>
+          <input type="text" class="form-control" name="direccion" value="{{ usuario.direccion|default:'' }}" placeholder="Calle Principal #123">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>rol <span class="req-star">*</span></label>
+          <select name="rol" class="form-control">
+            {% for val, label in usuario.ROL_CHOICES %}
+              <option value="{{ val }}" {% if usuario.rol == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>estado <span class="req-star">*</span></label>
+          <select name="estado" class="form-control">
+            <option value="ACTIVO" {% if usuario.user.is_active %}selected{% endif %}>ACTIVO</option>
+            <option value="INACTIVO" {% if not usuario.user.is_active %}selected{% endif %}>INACTIVO</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section" style="border-top:none;padding-top:0;margin-top:.5rem">
+      <div style="display:flex;justify-content:space-between;gap:1rem">
+        <a href="{% url 'core:lista_usuarios' %}" class="btn btn-secondary">✕ Cancelar</a>
+        <button type="submit" class="btn btn-primary">
+          <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M16.707 5.293a1 1 0 0 1 0 1.414l-7.778 7.778a1 1 0 0 1-1.414 0L3.293 11.264a1 1 0 1 1 1.414-1.414l3.1 3.101 7.07-7.07a1 1 0 0 1 1.414 0z"/></svg>
+          Guardar cambios
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  // Validación con SweetAlert
+  document.querySelector('form').addEventListener('submit', function(e){
+    const email = document.getElementById('{{ form.email.id_for_label }}').value.trim();
+    const firstName = document.getElementById('{{ form.first_name.id_for_label }}').value.trim();
+    const lastName = document.getElementById('{{ form.last_name.id_for_label }}').value.trim();
+    const rol = document.querySelector('select[name="rol"]').value;
+    
+    const errores = [];
+    if (!email) errores.push('El email es obligatorio');
+    if (!firstName) errores.push('Los nombres son obligatorios');
+    if (!lastName) errores.push('Los apellidos son obligatorios');
+    if (!rol) errores.push('Debe seleccionar un rol');
+    
+    if (errores.length) {
+      e.preventDefault();
+      Swal.fire({
+        icon: 'error',
+        title: 'Campos incompletos',
+        html: '<ul style="text-align:left;margin:0;padding-left:1.1rem;">' + errores.map(x=>`<li>${x}</li>`).join('') + '</ul>',
+        confirmButtonText: 'Entendido',
+        confirmButtonColor: '#dc2626'
+      });
+    }
+  });
+
+  // Mostrar errores del servidor
+  {% if form.errors %}
+    try {
+      const serverErrors = JSON.parse('{{ form.errors.as_json|escapejs }}');
+      const items = [];
+      for (const k in serverErrors) {
+        const first = serverErrors[k][0]?.message || '';
+        if (first) items.push(first);
+      }
+      if (items.length) {
+        Swal.fire({
+          icon: 'error',
+          title: 'No se pudo actualizar',
+          html: '<ul style="text-align:left;margin:0;padding-left:1.1rem;">' + items.map(x=>`<li>${x}</li>`).join('') + '</ul>',
+          confirmButtonText: 'OK',
+          confirmButtonColor: '#dc2626'
+        });
+      }
+    } catch(_e) {}
+  {% endif %}
+</script>
+{% endblock %}

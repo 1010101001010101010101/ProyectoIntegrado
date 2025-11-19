@@ -1,0 +1,727 @@
+{% extends 'base.html' %}
+
+{% block title %}Usuarios - Dulcería Lilis{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary: #dc2626;
+        --primary-dark: #b91c1c;
+        --text-dark: #1f2937;
+        --text-gray: #6b7280;
+        --border: #e5e7eb;
+        --shadow: rgba(0, 0, 0, 0.1);
+        --bg-light: #f9fafb;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--border);
+    }
+
+    .page-title {
+        font-size: 2rem;
+        color: var(--text-dark);
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.95rem;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
+    }
+
+    .btn-secondary {
+        background: white;
+        color: var(--text-dark);
+        border: 2px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+        background: var(--bg-light);
+        border-color: var(--text-gray);
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, #16a34a, #22c55e);
+        color: white;
+        box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
+    }
+
+    .btn-success:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(22, 163, 74, 0.4);
+    }
+
+    .btn-danger {
+        background: linear-gradient(135deg, #dc2626, #ef4444);
+        color: white;
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+    }
+
+    .btn-danger:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
+    }
+
+    .btn-sm {
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+    }
+
+    /* Filtros y búsqueda */
+    .filters-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 12px var(--shadow);
+    }
+
+    .filters-form {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr;
+        gap: 1rem;
+        align-items: end;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+    }
+
+    .form-group label {
+        font-weight: 600;
+        color: var(--text-dark);
+        font-size: 0.9rem;
+    }
+
+    .form-control {
+        padding: 0.75rem 1rem;
+        border: 2px solid var(--border);
+        border-radius: 8px;
+        font-size: 0.95rem;
+        transition: all 0.2s ease;
+        width: 100%;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+    }
+
+    select.form-control {
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        padding-right: 2.5rem;
+    }
+
+    /* Indicador de carga */
+    .search-loading {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        display: none;
+    }
+
+    .search-loading.active {
+        display: block;
+    }
+
+    .spinner {
+        width: 20px;
+        height: 20px;
+        border: 3px solid var(--border);
+        border-top-color: var(--primary);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* Tabla */
+    .table-card {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 12px var(--shadow);
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    thead {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: white;
+    }
+
+    th {
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    td {
+        padding: 1rem;
+        border-bottom: 1px solid var(--border);
+        color: var(--text-dark);
+    }
+
+    tbody tr {
+        transition: background-color 0.2s ease;
+    }
+
+    tbody tr:hover {
+        background-color: #FFF5F7;
+    }
+
+    tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .badge {
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+    }
+
+    .badge-success {
+        background: linear-gradient(135deg, #16a34a, #22c55e);
+        color: white;
+    }
+
+    .badge-danger {
+        background: linear-gradient(135deg, #dc2626, #ef4444);
+        color: white;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .alert {
+        padding: 1rem 1.2rem;
+        border-radius: 10px;
+        margin-bottom: 1.5rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+    }
+
+    .alert-success {
+        background: linear-gradient(135deg, #d1f4e0, #a7f3d0);
+        color: #065f46;
+        border-left: 4px solid #10b981;
+    }
+
+    .alert-error {
+        background: linear-gradient(135deg, #fee2e2, #fecaca);
+        color: #991b1b;
+        border-left: 4px solid #dc2626;
+    }
+
+    .alert-warning {
+        background: linear-gradient(135deg, #fef3c7, #fde68a);
+        color: #92400e;
+        border-left: 4px solid #f59e0b;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: var(--text-gray);
+    }
+
+    .empty-state svg {
+        width: 64px;
+        height: 64px;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    @media (max-width: 768px) {
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .filters-form {
+            grid-template-columns: 1fr;
+        }
+
+        .table-card {
+            overflow-x: auto;
+        }
+
+        table {
+            min-width: 800px;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+    }
+
+    /* Paginación */
+    .pagination-wrapper {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 1rem;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .pagination-info {
+        color: var(--text-dark);
+        font-weight: 500;
+    }
+
+    .pagination-nav {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .pagination-nav ul {
+        display: flex;
+        gap: 0.5rem;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .pagination-nav a {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        background: var(--bg-light);
+        color: var(--text-dark);
+        text-decoration: none;
+        transition: background 0.3s ease;
+    }
+
+    .pagination-nav a:hover {
+        background: var(--primary);
+        color: white;
+    }
+
+    .pagination-nav .btn-primary {
+        background: var(--primary);
+        color: white;
+    }
+
+    .pagination-nav .btn-primary:hover {
+        background: var(--primary-dark);
+    }
+
+    .pagination-nav .btn-secondary {
+        background: var(--bg-light);
+        color: var(--text-dark);
+    }
+
+    .pagination-nav .btn-secondary:hover {
+        background: var(--primary);
+        color: white;
+    }
+
+    /* Filtros en grid */
+    .filters-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 1rem;
+    }
+
+    .filter-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+    }
+
+    .filter-item label {
+        font-weight: 600;
+        color: var(--text-dark);
+        font-size: 0.9rem;
+    }
+
+    .filter-item input,
+    .filter-item select {
+        padding: 0.75rem 1rem;
+        border: 2px solid var(--border);
+        border-radius: 8px;
+        font-size: 0.95rem;
+        transition: all 0.2s ease;
+        width: 100%;
+    }
+
+    .filter-item input:focus,
+    .filter-item select:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+    }
+
+    .filter-actions {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .filter-actions .btn {
+        flex: 1;
+        min-width: 120px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">👥 Gestión de Usuarios</h1>
+    <div style="display: flex; gap: 1rem;">
+        <a href="{% url 'core:exportar_usuarios_excel' %}?{{ base_qs }}" class="btn btn-success">
+             Exportar Excel
+        </a>
+
+        {# Solo ADMIN, EDITOR, BODEGA pueden crear #}
+        {% if request.user.perfil.rol in 'ADMIN EDITOR BODEGA' %}
+            <a href="{% url 'core:crear_usuario' %}" class="btn btn-primary">
+                 Nuevo Usuario
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {% if message.tags == 'success' %}
+                ✅
+            {% elif message.tags == 'error' %}
+                ❌
+            {% else %}
+                ⚠️
+            {% endif %}
+            {{ message|safe }}
+        </div>
+    {% endfor %}
+{% endif %}
+
+<div class="filters-card">
+    <form id="filtros-form" method="get" class="filters-grid">
+        <div class="filter-item">
+            <label for="buscar">Buscar</label>
+            <div class="input-wrapper">
+                <input type="search" id="buscar" name="buscar" value="{{ buscar }}" placeholder="Username, email, teléfono...">
+                <span id="search-loading" class="search-loading">
+                    <span class="spinner"></span>
+                </span>
+            </div>
+        </div>
+
+        <div class="filter-item">
+            <label for="rol">Rol</label>
+            <select id="rol" name="rol">
+                <option value="">Todos los roles</option>
+                {% for value, label in roles_choices %}
+                <option value="{{ value }}" {% if rol_filtro == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="filter-item">
+            <label for="estado">Estado</label>
+            <select id="estado" name="estado" onchange="this.form.submit()">
+                <option value="" {% if not estado_filtro %}selected{% endif %}>Todos</option>
+                <option value="ACTIVO" {% if estado_filtro == 'ACTIVO' %}selected{% endif %}>Activo</option>
+                <option value="INACTIVO" {% if estado_filtro == 'INACTIVO' %}selected{% endif %}>Inactivo</option>
+                <option value="BLOQUEADO" {% if estado_filtro == 'BLOQUEADO' %}selected{% endif %}>Bloqueado</option>
+            </select>
+        </div>
+
+        <div class="filter-item">
+            <label for="page_size">Registros por página</label>
+            <select id="page_size" name="page_size">
+                {% for size in page_size_options %}
+                <option value="{{ size }}" {% if page_size == size %}selected{% endif %}>{{ size }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </form>
+</div>
+
+<!-- Tabla de usuarios -->
+<div class="table-card" style="margin-top: 1.5rem;">
+    <table>
+        <thead>
+            <tr>
+                <th>
+                    <a href="?{{ base_qs }}&orden=username&dir={% if orden == 'username' and dir == 'asc' %}desc{% else %}asc{% endif %}" style="color:#fff;text-decoration:none">
+                        Username
+                        {% if orden == 'username' %}{% if dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}
+                    </a>
+                </th>
+                <th>
+                    <a href="?{{ base_qs }}&orden=nombre&dir={% if orden == 'nombre' and dir == 'asc' %}desc{% else %}asc{% endif %}" style="color:#fff;text-decoration:none">
+                        Nombre Completo
+                        {% if orden == 'nombre' %}{% if dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}
+                    </a>
+                </th>
+                <th>
+                    <a href="?{{ base_qs }}&orden=email&dir={% if orden == 'email' and dir == 'asc' %}desc{% else %}asc{% endif %}" style="color:#fff;text-decoration:none">
+                        Email
+                        {% if orden == 'email' %}{% if dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}
+                    </a>
+                </th>
+                <th>
+                    <a href="?{{ base_qs }}&orden=rol&dir={% if orden == 'rol' and dir == 'asc' %}desc{% else %}asc{% endif %}" style="color:#fff;text-decoration:none">
+                        Rol
+                        {% if orden == 'rol' %}{% if dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}
+                    </a>
+                </th>
+                <th>
+                    <a href="?{{ base_qs }}&orden=estado&dir={% if orden == 'estado' and dir == 'asc' %}desc{% else %}asc{% endif %}" style="color:#fff;text-decoration:none">
+                        Estado
+                        {% if orden == 'estado' %}{% if dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}
+                    </a>
+                </th>
+                <th>
+                    <a href="?{{ base_qs }}&orden=bloqueado&dir={% if orden == 'bloqueado' and dir == 'asc' %}desc{% else %}asc{% endif %}" style="color:#fff;text-decoration:none">
+                        Bloqueado
+                        {% if orden == 'bloqueado' %}{% if dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}
+                    </a>
+                </th>
+                <th style="text-align: center;">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for usuario in usuarios %}
+            <tr>
+                <td><strong>{{ usuario.user.username }}</strong></td>
+                <td>{{ usuario.user.get_full_name|default:"—" }}</td>
+                <td>{{ usuario.user.email }}</td>
+                <td>{{ usuario.get_rol_display }}</td>
+                <td>
+                    {% if usuario.user.is_active %}
+                        <span class="badge badge-success">ACTIVO</span>
+                    {% else %}
+                        <span class="badge badge-danger">INACTIVO</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if usuario.bloqueado %}
+                        <span class="badge badge-danger">Bloqueado</span>
+                    {% else %}
+                        <span class="badge badge-success">—</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <div class="action-buttons">
+                     {% if request.user.perfil.rol == 'ADMIN' or request.user.perfil.rol == 'EDITOR' or request.user.perfil.rol == 'BODEGA' %}
+                        <a href="{% url 'core:editar_usuario' usuario.id %}" class="btn btn-sm btn-success">
+                            Editar
+                        </a>
+                    {% endif %}
+                                            
+                        {% if request.user.perfil.rol == 'ADMIN' and not usuario.user.is_superuser and usuario.user != request.user %}
+                            <button 
+                                type="button" 
+                                class="btn btn-sm btn-danger btn-eliminar"
+                                data-id="{{ usuario.id }}"
+                                data-username="{{ usuario.user.username }}">
+                                Eliminar
+                            </button>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="empty-state">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                    <p><strong>No hay usuarios que coincidan con la búsqueda</strong></p>
+                    <p>Intenta con otros términos</p>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Paginación -->
+<div class="pagination-wrapper">
+    <div class="pagination-info">
+        Mostrando {{ page_obj.start_index }}–{{ page_obj.end_index }} de {{ page_obj.paginator.count }}
+    </div>
+    <nav class="pagination-nav" aria-label="Paginación">
+        <ul>
+            {% if page_obj.has_previous %}
+                <li><a class="btn btn-secondary btn-sm" href="?{{ base_qs }}&page=1">« Primero</a></li>
+                <li><a class="btn btn-secondary btn-sm" href="?{{ base_qs }}&page={{ page_obj.previous_page_number }}">‹ Anterior</a></li>
+            {% endif %}
+            {% for i in elided_range %}
+                {% if i == ELLIPSIS %}
+                    <li><span class="btn btn-secondary btn-sm" style="pointer-events:none">…</span></li>
+                {% elif i == page_obj.number %}
+                    <li><span class="btn btn-primary btn-sm" style="pointer-events:none">{{ i }}</span></li>
+                {% else %}
+                    <li><a class="btn btn-secondary btn-sm" href="?{{ base_qs }}&page={{ i }}">{{ i }}</a></li>
+                {% endif %}
+            {% endfor %}
+            {% if page_obj.has_next %}
+                <li><a class="btn btn-secondary btn-sm" href="?{{ base_qs }}&page={{ page_obj.next_page_number }}">Siguiente ›</a></li>
+                <li><a class="btn btn-secondary btn-sm" href="?{{ base_qs }}&page={{ page_obj.paginator.num_pages }}">Último »</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>
+
+<!-- Formulario oculto para eliminar -->
+<form id="form-eliminar" method="post" style="display:none;">
+    {% csrf_token %}
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    // ==========================================
+    // BÚSQUEDA EN TIEMPO REAL (debounce)
+    // ==========================================
+    const form = document.getElementById('filtros-form');
+    const searchInput = document.getElementById('buscar');
+    const searchLoading = document.getElementById('search-loading');
+    let searchTimeout = null;
+
+    const autoSubmit = (delay = 0) => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => form.submit(), delay);
+    };
+
+    searchInput.addEventListener('input', () => {
+        searchLoading?.classList.add('active');
+        autoSubmit(350);
+    });
+
+    ['rol', 'estado', 'page_size'].forEach(id => {
+        document.getElementById(id)?.addEventListener('change', () => autoSubmit());
+    });
+
+    form.addEventListener('submit', () => searchLoading?.classList.remove('active'));
+
+    // ==========================================
+    // CONFIRMAR ELIMINACIÓN con SweetAlert2
+    // ==========================================
+    document.querySelectorAll('.btn-eliminar').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const id = this.dataset.id;
+            const username = this.dataset.username;
+            const movimientos = parseInt(this.dataset.movimientos || 0);
+            const ventas = parseInt(this.dataset.ventas || 0);
+            const tieneRegistros = movimientos > 0 || ventas > 0;
+            
+            let mensaje = '';
+            let icon = 'warning';
+            let confirmText = 'Sí, eliminar';
+            
+            if (tieneRegistros) {
+                mensaje = `
+                    <p>El usuario <strong>${username}</strong> tiene registros asociados:</p>
+                    <ul style="text-align:left;margin:1rem auto;max-width:300px;">
+                        <li>${movimientos} movimiento(s) de inventario</li>
+                        <li>${ventas} venta(s)</li>
+                    </ul>
+                    <p><strong>⚠️ Se desactivará en lugar de eliminarse.</strong></p>
+                `;
+                icon = 'warning';
+                confirmText = 'Desactivar usuario';
+            } else {
+                mensaje = `
+                    <p>¿Estás seguro de eliminar al usuario <strong>${username}</strong>?</p>
+                    <p style="color:#dc2626;font-weight:600;">Esta acción es irreversible.</p>
+                `;
+                icon = 'error';
+                confirmText = 'Sí, eliminar permanentemente';
+            }
+            
+            Swal.fire({
+                title: tieneRegistros ? '⚠️ Usuario con registros' : '🗑️ Confirmar eliminación',
+                html: mensaje,
+                icon: icon,
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: confirmText,
+                cancelButtonText: 'Cancelar',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const form = document.getElementById('form-eliminar');
+                    form.action = `/usuarios/${id}/eliminar/`;
+                    form.submit();
+                }
+            });
+        });
+    });
+
+    // ==========================================
+    // AUTO-OCULTAR ALERTAS
+    // ==========================================
+    const alerts = document.querySelectorAll('.alert');
+    if (alerts.length > 0) {
+        setTimeout(() => {
+            alerts.forEach(alert => {
+                alert.style.transition = 'opacity 0.5s ease';
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 500);
+            });
+        }, 5000);
+    }
+</script>
+{% endblock %}

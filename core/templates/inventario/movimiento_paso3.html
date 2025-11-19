@@ -1,0 +1,769 @@
+{% extends 'base.html' %}
+
+{% block title %}Registrar Movimiento - Paso 3{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+    
+    .page-title {
+        font-size: 2rem;
+        color: var(--text-dark);
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    
+    .breadcrumb {
+        color: var(--text-gray);
+        font-size: 0.95rem;
+    }
+    
+    .breadcrumb a {
+        color: #dc2626;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+    
+    .breadcrumb a:hover {
+        color: #991b1b;
+    }
+    
+    .form-card {
+        background: white;
+        border-radius: 12px;
+        padding: 2.5rem;
+        box-shadow: 0 2px 12px var(--shadow);
+    }
+    
+    .steps-progress {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 12px var(--shadow);
+        margin-bottom: 2rem;
+    }
+
+    .steps-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+    }
+
+    .step-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        flex: 1;
+        position: relative;
+        z-index: 2;
+    }
+
+    .step-number {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        background: var(--border);
+        color: var(--text-gray);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.2rem;
+        transition: all 0.3s ease;
+    }
+
+    .step-item.completed .step-number {
+        background: #dc2626;
+        color: white;
+    }
+
+    .step-item.active .step-number {
+        background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+        }
+        50% {
+            box-shadow: 0 4px 20px rgba(220, 38, 38, 0.6);
+        }
+    }
+
+    .step-label {
+        font-size: 0.85rem;
+        color: var(--text-gray);
+        font-weight: 600;
+        text-align: center;
+    }
+
+    .step-item.active .step-label {
+        color: #dc2626;
+        font-weight: 700;
+    }
+
+    .progress-line {
+        position: absolute;
+        top: 22px;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--border);
+        z-index: 1;
+    }
+
+    .progress-line-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #dc2626 0%, #991b1b 100%);
+        width: 100%;
+        transition: width 0.5s ease;
+    }
+    
+    .form-section {
+        margin-bottom: 2rem;
+    }
+    
+    .section-title {
+        font-size: 1.3rem;
+        color: var(--text-dark);
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .form-group label {
+        font-weight: 600;
+        color: var(--text-dark);
+        font-size: 0.95rem;
+    }
+    
+    .optional {
+        color: var(--text-gray);
+        font-weight: 400;
+        font-size: 0.85rem;
+        margin-left: 0.3rem;
+    }
+    
+    .form-control {
+        padding: 0.9rem;
+        border: 2px solid var(--border);
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: #dc2626;
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+    }
+    
+    textarea.form-control {
+        min-height: 120px;
+        resize: vertical;
+        font-family: inherit;
+    }
+    
+    .info-box {
+        background: #fef2f2;
+        border-left: 4px solid #dc2626;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+    }
+
+    .info-box p {
+        margin: 0;
+        color: #991b1b;
+        font-size: 0.95rem;
+    }
+    
+    .form-actions {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 2px solid var(--border);
+    }
+    
+    .btn {
+        padding: 0.9rem 1.8rem;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
+    }
+    
+    .btn-secondary {
+        background: #f5f5f5;
+        color: var(--text-dark);
+    }
+    
+    .btn-secondary:hover {
+        background: #e0e0e0;
+    }
+    
+    /* Estilos personalizados para SweetAlert2 */
+    .swal2-popup {
+        border-radius: 16px;
+        font-family: inherit;
+    }
+
+    .swal2-title {
+        color: var(--text-dark);
+        font-size: 1.5rem;
+    }
+
+    .swal2-html-container {
+        color: var(--text-gray);
+    }
+
+    .swal2-confirm {
+        background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%) !important;
+        border-radius: 8px;
+        padding: 0.6rem 2rem;
+        font-weight: 600;
+    }
+
+    .swal2-cancel {
+        background: #f5f5f5 !important;
+        color: var(--text-dark) !important;
+        border-radius: 8px;
+        padding: 0.6rem 2rem;
+        font-weight: 600;
+    }
+    
+    @media (max-width: 768px) {
+        .form-actions {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Registrar Movimiento - Paso 3</h1>
+        <div class="breadcrumb">
+            <a href="{% url 'core:dashboard' %}">Dashboard</a> / 
+            <a href="{% url 'core:lista_movimientos' %}">Movimientos</a> / 
+            Nuevo
+        </div>
+    </div>
+    <a href="{% url 'core:lista_movimientos' %}" class="btn btn-secondary">← Volver</a>
+</div>
+
+<div class="steps-progress">
+    <div class="steps-header">
+        <div class="progress-line">
+            <div class="progress-line-fill"></div>
+        </div>
+        <div class="step-item completed">
+            <div class="step-number">✓</div>
+            <div class="step-label">Datos del Movimiento</div>
+        </div>
+        <div class="step-item completed">
+            <div class="step-number">✓</div>
+            <div class="step-label">Control Avanzado</div>
+        </div>
+        <div class="step-item active">
+            <div class="step-number">3</div>
+            <div class="step-label">Referencias</div>
+        </div>
+    </div>
+</div>
+
+<div class="form-card">
+    <form method="post" id="movimientoForm" novalidate>
+        {% csrf_token %}
+        
+        <div class="form-section">
+            <h2 class="section-title">Referencias y Documentos</h2>
+            
+            <div class="info-box">
+                <p><strong>Información:</strong> Asocia documentos de referencia relacionados con este movimiento (órdenes de compra, facturas, guías, etc.)</p>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="documento_numero">Documento de Referencia <span class="optional">(opcional)</span></label>
+                    <input type="text" id="documento_numero" name="documento_numero" class="form-control" 
+                           value="{{ data.documento_numero }}" 
+                           placeholder="Ej: OC-123 / FAC-456 / GUIA-789">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="motivo">Motivo <span class="optional">(opcional)</span></label>
+                    <input type="text" id="motivo" name="motivo" class="form-control" 
+                           value="{{ data.motivo }}" 
+                           placeholder="Ej: Diferencia inventario, devolución cliente, ajuste por merma, etc.">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2 class="section-title">Observaciones</h2>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="observaciones">Observaciones Generales <span class="optional">(opcional)</span></label>
+                    <textarea id="observaciones" name="observaciones" class="form-control" 
+                              placeholder="Notas adicionales sobre el movimiento: condiciones de recibo, daños, observaciones de calidad, etc.">{{ data.observaciones }}</textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a class="btn btn-secondary" href="{% url 'core:movimiento_paso2' %}">← Anterior</a>
+            <button type="submit" class="btn btn-success">
+                Guardar movimiento
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+// ============================================
+// PASO 3 - VALIDACIONES Y SWEETALERTS (FINAL)
+// ============================================
+
+// Toast personalizado
+const Toast = Swal.mixin({
+    toast: true,
+    position: 'top-end',
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer)
+        toast.addEventListener('mouseleave', Swal.resumeTimer)
+    }
+});
+
+// Mensaje de bienvenida al paso final
+document.addEventListener('DOMContentLoaded', function() {
+    Swal.fire({
+        icon: 'success',
+        title: '🎯 Paso Final',
+        html: '<p>Complete las referencias y observaciones</p><small style="color: #6B7280;">¡Ya casi terminas!</small>',
+        timer: 3000,
+        showConfirmButton: false,
+        toast: true,
+        position: 'top-end',
+        background: '#D1FAE5',
+        iconColor: '#10B981'
+    });
+});
+
+// Contador de caracteres en tiempo real
+const observaciones = document.getElementById('observaciones');
+let contadorDiv = null;
+
+if (observaciones) {
+    contadorDiv = document.createElement('div');
+    contadorDiv.style.cssText = `
+        text-align: right;
+        margin-top: 0.5rem;
+        font-size: 0.85rem;
+        color: #6B7280;
+        transition: all 0.3s ease;
+    `;
+    observaciones.parentElement.appendChild(contadorDiv);
+
+    observaciones.addEventListener('input', function(e) {
+        const length = e.target.value.length;
+        const maxLength = 500;
+        contadorDiv.textContent = `${length} / ${maxLength} caracteres`;
+
+        if (length > maxLength) {
+            contadorDiv.style.color = '#DC2626';
+            contadorDiv.style.fontWeight = 'bold';
+            e.target.style.borderColor = '#DC2626';
+            e.target.style.boxShadow = '0 0 0 3px rgba(220, 38, 38, 0.1)';
+            Toast.fire({
+                icon: 'warning',
+                title: `⚠️ Texto muy largo (${length} caracteres)`,
+                text: 'Considera resumir la información',
+                background: '#FEF3C7'
+            });
+        } else if (length > maxLength * 0.9) {
+            contadorDiv.style.color = '#F59E0B';
+            contadorDiv.style.fontWeight = 'bold';
+            e.target.style.borderColor = '#F59E0B';
+        } else if (length > maxLength * 0.7) {
+            contadorDiv.style.color = '#6B7280';
+            contadorDiv.style.fontWeight = 'normal';
+            e.target.style.borderColor = '#10B981';
+        } else {
+            contadorDiv.style.color = '#6B7280';
+            contadorDiv.style.fontWeight = 'normal';
+            e.target.style.borderColor = 'var(--border)';
+            e.target.style.boxShadow = '';
+        }
+    });
+
+    observaciones.dispatchEvent(new Event('input'));
+}
+
+// Validación en tiempo real para documento de referencia
+const docInput = document.getElementById('documento_numero');
+if (docInput) {
+    docInput.addEventListener('input', function(e) {
+        e.target.value = e.target.value.replace(/\s+/g, ' ').toUpperCase();
+        const formatoValido = /^[A-Z]+-\d+/.test(e.target.value);
+
+        if (e.target.value.length > 0) {
+            if (formatoValido) {
+                e.target.style.borderColor = '#10B981';
+                e.target.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+            } else if (e.target.value.length >= 3) {
+                e.target.style.borderColor = '#F59E0B';
+                e.target.style.boxShadow = '0 0 0 3px rgba(245, 158, 11, 0.1)';
+            }
+        } else {
+            e.target.style.borderColor = 'var(--border)';
+            e.target.style.boxShadow = '';
+        }
+    });
+}
+
+// Validación en tiempo real para motivo
+const motivoInput = document.getElementById('motivo');
+if (motivoInput) {
+    motivoInput.addEventListener('input', function(e) {
+        e.target.value = e.target.value.replace(/\s+/g, ' ');
+        if (e.target.value.length >= 10) {
+            e.target.style.borderColor = '#10B981';
+            e.target.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+        } else if (e.target.value.length > 0) {
+            e.target.style.borderColor = '#F59E0B';
+        } else {
+            e.target.style.borderColor = 'var(--border)';
+            e.target.style.boxShadow = '';
+        }
+    });
+}
+
+// Validación principal del formulario
+document.getElementById('movimientoForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const docReferencia = document.getElementById('documento_numero').value.trim();
+    const motivo = document.getElementById('motivo').value.trim();
+    const observaciones = document.getElementById('observaciones').value.trim();
+
+    // === Validación de formato de documento_numero ===
+    // Acepta: OC-123, FAC-456, GUIA-789, GD-10, NC-25 (may/min), separados por / o ,
+    // Ejemplo válido: OC-123 / FAC-456, GUIA-789
+    if (docReferencia) {
+        // Regex: uno o más grupos de (prefijo)-(dígitos), separados por / o ,
+        const docRegex = /^((OC|FAC|GUIA|GD|NC)-\d+)(\s*([\/,])\s*(OC|FAC|GUIA|GD|NC)-\d+)*$/i;
+        if (!docRegex.test(docReferencia)) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Formato de documento inválido',
+                html: `
+                    <p>El campo <strong>Documento de Referencia</strong> debe tener el formato:</p>
+                    <ul style="text-align:left;">
+                        <li>OC-123</li>
+                        <li>FAC-456</li>
+                        <li>GUIA-789</li>
+                        <li>GD-10</li>
+                        <li>NC-25</li>
+                        <li>O varios separados por <strong>/</strong> o <strong>,</strong> (ej: OC-123 / FAC-456)</li>
+                    </ul>
+                    <p style="color:#991b1b;">Prefijos permitidos: OC, FAC, GUIA, GD, NC</p>
+                `,
+                confirmButtonText: 'Corregir',
+                confirmButtonColor: '#DC2626'
+            });
+            document.getElementById('documento_numero').focus();
+            return;
+        }
+    }
+
+    // === Validación de longitud de observaciones ===
+    if (observaciones.length > 500) {
+        Swal.fire({
+            icon: 'warning',
+            title: '📝 Texto muy extenso',
+            html: `
+                <div style="text-align: center; margin: 1rem 0;">
+                    <div style="font-size: 2rem; font-weight: bold; color: #F59E0B;">
+                        ${observaciones.length}
+                    </div>
+                    <p style="color: #6B7280;">caracteres (máximo recomendado: 500)</p>
+                    <div style="background: #FEF3C7; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                        <p style="color: #92400E; font-size: 0.9em;">Las observaciones son muy largas. Se recomienda resumir la información para facilitar su lectura.</p>
+                    </div>
+                </div>
+            `,
+            showCancelButton: true,
+            confirmButtonText: 'Continuar de todas formas',
+            cancelButtonText: '← Editar texto',
+            confirmButtonColor: '#F59E0B',
+            cancelButtonColor: '#6B7280',
+            backdrop: `rgba(245, 158, 11, 0.1)`
+        }).then((result) => {
+            if (result.isConfirmed) {
+                mostrarConfirmacionFinal();
+            }
+        });
+        return;
+    }
+
+    // Advertencia si no se ingresó ningún dato opcional
+    if (!docReferencia && !motivo && !observaciones) {
+        Swal.fire({
+            icon: 'question',
+            title: '📋 Sin información adicional',
+            html: '<p>No has ingresado ningún dato de referencia u observación.</p><p style="color: #6B7280; margin-top: 0.5rem;">¿Deseas continuar sin esta información?</p>',
+            showCancelButton: true,
+            confirmButtonText: '✓ Sí, continuar',
+            cancelButtonText: '← Agregar información',
+            confirmButtonColor: '#2563EB',
+            cancelButtonColor: '#6B7280',
+            backdrop: `rgba(37, 99, 235, 0.1)`
+        }).then((result) => {
+            if (result.isConfirmed) {
+                mostrarConfirmacionFinal();
+            }
+        });
+        return;
+    }
+
+    // Si hay información, mostrar confirmación directamente
+    mostrarConfirmacionFinal();
+});
+
+function mostrarConfirmacionFinal() {
+    const docReferencia = document.getElementById('documento_numero').value.trim();
+    const motivo = document.getElementById('motivo').value.trim();
+    const observaciones = document.getElementById('observaciones').value.trim();
+
+    let resumenHTML = '<div style="text-align: left; margin: 1.5rem 0;">';
+
+    if (docReferencia || motivo || observaciones) {
+        resumenHTML += '<div style="display: grid; gap: 0.75rem; font-size: 0.95rem;">';
+
+        if (docReferencia) {
+            resumenHTML += `
+                <div style="background: #F9FAFB; padding: 0.75rem; border-radius: 6px; border-left: 3px solid #2563EB;">
+                    <strong style="color: #1F2937;">📄 Documento:</strong>
+                    <div style="color: #4B5563; margin-top: 0.25rem;">${docReferencia}</div>
+                </div>
+            `;
+        }
+
+        if (motivo) {
+            resumenHTML += `
+                <div style="background: #F9FAFB; padding: 0.75rem; border-radius: 6px; border-left: 3px solid #7C3AED;">
+                    <strong style="color: #1F2937;">💡 Motivo:</strong>
+                    <div style="color: #4B5563; margin-top: 0.25rem;">${motivo}</div>
+                </div>
+            `;
+        }
+
+        if (observaciones) {
+            const obsCorta = observaciones.length > 100 
+                ? observaciones.substring(0, 100) + '...' 
+                : observaciones;
+            resumenHTML += `
+                <div style="background: #F9FAFB; padding: 0.75rem; border-radius: 6px; border-left: 3px solid #10B981;">
+                    <strong style="color: #1F2937;">📝 Observaciones:</strong>
+                    <div style="color: #4B5563; margin-top: 0.25rem;">${obsCorta}</div>
+                    ${observaciones.length > 100 ? '<small style="color: #9CA3AF;">(texto completo será guardado)</small>' : ''}
+                </div>
+            `;
+        }
+
+        resumenHTML += '</div>';
+    } else {
+        resumenHTML += `
+            <div style="background: #F3F4F6; padding: 1rem; border-radius: 8px; text-align: center;">
+                <p style="color: #6B7280; margin: 0;">Sin información adicional registrada</p>
+            </div>
+        `;
+    }
+
+    resumenHTML += `
+        <div style="background: linear-gradient(135deg, #FEE2E2 0%, #FEF2F2 100%); padding: 1.5rem; border-radius: 10px; margin-top: 1.5rem; border: 2px solid #DC2626;">
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                <span style="font-size: 1.5rem;">✅</span>
+                <strong style="color: #991B1B; font-size: 1.1rem;">¿Confirmar registro?</strong>
+            </div>
+            <p style="color: #6B7280; margin: 0; font-size: 0.9em;">Esta acción guardará el movimiento completo en el sistema</p>
+        </div>
+    </div>`;
+
+    Swal.fire({
+        icon: 'question',
+        title: 'Resumen del movimiento',
+        html: resumenHTML,
+        showCancelButton: true,
+        confirmButtonText: '✓ Guardar movimiento',
+        cancelButtonText: '← Revisar',
+        confirmButtonColor: '#DC2626',
+        cancelButtonColor: '#6B7280',
+        width: '600px',
+        backdrop: `rgba(220, 38, 38, 0.1)`,
+        customClass: {
+            confirmButton: 'animate__animated animate__pulse',
+            popup: 'animate__animated animate__fadeInDown'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            guardarMovimientoFinal();
+        }
+    });
+}
+
+function guardarMovimientoFinal() {
+    // Animación de guardado con múltiples etapas
+    let etapa = 0;
+    const etapas = [
+        { icono: '📝', texto: 'Validando datos...', progreso: 25 },
+        { icono: '💾', texto: 'Guardando movimiento...', progreso: 50 },
+        { icono: '🔄', texto: 'Actualizando inventario...', progreso: 75 },
+        { icono: '✅', texto: 'Finalizando registro...', progreso: 100 }
+    ];
+
+    Swal.fire({
+        title: etapas[0].texto,
+        html: `
+            <div style="margin: 1.5rem 0;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">
+                    ${etapas[0].icono}
+                </div>
+                <div style="background: #F3F4F6; height: 8px; border-radius: 4px; overflow: hidden;">
+                    <div id="progressBar" style="background: linear-gradient(90deg, #DC2626, #991B1B); height: 100%; width: 0%; transition: width 0.5s ease;"></div>
+                </div>
+                <p style="color: #6B7280; margin-top: 1rem; font-size: 0.9em;">Por favor espere...</p>
+            </div>
+        `,
+        showConfirmButton: false,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => {
+            const progressBar = document.getElementById('progressBar');
+            let intervalo = setInterval(() => {
+                if (etapa < etapas.length) {
+                    const etapaActual = etapas[etapa];
+                    Swal.update({
+                        title: etapaActual.texto,
+                        html: `
+                            <div style="margin: 1.5rem 0;">
+                                <div style="font-size: 3rem, margin-bottom: 1rem; animation: bounce 0.5s;">
+                                    ${etapaActual.icono}
+                                </div>
+                                <div style="background: #F3F4F6; height: 8px; border-radius: 4px; overflow: hidden;">
+                                    <div id="progressBar" style="background: linear-gradient(90deg, #DC2626, #991B1B); height: 100%; width: ${etapaActual.progreso}%; transition: width 0.5s ease;"></div>
+                                </div>
+                                <p style="color: #6B7280; margin-top: 1rem; font-size: 0.9em;">${etapaActual.progreso}% completado</p>
+                            </div>
+                        `
+                    });
+                    etapa++;
+                } else {
+                    clearInterval(intervalo);
+                    mostrarExito();
+                }
+            }, 800);
+        }
+    });
+}
+
+function mostrarExito() {
+    Swal.fire({
+        icon: 'success',
+        title: '🎉 ¡Movimiento registrado!',
+        html: `
+            <div style="margin: 1.5rem 0;">
+                <div style="background: linear-gradient(135deg, #D1FAE5 0%, #ECFDF5 100%); padding: 1.5rem; border-radius: 12px; border: 2px solid #10B981;">
+                    <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">✅</div>
+                    <p style="color: #065F46; font-size: 1.1rem; margin: 0;">El movimiento ha sido guardado exitosamente</p>
+                </div>
+                <div style="margin-top: 1.5rem; padding: 1rem; background: #F9FAFB; border-radius: 8px;">
+                    <p style="color: #6B7280; margin: 0; font-size: 0.9em;">
+                        ✓ Inventario actualizado<br>
+                        ✓ Trazabilidad registrada<br>
+                        ✓ Referencias guardadas
+                    </p>
+                </div>
+            </div>
+        `,
+        confirmButtonText: '📋 Ver lista de movimientos',
+        confirmButtonColor: '#DC2626',
+        backdrop: `rgba(16, 185, 129, 0.1)`,
+        customClass: {
+            popup: 'animate__animated animate__bounceIn',
+            confirmButton: 'animate__animated animate__pulse animate__infinite'
+        },
+        willClose: () => {
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes bounce {
+                    0%, 100% { transform: translateY(0); }
+                    50% { transform: translateY(-20px); }
+                }
+            `;
+            document.head.appendChild(style);
+            document.getElementById('movimientoForm').submit();
+        }
+    });
+}
+</script>
+{% endblock %}

@@ -1,0 +1,830 @@
+{% extends 'base.html' %}
+
+{% block title %}Nuevo Producto - Paso 3{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary: #2563eb;
+        --primary-dark: #1e40af;
+        --text-dark: #1f2937;
+        --text-gray: #6b7280;
+        --border: #e5e7eb;
+        --shadow: rgba(0, 0, 0, 0.1);
+    }
+    
+    .wizard-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    
+    .wizard-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .wizard-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+    }
+    
+    /* WIZARD STEPS */
+    .wizard-steps {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px var(--shadow);
+    }
+    
+    .step {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        background: #f9fafb;
+    }
+    
+    .step.completed {
+        background: #22c55e;
+        color: white;
+    }
+    
+    .step.active {
+        background: var(--primary);
+        color: white;
+    }
+    
+    .step-number {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+    }
+    
+    .step.completed .step-number {
+        background: white;
+        color: #22c55e;
+    }
+    
+    .step.active .step-number {
+        background: white;
+        color: var(--primary);
+    }
+    
+    /* FORM CARD */
+    .form-card {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 2px 12px var(--shadow);
+    }
+    
+    .section-title {
+        font-size: 1.1rem;
+        color: var(--text-dark);
+        font-weight: 700;
+        margin: 1.5rem 0 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--border);
+    }
+    
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .form-group label {
+        font-weight: 600;
+        margin-bottom: 0.4rem;
+        color: var(--text-dark);
+        font-size: 0.9rem;
+    }
+    
+    .label-hint {
+        font-size: 0.75rem;
+        color: var(--text-gray);
+        margin-top: 0.25rem;
+    }
+    
+    .form-control {
+        padding: 0.75rem;
+        border: 2px solid var(--border);
+        border-radius: 6px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    
+    .form-control[readonly] {
+        background: #f9fafb;
+        cursor: not-allowed;
+        color: var(--text-gray);
+        border-color: #e5e7eb;
+    }
+    
+    .form-control.error {
+        border-color: #dc2626;
+        background: #fef2f2;
+    }
+    
+    /* READONLY SECTION */
+    .readonly-section {
+        background: #f9fafb;
+        border: 2px dashed #e5e7eb;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-top: 1rem;
+    }
+    
+    /* FORM ACTIONS */
+    .form-actions {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 2px solid var(--border);
+    }
+    
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.95rem;
+    }
+    
+    .btn-primary {
+        background: var(--primary);
+        color: white;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+    
+    .btn-primary:hover {
+        background: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+    }
+    
+    .btn-secondary {
+        background: #f3f4f6;
+        color: var(--text-dark);
+    }
+    
+    .btn-secondary:hover {
+        background: #e5e7eb;
+    }
+    
+    .info-box {
+        background: #f0f9ff;
+        border-left: 4px solid var(--primary);
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+    }
+    
+    .info-box p {
+        margin: 0;
+        color: var(--text-dark);
+        font-size: 0.9rem;
+    }
+    
+    .error-message {
+        color: #dc2626;
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="wizard-container">
+    <div class="wizard-header">
+        <h1 class="wizard-title">📦 Formulario de Producto</h1>
+    </div>
+
+    <!-- WIZARD STEPS -->
+    <div class="wizard-steps">
+        <div class="step completed">
+            <div class="step-number">✓</div>
+            <div class="step-label">Identificación y precios</div>
+        </div>
+        <div class="step completed">
+            <div class="step-number">✓</div>
+            <div class="step-label">Stock y control</div>
+        </div>
+        <div class="step active">
+            <div class="step-number">3</div>
+            <div class="step-label">Relaciones y derivados</div>
+        </div>
+    </div>
+
+    <div class="form-card">
+        <form method="POST" id="productoForm" novalidate>
+            {% csrf_token %}
+            
+            <h3 class="section-title">🔗 Relaciones y soporte</h3>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="imagen_url">URL de Imagen <span style="color:var(--text-gray);">(opcional)</span></label>
+                    <input 
+                        type="url" 
+                        id="imagen_url" 
+                        name="imagen_url" 
+                        class="form-control" 
+                        value="{{ data.imagen_url|default:'' }}" 
+                        placeholder="https://.../foto.jpg"
+                    >
+                    <span class="label-hint">URL completa de la imagen del producto</span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="ficha_tecnica_url">URL de Ficha Técnica <span style="color:var(--text-gray);">(opcional)</span></label>
+                    <input 
+                        type="url" 
+                        id="ficha_tecnica_url" 
+                        name="ficha_tecnica_url" 
+                        class="form-control" 
+                        value="{{ data.ficha_tecnica_url|default:'' }}" 
+                        placeholder="https://.../ficha.pdf"
+                    >
+                    <span class="label-hint">URL completa de la ficha técnica</span>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="{{ form.proveedor_principal.id_for_label }}">Proveedor principal</label>
+                    {{ form.proveedor_principal }}
+                    {% if form.proveedor_principal.errors %}
+                        <span class="error-message">{{ form.proveedor_principal.errors.0 }}</span>
+                    {% else %}
+                        <span class="label-hint">Selecciona el proveedor que abastece este producto</span>
+                    {% endif %}
+                </div>
+
+                <div class="form-group" style="align-self: flex-end;">
+                    <a href="{% url 'core:proveedor_paso1' %}?next={{ request.path }}" target="_blank" class="btn btn-secondary" style="justify-content:center;">
+                        ➕ Crear nuevo proveedor
+                    </a>
+                    <span class="label-hint">Se abre en otra pestaña; vuelve y actualiza la lista si lo creas.</span>
+                </div>
+            </div>
+
+            <h3 class="section-title">📊 Derivados (solo lectura)</h3>
+            
+            <div class="info-box">
+                <p><strong>ℹ️ Información:</strong> Estos campos se calculan automáticamente según el stock mínimo configurado.</p>
+            </div>
+            
+            <div class="readonly-section">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="stock_actual">Stock Actual</label>
+                        <input 
+                            type="number" 
+                            id="stock_actual" 
+                            class="form-control" 
+                            value="0" 
+                            readonly
+                            title="Este campo se calcula automáticamente"
+                        >
+                        <span class="label-hint">Calculado automáticamente</span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="alerta_bajo_stock">Alerta Bajo Stock</label>
+                        <input 
+                            type="text" 
+                            id="alerta_bajo_stock" 
+                            class="form-control" 
+                            value="SÍ" 
+                            readonly
+                            title="Este campo se calcula automáticamente"
+                        >
+                        <span class="label-hint">Basado en stock mínimo</span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="alerta_por_vencer">Alerta Por Vencer</label>
+                        <input 
+                            type="text" 
+                            id="alerta_por_vencer" 
+                            class="form-control" 
+                            value="NO" 
+                            readonly
+                            title="Este campo se calcula automáticamente"
+                        >
+                        <span class="label-hint">Solo si es perecedero</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <a href="{% url 'core:producto_paso2' %}" class="btn btn-secondary">
+                    ← Anterior
+                </a>
+                <button type="button" class="btn btn-secondary" onclick="limpiarFormulario()">
+                    🔄 Limpiar
+                </button>
+                <button type="submit" class="btn btn-primary">
+                    💾 Guardar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+// ============================================
+// PRODUCTO PASO 3 - VALIDACIONES Y SWEETALERTS PRO (FINAL)
+// ============================================
+
+// Toast personalizado
+const Toast = Swal.mixin({
+    toast: true,
+    position: 'top-end',
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer)
+        toast.addEventListener('mouseleave', Swal.resumeTimer)
+    }
+});
+
+// Mensaje de bienvenida
+document.addEventListener('DOMContentLoaded', function() {
+    Swal.fire({
+        icon: 'success',
+        title: '🎯 Paso Final',
+        html: '<p>Complete las relaciones y documentos</p><small style="color: #6B7280;">¡Ya casi terminas!</small>',
+        timer: 3000,
+        showConfirmButton: false,
+        toast: true,
+        position: 'top-end',
+        background: '#DBEAFE',
+        iconColor: '#2563EB'
+    });
+});
+
+// ============================================
+// VALIDACIÓN DE URLs
+// ============================================
+function validarURL(url) {
+    if (!url) return true; // URLs vacías son válidas (opcional)
+    try {
+        const urlObj = new URL(url);
+        return urlObj.protocol === 'http:' || urlObj.protocol === 'https:';
+    } catch (e) {
+        return false;
+    }
+}
+
+// Validación de URL de imagen en tiempo real
+const imagenUrlInput = document.getElementById('imagen_url');
+imagenUrlInput.addEventListener('input', function(e) {
+    const url = e.target.value.trim();
+    if (url) {
+        if (validarURL(url)) {
+            e.target.style.borderColor = '#10B981';
+            e.target.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+        } else {
+            e.target.style.borderColor = '#F59E0B';
+            e.target.style.boxShadow = '0 0 0 3px rgba(245, 158, 11, 0.1)';
+        }
+    } else {
+        e.target.style.borderColor = 'var(--border)';
+        e.target.style.boxShadow = '';
+    }
+});
+
+imagenUrlInput.addEventListener('blur', function(e) {
+    const url = e.target.value.trim();
+    if (url && !validarURL(url)) {
+        e.target.classList.add('error');
+        Swal.fire({
+            icon: 'error',
+            title: '🖼️ URL de imagen inválida',
+            html: '<p>La URL debe comenzar con <strong>http://</strong> o <strong>https://</strong></p><p style="color: #6B7280; margin-top: 0.5rem;">Ejemplo: https://ejemplo.com/imagen.jpg</p>',
+            confirmButtonText: 'Corregir',
+            confirmButtonColor: '#2563EB'
+        });
+    } else {
+        e.target.classList.remove('error');
+        // Validar extensión de imagen
+        if (url) {
+            const extensionesImagen = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'];
+            const tieneExtensionValida = extensionesImagen.some(ext => url.toLowerCase().includes(ext));
+            if (!tieneExtensionValida) {
+                Toast.fire({
+                    icon: 'info',
+                    title: '💡 Formato de imagen',
+                    text: 'Verifica que sea una URL de imagen válida (.jpg, .png, etc.)',
+                    background: '#FEF3C7'
+                });
+            }
+        }
+    }
+});
+
+// Validación de URL de ficha técnica
+const fichaTecnicaInput = document.getElementById('ficha_tecnica_url');
+fichaTecnicaInput.addEventListener('input', function(e) {
+    const url = e.target.value.trim();
+    if (url) {
+        if (validarURL(url)) {
+            e.target.style.borderColor = '#10B981';
+            e.target.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+        } else {
+            e.target.style.borderColor = '#F59E0B';
+            e.target.style.boxShadow = '0 0 0 3px rgba(245, 158, 11, 0.1)';
+        }
+    } else {
+        e.target.style.borderColor = 'var(--border)';
+        e.target.style.boxShadow = '';
+    }
+});
+
+fichaTecnicaInput.addEventListener('blur', function(e) {
+    const url = e.target.value.trim();
+    if (url && !validarURL(url)) {
+        e.target.classList.add('error');
+        Swal.fire({
+            icon: 'error',
+            title: '📄 URL de ficha técnica inválida',
+            html: '<p>La URL debe comenzar con <strong>http://</strong> o <strong>https://</strong></p><p style="color: #6B7280; margin-top: 0.5rem;">Ejemplo: https://ejemplo.com/ficha.pdf</p>',
+            confirmButtonText: 'Corregir',
+            confirmButtonColor: '#2563EB'
+        });
+    } else {
+        e.target.classList.remove('error');
+        // Validar extensión de documento
+        if (url) {
+            const extensionesDocumento = ['.pdf', '.doc', '.docx', '.xls', '.xlsx'];
+            const tieneExtensionValida = extensionesDocumento.some(ext => url.toLowerCase().includes(ext));
+            if (!tieneExtensionValida) {
+                Toast.fire({
+                    icon: 'info',
+                    title: '💡 Formato de documento',
+                    text: 'Verifica que sea una URL de documento válida (.pdf, .doc, etc.)',
+                    background: '#FEF3C7'
+                });
+            }
+        }
+    }
+});
+
+// Sugerencia si agrega imagen pero no ficha técnica
+imagenUrlInput.addEventListener('blur', function(e) {
+    const imagenUrl = e.target.value.trim();
+    const fichaTecnicaUrl = fichaTecnicaInput.value.trim();
+    if (imagenUrl && validarURL(imagenUrl) && !fichaTecnicaUrl) {
+        setTimeout(() => {
+            Toast.fire({
+                icon: 'info',
+                title: '💡 Sugerencia',
+                text: '¿Deseas agregar también una ficha técnica?',
+                background: '#DBEAFE'
+            });
+        }, 500);
+    }
+});
+
+// ============================================
+// PREVENIR EDICIÓN DE CAMPOS READONLY
+// ============================================
+const readonlyFields = document.querySelectorAll('input[readonly]');
+readonlyFields.forEach(field => {
+    field.addEventListener('click', function() {
+        Toast.fire({
+            icon: 'info',
+            title: '🔒 Campo de solo lectura',
+            text: 'Este campo se calcula automáticamente',
+            background: '#F3F4F6'
+        });
+    });
+    field.addEventListener('keydown', function(e) {
+        e.preventDefault();
+    });
+});
+
+// ============================================
+// VALIDACIÓN PRINCIPAL DEL FORMULARIO
+// ============================================
+document.getElementById('productoForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const imagenUrl = imagenUrlInput.value.trim();
+    const fichaTecnicaUrl = fichaTecnicaInput.value.trim();
+    const proveedorPrincipal = document.getElementById('{{ form.proveedor_principal.id_for_label }}').value;
+
+    // Validar URL de imagen
+    if (imagenUrl && !validarURL(imagenUrl)) {
+        Swal.fire({
+            icon: 'error',
+            title: '🖼️ URL de imagen inválida',
+            html: '<p>Por favor ingrese una URL válida para la imagen</p><p style="color: #6B7280;">Debe comenzar con http:// o https://</p>',
+            confirmButtonText: 'Corregir',
+            confirmButtonColor: '#2563EB'
+        });
+        imagenUrlInput.classList.add('error');
+        imagenUrlInput.focus();
+        return;
+    }
+
+    // Validar URL de ficha técnica
+    if (fichaTecnicaUrl && !validarURL(fichaTecnicaUrl)) {
+        Swal.fire({
+            icon: 'error',
+            title: '📄 URL de ficha técnica inválida',
+            html: '<p>Por favor ingrese una URL válida para la ficha técnica</p><p style="color: #6B7280;">Debe comenzar con http:// o https://</p>',
+            confirmButtonText: 'Corregir',
+            confirmButtonColor: '#2563EB'
+        });
+        fichaTecnicaInput.classList.add('error');
+        fichaTecnicaInput.focus();
+        return;
+    }
+
+    // Advertencia si no se ingresó nada
+    if (!imagenUrl && !fichaTecnicaUrl && !proveedorPrincipal) {
+        Swal.fire({
+            icon: 'question',
+            title: '📋 Sin información adicional',
+            html: '<p>No has agregado documentos ni proveedor.</p><p style="color: #6B7280; margin-top: 0.5rem;">¿Deseas continuar sin esta información?</p>',
+            showCancelButton: true,
+            confirmButtonText: '✓ Sí, crear producto',
+            cancelButtonText: '← Agregar información',
+            confirmButtonColor: '#2563EB',
+            cancelButtonColor: '#6B7280',
+            backdrop: `rgba(37, 99, 235, 0.1)`
+        }).then((result) => {
+            if (result.isConfirmed) {
+                mostrarConfirmacionFinal(imagenUrl, fichaTecnicaUrl, proveedorPrincipal);
+            }
+        });
+        return;
+    }
+
+    // Todo correcto
+    mostrarConfirmacionFinal(imagenUrl, fichaTecnicaUrl, proveedorPrincipal);
+});
+
+// ============================================
+// CONFIRMACIÓN FINAL
+// ============================================
+function mostrarConfirmacionFinal(imagenUrl, fichaTecnicaUrl, proveedorPrincipal) {
+    let resumenHTML = '<div style="text-align: left; margin: 1.5rem 0;">';
+    if (imagenUrl || fichaTecnicaUrl || proveedorPrincipal) {
+        resumenHTML += '<div style="display: grid; gap: 0.75rem;">';
+        if (imagenUrl) {
+            resumenHTML += `
+                <div style="background: #F9FAFB; padding: 0.75rem; border-radius: 6px; border-left: 3px solid #10B981;">
+                    <strong style="color: #1F2937;">🖼️ Imagen:</strong>
+                    <div style="color: #6B7280; font-size: 0.85em; margin-top: 0.25rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                        ${imagenUrl}
+                    </div>
+                </div>
+            `;
+        }
+        if (fichaTecnicaUrl) {
+            resumenHTML += `
+                <div style="background: #F9FAFB; padding: 0.75rem; border-radius: 6px; border-left: 3px solid #2563EB;">
+                    <strong style="color: #1F2937;">📄 Ficha Técnica:</strong>
+                    <div style="color: #6B7280; font-size: 0.85em; margin-top: 0.25rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                        ${fichaTecnicaUrl}
+                    </div>
+                </div>
+            `;
+        }
+        if (proveedorPrincipal) {
+            const proveedorTexto = document.getElementById('{{ form.proveedor_principal.id_for_label }}').options[document.getElementById('{{ form.proveedor_principal.id_for_label }}').selectedIndex].text;
+            resumenHTML += `
+                <div style="background: #F9FAFB; padding: 0.75rem; border-radius: 6px; border-left: 3px solid #7C3AED;">
+                    <strong style="color: #1F2937;">🏭 Proveedor:</strong>
+                    <div style="color: #6B7280; margin-top: 0.25rem;">${proveedorTexto}</div>
+                </div>
+            `;
+        }
+        resumenHTML += '</div>';
+    } else {
+        resumenHTML += `
+            <div style="background: #F3F4F6; padding: 1rem; border-radius: 8px; text-align: center;">
+                <p style="color: #6B7280; margin: 0;">📭 Sin documentos ni proveedor configurado</p>
+            </div>
+        `;
+    }
+    resumenHTML += `
+        <div style="background: linear-gradient(135deg, #DBEAFE 0%, #EFF6FF 100%); padding: 1.5rem; border-radius: 10px; margin-top: 1.5rem; border: 2px solid #2563EB;">
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                <span style="font-size: 1.5rem;">✅</span>
+                <strong style="color: #1E40AF; font-size: 1.1rem;">¿Crear producto?</strong>
+            </div>
+            <p style="color: #6B7280; margin: 0.5rem 0 0 0; font-size: 0.9em;">
+                Se guardará toda la información de los 3 pasos
+            </p>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin-top: 1rem; font-size: 0.85em;">
+                <div style="text-align: center;">
+                    <div style="font-weight: bold; color: #2563EB;">✓ Paso 1</div>
+                    <div style="color: #6B7280;">Identificación</div>
+                </div>
+                <div style="text-align: center;">
+                    <div style="font-weight: bold; color: #2563EB;">✓ Paso 2</div>
+                    <div style="color: #6B7280;">Stock</div>
+                </div>
+                <div style="text-align: center;">
+                    <div style="font-weight: bold; color: #2563EB;">✓ Paso 3</div>
+                    <div style="color: #6B7280;">Relaciones</div>
+                </div>
+            </div>
+        </div>
+    </div>`;
+    Swal.fire({
+        icon: 'question',
+        title: '🎉 Confirmar creación del producto',
+        html: resumenHTML,
+        showCancelButton: true,
+        confirmButtonText: '✓ Sí, crear producto',
+        cancelButtonText: '← Revisar datos',
+        confirmButtonColor: '#2563EB',
+        cancelButtonColor: '#6B7280',
+        width: '650px',
+        backdrop: `rgba(37, 99, 235, 0.1)`,
+        customClass: {
+            confirmButton: 'animate__animated animate__pulse',
+            popup: 'animate__animated animate__fadeInDown'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            crearProductoFinal();
+        }
+    });
+}
+
+// ============================================
+// ANIMACIÓN DE CREACIÓN FINAL
+// ============================================
+function crearProductoFinal() {
+    let etapa = 0;
+    const etapas = [
+        { icono: '📝', texto: 'Validando información completa...', progreso: 20 },
+        { icono: '💾', texto: 'Creando producto en el sistema...', progreso: 40 },
+        { icono: '📊', texto: 'Configurando niveles de stock...', progreso: 60 },
+        { icono: '🔗', texto: 'Vinculando documentos...', progreso: 80 },
+        { icono: '✅', texto: 'Finalizando registro...', progreso: 100 }
+    ];
+    Swal.fire({
+        title: etapas[0].texto,
+        html: `
+            <div style="margin: 1.5rem 0;">
+                <div style="font-size: 3rem; margin-bottom: 1rem; animation: bounce 0.5s;">
+                    ${etapas[0].icono}
+                </div>
+                <div style="background: #F3F4F6; height: 8px; border-radius: 4px; overflow: hidden;">
+                    <div id="progressBar" style="background: linear-gradient(90deg, #2563EB, #1E40AF); height: 100%; width: 0%; transition: width 0.5s ease;"></div>
+                </div>
+                <p style="color: #6B7280; margin-top: 1rem; font-size: 0.9em;">Por favor espere...</p>
+            </div>
+        `,
+        showConfirmButton: false,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => {
+            const progressBar = document.getElementById('progressBar');
+            const intervalo = setInterval(() => {
+                if (etapa < etapas.length) {
+                    const etapaActual = etapas[etapa];
+                    Swal.update({
+                        title: etapaActual.texto,
+                        html: `
+                            <div style="margin: 1.5rem 0;">
+                                <div style="font-size: 3rem; margin-bottom: 1rem; animation: bounce 0.5s;">
+                                    ${etapaActual.icono}
+                                </div>
+                                <div style="background: #F3F4F6; height: 8px; border-radius: 4px; overflow: hidden;">
+                                    <div id="progressBar" style="background: linear-gradient(90deg, #2563EB, #1E40AF); height: 100%; width: ${etapaActual.progreso}%; transition: width 0.5s ease;"></div>
+                                </div>
+                                <p style="color: #6B7280; margin-top: 1rem; font-size: 0.9em;">${etapaActual.progreso}% completado</p>
+                            </div>
+                        `
+                    });
+                    etapa++;
+                } else {
+                    clearInterval(intervalo);
+                    mostrarExito();
+                }
+            }, 800);
+        }
+    });
+}
+
+function mostrarExito() {
+    Swal.fire({
+        icon: 'success',
+        title: '🎉 ¡Producto creado exitosamente!',
+        html: `
+            <div style="margin: 1.5rem 0;">
+                <div style="background: linear-gradient(135deg, #DBEAFE 0%, #EFF6FF 100%); padding: 1.5rem; border-radius: 12px; border: 2px solid #2563EB;">
+                    <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">✅</div>
+                    <p style="color: #1E40AF; font-size: 1.1rem; margin: 0;">El producto ha sido registrado correctamente</p>
+                </div>
+                <div style="margin-top: 1.5rem; padding: 1rem; background: #F9FAFB; border-radius: 8px;">
+                    <p style="color: #6B7280; margin: 0; font-size: 0.9em;">
+                        ✓ Información básica guardada<br>
+                        ✓ Niveles de stock configurados<br>
+                        ✓ Documentos vinculados<br>
+                        ✓ Producto listo para usar
+                    </p>
+                </div>
+            </div>
+        `,
+        confirmButtonText: '📦 Ver lista de productos',
+        confirmButtonColor: '#2563EB',
+        backdrop: `rgba(37, 99, 235, 0.1)`,
+        customClass: {
+            popup: 'animate__animated animate__bounceIn',
+            confirmButton: 'animate__animated animate__pulse animate__infinite'
+        },
+        willClose: () => {
+            // Añadir animación de bounce
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes bounce {
+                    0%, 100% { transform: translateY(0); }
+                    50% { transform: translateY(-20px); }
+                }
+            `;
+            document.head.appendChild(style);
+            // Enviar el formulario
+            document.getElementById('productoForm').submit();
+        }
+    });
+}
+
+// ============================================
+// LIMPIAR FORMULARIO
+// ============================================
+function limpiarFormulario() {
+    Swal.fire({
+        icon: 'warning',
+        title: '🔄 ¿Limpiar URLs y proveedor?',
+        text: 'Se borrarán los datos ingresados en este paso',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, limpiar',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#F59E0B',
+        cancelButtonColor: '#6B7280'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('productoForm').reset();
+            // Remover clases de error
+            imagenUrlInput.classList.remove('error');
+            fichaTecnicaInput.classList.remove('error');
+            imagenUrlInput.style.borderColor = 'var(--border)';
+            fichaTecnicaInput.style.borderColor = 'var(--border)';
+            imagenUrlInput.style.boxShadow = '';
+            fichaTecnicaInput.style.boxShadow = '';
+            Toast.fire({
+                icon: 'success',
+                title: '✓ Formulario limpiado',
+                background: '#D1FAE5'
+            });
+        }
+    });
+}
+</script>
+{% endblock %}

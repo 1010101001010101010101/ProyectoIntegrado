@@ -1,0 +1,712 @@
+{% extends 'base.html' %}
+{% block title %}Proveedores{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">🏢 Proveedores</h1>
+  <div style="display: flex; gap: 1rem;">
+    <a href="{% url 'core:exportar_proveedores_excel' %}?buscar={{ buscar }}&estado={{ estado_filtro }}&orden={{ orden }}" class="btn export-btn">
+      Exportar Excel
+    </a>
+    {% if request.user.perfil.rol == 'ADMIN' or request.user.perfil.rol == 'EDITOR' %}
+    <a class="btn btn-primary" href="{% url 'core:proveedor_paso1' %}"> Nuevo proveedor</a>
+    {% endif %}
+  </div>
+</div>
+
+<div class="filters-card">
+  <div class="filters-form">
+    <div class="form-group">
+      <label for="buscar">Buscar</label>
+      <div class="input-wrapper">
+        <input id="buscar" name="buscar" class="form-control" placeholder="Nombre, RUT, email, teléfono…" value="{{ buscar }}" autocomplete="off">
+        <span id="search-loading" class="search-loading">
+          <span class="spinner"></span>
+        </span>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="estado">Estado</label>
+      <select id="estado" name="estado" class="form-control">
+        <option value="">Todos</option>
+        {% for value, label in estado_choices %}
+          <option value="{{ value }}" {% if estado_filtro == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="page_size">Registros por página</label>
+      <select id="page_size" name="page_size" class="form-control">
+        {% for size in page_size_options %}
+          <option value="{{ size }}" {% if page_size == size %}selected{% endif %}>{{ size }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <input type="hidden" id="orden" name="orden" value="{{ orden }}">
+    <input type="hidden" id="dir" name="dir" value="{{ dir }}">
+  </div>
+</div>
+
+<div id="proveedoresResultado" class="lista-live">
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th>
+            <a href="#" class="sort-link" data-sort="nombre" data-next-dir="{% if orden == 'nombre' and dir == 'asc' %}desc{% else %}asc{% endif %}">
+               Nombre
+               {% if orden == 'nombre' %}{% if dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}
+             </a>
+          </th>
+          <th>
+            <a href="#" class="sort-link" data-sort="razon" data-next-dir="{% if orden == 'razon' and dir == 'asc' %}desc{% else %}asc{% endif %}">
+               Razón social
+               {% if orden == 'razon' %}{% if dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}
+             </a>
+          </th>
+          <th>
+            <a href="#" class="sort-link" data-sort="rut" data-next-dir="{% if orden == 'rut' and dir == 'asc' %}desc{% else %}asc{% endif %}">
+               RUT
+               {% if orden == 'rut' %}{% if dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}
+             </a>
+          </th>
+          <th>
+            <a href="#" class="sort-link" data-sort="email" data-next-dir="{% if orden == 'email' and dir == 'asc' %}desc{% else %}asc{% endif %}">
+               Email
+               {% if orden == 'email' %}{% if dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}
+             </a>
+          </th>
+          <th>
+            <a href="#" class="sort-link" data-sort="telefono" data-next-dir="{% if orden == 'telefono' and dir == 'asc' %}desc{% else %}asc{% endif %}">
+               Teléfono
+               {% if orden == 'telefono' %}{% if dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}
+             </a>
+          </th>
+          <th>
+            <a href="#" class="sort-link" data-sort="estado" data-next-dir="{% if orden == 'estado' and dir == 'asc' %}desc{% else %}asc{% endif %}">
+               Estado
+               {% if orden == 'estado' %}{% if dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}
+             </a>
+          </th>
+          <th style="text-align:center;">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if proveedores %}
+          {% for proveedor in proveedores %}
+            <tr>
+              <td>{{ proveedor.nombre_display }}</td>
+              <td>{{ proveedor.razon_social }}</td>
+              <td>{{ proveedor.rut }}</td>
+              <td>{{ proveedor.email|default:'—' }}</td>
+              <td>{{ proveedor.telefono|default:'—' }}</td>
+              <td>
+                <span class="badge {% if proveedor.estado == 'ACTIVO' %}badge-success{% else %}badge-danger{% endif %}">
+                  {{ proveedor.get_estado_display }}
+                </span>
+              </td>
+              <td class="acciones">
+                <div class="acciones-flex">
+                    {% if request.user.perfil.rol == 'ADMIN' or request.user.perfil.rol == 'EDITOR' %}
+                        <a
+                            href="{% url 'core:editar_proveedor' proveedor.id %}"
+                            class="btn-editar"
+                        >
+                            Editar
+                        </a>
+                    {% endif %}
+                    {% if request.user.perfil.rol == 'ADMIN' %}
+                        <button
+                            type="button"
+                            class="btn-eliminar"
+                            data-url="{% url 'core:eliminar_proveedor' proveedor.id %}"
+                            data-estado-url="{% url 'core:cambiar_estado_proveedor' proveedor.id %}"
+                            data-productos="{{ proveedor.total_productos }}"
+                        >
+                            Eliminar
+                        </button>
+                    {% endif %}
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="7" class="empty-state">No se encontraron proveedores.</td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pagination-wrapper">
+    <div class="pagination-info">
+      Mostrando {{ page_obj.start_index }} – {{ page_obj.end_index }} de {{ page_obj.paginator.count }}
+    </div>
+    <nav class="pagination-nav" aria-label="Paginación">
+      <ul>
+        {% if page_obj.has_previous %}
+          <li><a class="page-link" href="#" data-page="1">« Primero</a></li>
+          <li><a class="page-link" href="#" data-page="{{ page_obj.previous_page_number }}">‹ Anterior</a></li>
+        {% endif %}
+        {% for page in elided_range %}
+          {% if page == ELLIPSIS %}
+            <li><span class="btn btn-secondary btn-sm">…</span></li>
+          {% elif page == page_obj.number %}
+            <li><span class="btn btn-primary btn-sm">{{ page }}</span></li>
+          {% else %}
+            <li><a class="page-link btn btn-secondary btn-sm" href="#" data-page="{{ page }}">{{ page }}</a></li>
+          {% endif %}
+        {% endfor %}
+        {% if page_obj.has_next %}
+          <li><a class="page-link" href="#" data-page="{{ page_obj.next_page_number }}">Siguiente ›</a></li>
+          <li><a class="page-link" href="#" data-page="{{ page_obj.paginator.num_pages }}">Último »</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+  </div>
+
+  <form id="form-eliminar" method="post" style="display:none;">
+    {% csrf_token %}
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.75rem;
+  }
+  .page-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+  }
+  .filters-card,
+  .pagination-wrapper {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 12px 40px rgba(15, 23, 42, 0.1);
+    padding: 1.75rem;
+    margin-bottom: 1.75rem;
+  }
+  .filters-form {
+    display: grid;
+    gap: 1.1rem;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    align-items: end;
+  }
+  .filters-form .form-group label {
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 0.4rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    display: block;
+  }
+  .input-wrapper {
+    position: relative;
+  }
+  .search-loading {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    display: none;
+    z-index: 10;
+  }
+  .search-loading.active {
+    display: block;
+  }
+  .spinner {
+    width: 20px;
+    height: 20px;
+    border: 3px solid #e5e7eb;
+    border-top-color: #d11d1d;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  .form-control {
+    border: 1px solid #d7dcef;
+    border-radius: 10px;
+    padding: 0.65rem 0.85rem;
+    font-size: 0.95rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    background-color: #f8fafc;
+    width: 100%;
+  }
+  .form-control:focus {
+    border-color: #d11d1d;
+    box-shadow: 0 0 0 4px rgba(209, 29, 29, 0.18);
+    outline: none;
+    background-color: #ffffff;
+  }
+  .table-card {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 12px 40px rgba(15, 23, 42, 0.1);
+    overflow: hidden;
+    margin-bottom: 1.75rem;
+  }
+  .table-card table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .table-card thead th {
+    background: #d11d1d;
+    color: #ffffff;
+    padding: 0.95rem 1.1rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .table-card thead th a {
+    color: inherit;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    cursor: pointer;
+  }
+  .table-card tbody td {
+    padding: 1rem 1.1rem;
+    border-bottom: 1px solid #f1f5f9;
+    color: #0f172a;
+    font-size: 0.95rem;
+  }
+  .table-card tbody tr:hover {
+    background: #fff4f4;
+  }
+  .table-card tbody tr:last-child td {
+    border-bottom: none;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.3rem 0.85rem;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .badge-success {
+    background: #22c55e;
+    color: #ffffff;
+  }
+  .badge-danger {
+    background: #ef4444;
+    color: #ffffff;
+  }
+  .btn-eliminar {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.45rem 1rem;
+    border: none;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    color: #ffffff;
+    background: linear-gradient(135deg, #f87171, #dc2626);
+    box-shadow: 0 10px 24px rgba(239, 68, 68, 0.35);
+    transition: transform 0.15s ease, box-shadow 0.2s ease;
+  }
+  .btn-eliminar:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 14px 30px rgba(220, 38, 38, 0.35);
+  }
+  .acciones-flex {
+    display: inline-flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+  .btn-editar {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.45rem 1rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    color: #1f2937;
+    background: linear-gradient(135deg, #fde68a, #fbbf24);
+    box-shadow: 0 10px 24px rgba(251, 191, 36, 0.35);
+    transition: transform 0.15s ease, box-shadow 0.2s ease;
+  }
+  .btn-editar:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 14px 30px rgba(234, 179, 8, 0.35);
+  }
+  .pagination-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .pagination-info {
+    font-weight: 600;
+    color: #475569;
+  }
+  .pagination-nav ul {
+    list-style: none;
+    display: flex;
+    gap: 0.4rem;
+    padding: 0;
+    margin: 0;
+  }
+  .pagination-nav a,
+  .pagination-nav span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    padding: 0.45rem 0.85rem;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    text-decoration: none;
+    background: #f1f5f9;
+    color: #0f172a;
+    transition: background 0.2s ease, color 0.2s ease;
+    cursor: pointer;
+  }
+  .pagination-nav a:hover {
+    background: #d11d1d;
+    color: #ffffff;
+  }
+  .pagination-nav .btn-primary,
+  .pagination-nav span.btn-primary {
+    background: #d11d1d;
+    color: #ffffff;
+  }
+  .empty-state {
+    text-align: center;
+    padding: 2.75rem 1rem;
+    color: #94a3b8;
+    font-style: italic;
+  }
+  .lista-live {
+    position: relative;
+  }
+  .lista-live[data-loading="true"]::after {
+    content: 'Actualizando…';
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background: rgba(255, 255, 255, 0.85);
+    font-weight: 600;
+    color: #d11d1d;
+    backdrop-filter: blur(2px);
+    z-index: 5;
+    border-radius: 16px;
+  }
+  .export-btn {
+    background: #10B981;
+    color: white;
+    font-weight: 600;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    transition: background 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+    border: none;
+    text-decoration: none;
+    padding: 0.75rem 1.5rem;
+  }
+  .export-btn:hover {
+    background: #059669;
+  }
+  @media (max-width: 992px) {
+    .page-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.9rem;
+    }
+    .table-card {
+      overflow-x: auto;
+    }
+    .table-card table {
+      min-width: 850px;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+(function() {
+  'use strict';
+  
+  const resultado = document.getElementById('proveedoresResultado');
+  const inputBuscar = document.getElementById('buscar');
+  const selectEstado = document.getElementById('estado');
+  const selectPageSize = document.getElementById('page_size');
+  const hiddenOrden = document.getElementById('orden');
+  const hiddenDir = document.getElementById('dir');
+  const searchLoading = document.getElementById('search-loading');
+  
+  const getCsrfToken = () => document.querySelector('[name="csrfmiddlewaretoken"]')?.value || '';
+  
+  let searchTimeout = null;
+  let currentUrl = window.location.href;
+
+  // Construir URL con parámetros
+  const buildUrl = (params = {}) => {
+    const url = new URL(window.location.href);
+    const searchParams = new URLSearchParams();
+    
+    // Agregar valores actuales de los campos
+    if (inputBuscar?.value) searchParams.set('buscar', inputBuscar.value);
+    if (selectEstado?.value) searchParams.set('estado', selectEstado.value);
+    if (selectPageSize?.value) searchParams.set('page_size', selectPageSize.value);
+    if (hiddenOrden?.value) searchParams.set('orden', hiddenOrden.value);
+    if (hiddenDir?.value) searchParams.set('dir', hiddenDir.value);
+    
+    // Sobrescribir con parámetros específicos
+    Object.entries(params).forEach(([key, value]) => {
+      if (value === null || value === undefined || value === '') {
+        searchParams.delete(key);
+      } else {
+        searchParams.set(key, value);
+      }
+    });
+    
+    url.search = searchParams.toString();
+    return url.href;
+  };
+
+  // Actualizar contenido via AJAX
+  const actualizarLista = async (url) => {
+    try {
+      resultado.dataset.loading = 'true';
+      if (searchLoading) searchLoading.classList.add('active');
+      
+      const response = await fetch(url, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      });
+      
+      if (!response.ok) throw new Error('Error al cargar datos');
+      
+      const html = await response.text();
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      const nuevoResultado = doc.getElementById('proveedoresResultado');
+      
+      if (!nuevoResultado) throw new Error('No se encontró el contenedor');
+      
+      resultado.innerHTML = nuevoResultado.innerHTML;
+      window.history.replaceState({}, '', url);
+      currentUrl = url;
+      
+      return true;
+    } catch (error) {
+      console.error('Error:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error al actualizar',
+        text: error.message,
+        confirmButtonText: 'Aceptar'
+      });
+      return false;
+    } finally {
+      delete resultado.dataset.loading;
+      if (searchLoading) searchLoading.classList.remove('active');
+    }
+  };
+
+  // Búsqueda con debounce
+  if (inputBuscar) {
+    inputBuscar.addEventListener('input', () => {
+      clearTimeout(searchTimeout);
+      if (searchLoading) searchLoading.classList.add('active');
+      
+      searchTimeout = setTimeout(() => {
+        const url = buildUrl({ page: 1 });
+        actualizarLista(url);
+      }, 350);
+    });
+  }
+
+  // Filtros sin debounce
+  if (selectEstado) {
+    selectEstado.addEventListener('change', () => {
+      const url = buildUrl({ page: 1 });
+      actualizarLista(url);
+    });
+  }
+
+  if (selectPageSize) {
+    selectPageSize.addEventListener('change', () => {
+      const url = buildUrl({ page: 1 });
+      actualizarLista(url);
+    });
+  }
+
+  // Event delegation para ordenamiento y paginación
+  resultado.addEventListener('click', async (e) => {
+    // Ordenamiento
+    const sortLink = e.target.closest('.sort-link');
+    if (sortLink) {
+      e.preventDefault();
+      const campo = sortLink.dataset.sort;
+      const direccion = sortLink.dataset.nextDir || 'asc';
+      
+      if (hiddenOrden) hiddenOrden.value = campo;
+      if (hiddenDir) hiddenDir.value = direccion;
+      
+      const url = buildUrl({ orden: campo, dir: direccion, page: 1 });
+      await actualizarLista(url);
+      return;
+    }
+
+    // Paginación
+    const pageLink = e.target.closest('.page-link');
+    if (pageLink) {
+      e.preventDefault();
+      const page = pageLink.dataset.page;
+      const url = buildUrl({ page });
+      await actualizarLista(url);
+      return;
+    }
+
+    // Eliminar proveedor
+    const btnEliminar = e.target.closest('.btn-eliminar');
+    if (btnEliminar) {
+      e.preventDefault();
+      await handleEliminar(btnEliminar);
+    }
+  });
+
+  // Función para inactivar proveedor
+  const inactivarProveedor = async (btn) => {
+    try {
+      const response = await fetch(btn.dataset.estadoUrl, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': getCsrfToken(),
+          'X-Requested-With': 'XMLHttpRequest',
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: new URLSearchParams({ estado: 'INACTIVO' })
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok || !data.ok) {
+        throw new Error(data.message || 'Error al inactivar proveedor');
+      }
+      
+      await actualizarLista(currentUrl);
+      
+      Swal.fire({
+        icon: 'success',
+        title: 'Proveedor inactivado',
+        timer: 1600,
+        showConfirmButton: false
+      });
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'No se pudo inactivar',
+        text: error.message,
+        confirmButtonText: 'Aceptar'
+      });
+    }
+  };
+
+  // Función para eliminar proveedor
+  const handleEliminar = async (btn) => {
+    const productos = parseInt(btn.dataset.productos || '0', 10);
+    
+    if (productos > 0) {
+      const result = await Swal.fire({
+        icon: 'warning',
+        title: 'No se puede eliminar',
+        html: 'Este proveedor tiene productos asociados.<br>Puedes inactivarlo para retirarlo de uso operativo.',
+        showCancelButton: true,
+        showDenyButton: true,
+        confirmButtonText: 'Inactivar proveedor',
+        denyButtonText: 'Mantener como está',
+        cancelButtonText: 'Cerrar',
+        reverseButtons: true
+      });
+      
+      if (result.isConfirmed) {
+        await inactivarProveedor(btn);
+      }
+      return;
+    }
+    
+    const confirmado = await Swal.fire({
+      icon: 'question',
+      title: '¿Eliminar proveedor?',
+      text: 'Esta acción no se puede deshacer.',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    });
+    
+    if (!confirmado.isConfirmed) return;
+    
+    Swal.fire({
+      title: 'Eliminando proveedor…',
+      text: 'Por favor, espera.',
+      allowOutsideClick: false,
+      showConfirmButton: false,
+      didOpen: () => Swal.showLoading()
+    });
+    
+    try {
+      const response = await fetch(btn.dataset.url, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': getCsrfToken(),
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      });
+      
+      const data = await response.json();
+      Swal.close();
+      
+      if (!response.ok || !data.ok) {
+        throw new Error(data.message || 'Error al eliminar proveedor');
+      }
+      
+      await actualizarLista(currentUrl);
+      
+      Swal.fire({
+        icon: 'success',
+        title: 'Proveedor eliminado',
+        timer: 1500,
+        showConfirmButton: false
+      });
+    } catch (error) {
+      Swal.close();
+      Swal.fire({
+        icon: 'error',
+        title: 'No se eliminó',
+        text: error.message,
+        confirmButtonText: 'Aceptar'
+      });
+    }
+  };
+})();
+</script>
+{% endblock %}

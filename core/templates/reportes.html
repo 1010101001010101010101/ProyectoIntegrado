@@ -1,0 +1,246 @@
+{% extends 'base.html' %}
+
+{% block title %}Reportes - Dulcería Lilis{% endblock %}
+{% block extra_css %}
+<style>
+    body {
+        background: #f4f6f8;
+        font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+    }
+    .page-header {
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+    .page-title {
+        font-size: 2.2rem;
+        color: #1f2937;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    .page-subtitle {
+        color: #6b7280;
+        font-size: 1.1rem;
+        margin-bottom: 1.5rem;
+    }
+    .stats-grid {
+        display: flex;
+        gap: 2rem;
+        justify-content: center;
+        margin-bottom: 2rem;
+    }
+    .stat-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem 2rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        min-width: 220px;
+        text-align: left;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        border: 1px solid #e5e7eb;
+    }
+    .stat-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+    .stat-icon {
+        font-size: 2rem;
+        opacity: 0.7;
+    }
+    .stat-title {
+        font-size: 1rem;
+        color: #6b7280;
+        margin: 0;
+        font-weight: 500;
+    }
+    .stat-value {
+        font-size: 2.1rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin: 0.5rem 0 0 0;
+    }
+    .stat-subtitle {
+        font-size: 0.95rem;
+        color: #6b7280;
+        margin: 0;
+    }
+    .charts-grid {
+        display: flex;
+        gap: 2rem;
+        justify-content: center;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+    }
+    .chart-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem 2rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        min-width: 350px;
+        border: 1px solid #e5e7eb;
+    }
+    .chart-title {
+        font-size: 1.15rem;
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 1.25rem;
+        text-align: center;
+    }
+    .chart-container {
+        height: 300px;
+        position: relative;
+    }
+    .btn-formal {
+        display: inline-block;
+        padding: 0.75rem 1.5rem;
+        background: linear-gradient(135deg, #dc2626, #b91c1c);
+        color: white;
+        font-weight: 600;
+        border-radius: 8px;
+        text-decoration: none;
+        box-shadow: 0 4px 12px rgba(220,38,38,0.15);
+        border: none;
+        transition: all 0.2s;
+        margin: 1rem auto 0 auto;
+        text-align: center;
+    }
+    .btn-formal:hover {
+        background: linear-gradient(135deg, #b91c1c, #dc2626);
+        box-shadow: 0 6px 20px rgba(220,38,38,0.25);
+        color: #fff;
+        transform: translateY(-2px);
+    }
+    @media (max-width: 900px) {
+        .stats-grid, .charts-grid {
+            flex-direction: column;
+            gap: 1.2rem;
+            align-items: center;
+        }
+        .chart-card, .stat-card {
+            min-width: 220px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Reportes</h1>
+    <p class="page-subtitle">Visualiza estadísticas y exporta información relevante del sistema.</p>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-header">
+            <div>
+                <p class="stat-title">Total Productos</p>
+                <h3 class="stat-value">{{ total_productos }}</h3>
+            </div>
+            <div class="stat-icon">📦</div>
+        </div>
+        <p class="stat-subtitle">Activos en inventario</p>
+    </div>
+    <div class="stat-card">
+        <div class="stat-header">
+            <div>
+                <p class="stat-title">Productos Bajo Stock</p>
+                <h3 class="stat-value">{{ productos_bajo_stock }}</h3>
+            </div>
+            <div class="stat-icon">⚠️</div>
+        </div>
+        <p class="stat-subtitle">Alertas de stock mínimo</p>
+    </div>
+    <div class="stat-card">
+        <div class="stat-header">
+            <div>
+                <p class="stat-title">Proveedores Activos</p>
+                <h3 class="stat-value">{{ proveedores_activos }}</h3>
+            </div>
+            <div class="stat-icon">🏢</div>
+        </div>
+        <p class="stat-subtitle">Con pedidos recientes</p>
+    </div>
+</div>
+
+<div class="charts-grid">
+    <div class="chart-card">
+        <div class="chart-title">Movimientos por Mes</div>
+        <div class="chart-container">
+            <canvas id="chartMovimientos"></canvas>
+        </div>
+    </div>
+    <div class="chart-card">
+        <div class="chart-title">Estado del Stock</div>
+        <div class="chart-container">
+            <canvas id="chartStock"></canvas>
+        </div>
+    </div>
+</div>
+
+
+<div style="text-align:center;">
+</div>
+<div style="text-align:center;">
+    <a href="{% url 'core:exportar_productos_excel' %}" class="btn-formal">Exportar Productos a Excel</a>
+    <a href="{% url 'core:dashboard' %}" class="btn-formal" style="margin-left:1rem; background:linear-gradient(135deg,#3b82f6,#2563eb);">Volver al Dashboard</a>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+    // Gráfico de Movimientos por Mes
+    const ctxMovimientos = document.getElementById('chartMovimientos');
+    new Chart(ctxMovimientos, {
+        type: 'bar',
+        data: {
+            labels: {{ meses_labels|safe }},
+            datasets: [
+                {
+                    label: 'Ingresos',
+                    data: {{ ingresos_data|safe }},
+                    backgroundColor: '#22c55e'
+                },
+                {
+                    label: 'Salidas',
+                    data: {{ salidas_data|safe }},
+                    backgroundColor: '#ef4444'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    // Gráfico de Estado del Stock
+    const ctxStock = document.getElementById('chartStock');
+    new Chart(ctxStock, {
+        type: 'pie',
+        data: {
+            labels: ['Con Stock OK', 'Stock Bajo', 'Sin Stock'],
+            datasets: [{
+                data: {{ stock_data|safe }},
+                backgroundColor: ['#22c55e', '#f59e0b', '#ef4444']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,350 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Dulcería Lilis{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary: #dc2626;
+        --primary-dark: #b91c1c;
+        --text-dark: #1f2937;
+        --text-gray: #6b7280;
+        --border: #e5e7eb;
+        --shadow: rgba(0, 0, 0, 0.08);
+        --bg-light: #f9fafb;
+    }
+
+    .page-header {
+        margin-bottom: 2rem;
+    }
+
+    .page-title {
+        font-size: 2rem;
+        color: var(--text-dark);
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .page-subtitle {
+        color: var(--text-gray);
+        font-size: 1rem;
+    }
+
+    /* Tarjetas de Estadísticas */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px var(--shadow);
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .stat-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+
+    .stat-icon {
+        font-size: 2rem;
+        opacity: 0.6;
+    }
+
+    .stat-title {
+        font-size: 0.875rem;
+        color: var(--text-gray);
+        margin: 0;
+        font-weight: 500;
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin: 0.5rem 0 0 0;
+    }
+
+    .stat-subtitle {
+        font-size: 0.875rem;
+        color: var(--text-gray);
+        margin: 0;
+    }
+
+    /* Gráficos */
+    .charts-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .chart-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px var(--shadow);
+    }
+
+    .chart-title {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 1.25rem;
+    }
+
+    .chart-container {
+        height: 300px;
+        position: relative;
+    }
+
+    /* Botones de Acceso Rápido */
+    .quick-access {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px var(--shadow);
+        margin-top: 2rem;
+    }
+
+    .quick-access-title {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 1rem;
+    }
+
+    .quick-access-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+
+    .quick-btn {
+        display: block;
+        padding: 1rem;
+        background: linear-gradient(135deg, var(--primary), #ef4444);
+        color: white;
+        text-align: center;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+        transition: all 0.3s ease;
+    }
+
+    .quick-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
+        color: white;
+    }
+
+    @media (max-width: 768px) {
+        .stats-grid,
+        .charts-grid,
+        .quick-access-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Dashboard - Dulcería Lilis</h1>
+    <p class="page-subtitle">Resumen general del inventario y operaciones</p>
+</div>
+
+<!-- Tarjetas de Estadísticas -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-header">
+            <div>
+                <p class="stat-title">Total Productos</p>
+                <h3 class="stat-value">{{ total_productos }}</h3>
+            </div>
+            <div class="stat-icon">📦</div>
+        </div>
+        <p class="stat-subtitle">Activos en inventario</p>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-header">
+            <div>
+                <p class="stat-title">Movimientos del Mes</p>
+                <h3 class="stat-value">{{ movimientos_mes }}</h3>
+            </div>
+            <div class="stat-icon">📈</div>
+        </div>
+        <p class="stat-subtitle">Ingresos y salidas</p>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-header">
+            <div>
+                <p class="stat-title">Proveedores Activos</p>
+                <h3 class="stat-value">{{ proveedores_activos }}</h3>
+            </div>
+            <div class="stat-icon">🏢</div>
+        </div>
+        <p class="stat-subtitle">Con pedidos recientes</p>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-header">
+            <div>
+                <p class="stat-title">Alertas de Stock</p>
+                <h3 class="stat-value">{{ productos_bajo_stock }}</h3>
+            </div>
+            <div class="stat-icon">⚠️</div>
+        </div>
+        <p class="stat-subtitle">Productos bajo mínimo</p>
+    </div>
+</div>
+
+
+<!-- Botones de Acceso Rápido -->
+<div class="quick-access">
+    <h3 class="quick-access-title">🚀 Acceso Rápido</h3>
+    <div class="quick-access-grid">
+        {% if request.user.perfil.rol == 'ADMIN' and permisos_dashboard.usuarios %}
+            <a href="{% url 'core:lista_usuarios' %}" class="quick-btn"> Usuarios</a>
+        {% endif %}
+        {% if request.user.perfil.rol == 'CONSULTA' %}
+            <a href="{% url 'core:lista_usuarios' %}" class="quick-btn"> Usuarios</a>
+        {% endif %}
+        {% if permisos_dashboard.productos or request.user.perfil.rol == 'CONSULTA' %}
+            <a href="{% url 'core:lista_productos' %}" class="quick-btn"> Productos</a>
+        {% endif %}
+        {% if permisos_dashboard.proveedores and request.user.perfil.rol != 'BODEGA' or request.user.perfil.rol == 'CONSULTA' %}
+            <a href="{% url 'core:lista_proveedores' %}" class="quick-btn"> Proveedores</a>
+        {% endif %}
+        {% if permisos_dashboard.movimientos %}
+            <a href="{% url 'core:lista_movimientos' %}" class="quick-btn"> Movimientos</a>
+        {% endif %}
+        {% if request.user.perfil.rol != 'BODEGA' %}
+            <a href="{% url 'core:reportes' %}" class="quick-btn"> Reportes</a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+    // Gráfico de Movimientos por Mes
+    const ctxMovimientos = document.getElementById('chartMovimientos');
+    new Chart(ctxMovimientos, {
+        type: 'bar',
+        data: {
+            labels: {{ meses_labels|safe }},
+            datasets: [
+                {
+                    label: 'Ingresos',
+                    data: {{ ingresos_data|safe }},
+                    backgroundColor: '#22c55e'
+                },
+                {
+                    label: 'Salidas',
+                    data: {{ salidas_data|safe }},
+                    backgroundColor: '#ef4444'
+                },
+                {
+                    label: 'Ajustes',
+                    data: {{ ajustes_data|safe }},
+                    backgroundColor: '#3b82f6'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    // Gráfico de Estado del Stock
+    const ctxStock = document.getElementById('chartStock');
+    new Chart(ctxStock, {
+        type: 'pie',
+        data: {
+            labels: ['Con Stock OK', 'Stock Bajo', 'Sin Stock'],
+            datasets: [{
+                data: {{ stock_data|safe }},
+                backgroundColor: ['#22c55e', '#f59e0b', '#ef4444']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    // Gráfico Top 5 Productos
+    const ctxTop = document.getElementById('chartTopProductos');
+    new Chart(ctxTop, {
+        type: 'bar',
+        data: {
+            labels: {{ top_productos_labels|safe }},
+            datasets: [{
+                label: 'Movimientos',
+                data: {{ top_productos_data|safe }},
+                backgroundColor: '#dc2626'
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+
+    // Gráfico Proveedores
+    const ctxProveedores = document.getElementById('chartProveedores');
+    new Chart(ctxProveedores, {
+        type: 'line',
+        data: {
+            labels: {{ proveedores_labels|safe }},
+            datasets: [{
+                label: 'Pedidos',
+                data: {{ proveedores_data|safe }},
+                borderColor: '#f59e0b',
+                backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                borderWidth: 3,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,897 @@
+{% extends 'base.html' %}
+
+{% block title %}Nuevo Producto - Paso 1{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary: #2563eb;
+        --primary-dark: #1e40af;
+        --text-dark: #1f2937;
+        --text-gray: #6b7280;
+        --border: #e5e7eb;
+        --shadow: rgba(0, 0, 0, 0.1);
+    }
+    
+    .wizard-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    
+    .wizard-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .wizard-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+    }
+    
+    /* WIZARD STEPS */
+    .wizard-steps {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px var(--shadow);
+    }
+    
+    .step {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    .step.active {
+        background: var(--primary);
+        color: white;
+    }
+    
+    .step-number {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+    }
+    
+    .step.active .step-number {
+        background: white;
+        color: var(--primary);
+    }
+    
+    /* FORM CARD */
+    .form-card {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 2px 12px var(--shadow);
+    }
+    
+    .section-title {
+        font-size: 1.1rem;
+        color: var(--text-dark);
+        font-weight: 700;
+        margin: 1.5rem 0 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--border);
+    }
+    
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .form-group label {
+        font-weight: 600;
+        margin-bottom: 0.4rem;
+        color: var(--text-dark);
+        font-size: 0.9rem;
+    }
+    
+    .label-hint {
+        font-size: 0.75rem;
+        color: var(--text-gray);
+        margin-top: 0.25rem;
+    }
+    
+    .form-control {
+        padding: 0.75rem;
+        border: 2px solid var(--border);
+        border-radius: 6px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    
+    .form-control[readonly] {
+        background: #f9fafb;
+        color: var(--text-gray);
+    }
+    
+    textarea.form-control {
+        min-height: 80px;
+        resize: vertical;
+        font-family: inherit;
+    }
+    
+    /* FORM ACTIONS */
+    .form-actions {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 2px solid var(--border);
+    }
+    
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.95rem;
+    }
+    
+    .btn-primary {
+        background: var(--primary);
+        color: white;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+    
+    .btn-primary:hover {
+        background: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+    }
+    
+    .btn-secondary {
+        background: #f3f4f6;
+        color: var(--text-dark);
+    }
+    
+    .btn-secondary:hover {
+        background: #e5e7eb;
+    }
+    
+    .error-message {
+        color: #dc2626;
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="wizard-container">
+    <div class="wizard-header">
+        <h1 class="wizard-title">📦 Formulario de Producto</h1>
+    </div>
+
+    <!-- WIZARD STEPS -->
+    <div class="wizard-steps">
+        <div class="step active">
+            <div class="step-number">1</div>
+            <div class="step-label">Identificación y precios</div>
+        </div>
+        <div class="step">
+            <div class="step-number">2</div>
+            <div class="step-label">Stock y control</div>
+        </div>
+        <div class="step">
+            <div class="step-number">3</div>
+            <div class="step-label">Relaciones y derivados</div>
+        </div>
+    </div>
+
+    <div class="form-card">
+        <!-- ⚠️ AGREGAMOS novalidate AQUÍ -->
+        <form method="POST" id="productoForm" novalidate>
+            {% csrf_token %}
+            
+            <h3 class="section-title">Identificación</h3>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="{{ form.sku.id_for_label }}">{{ form.sku.label }} <span style="color:#dc2626;">*</span></label>
+                    {{ form.sku }}
+                    {% if form.sku.errors %}
+                        <span class="error-message">{{ form.sku.errors.0 }}</span>
+                    {% else %}
+                        <span class="label-hint">{{ form.sku.help_text }}</span>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.ean_upc.id_for_label }}">{{ form.ean_upc.label }}</label>
+                    {{ form.ean_upc }}
+                    {% if form.ean_upc.errors %}
+                        <span class="error-message">{{ form.ean_upc.errors.0 }}</span>
+                    {% else %}
+                        <span class="label-hint">{{ form.ean_upc.help_text }}</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label for="{{ form.nombre.id_for_label }}">{{ form.nombre.label }} <span style="color:#dc2626;">*</span></label>
+                    {{ form.nombre }}
+                    {% if form.nombre.errors %}
+                        <span class="error-message">{{ form.nombre.errors.0 }}</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label for="{{ form.descripcion.id_for_label }}">{{ form.descripcion.label }}</label>
+                    {{ form.descripcion }}
+                    {% if form.descripcion.errors %}
+                        <span class="error-message">{{ form.descripcion.errors.0 }}</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="{{ form.categoria.id_for_label }}">{{ form.categoria.label }} <span style="color:#dc2626;">*</span></label>
+                    {{ form.categoria }}
+                    {% if form.categoria.errors %}
+                        <span class="error-message">{{ form.categoria.errors.0 }}</span>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.marca.id_for_label }}">{{ form.marca.label }}</label>
+                    {{ form.marca }}
+                    {% if form.marca.errors %}
+                        <span class="error-message">{{ form.marca.errors.0 }}</span>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.modelo.id_for_label }}">{{ form.modelo.label }}</label>
+                    {{ form.modelo }}
+                    {% if form.modelo.errors %}
+                        <span class="error-message">{{ form.modelo.errors.0 }}</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <h3 class="section-title">Unidades y precios</h3>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="{{ form.uom_compra.id_for_label }}">{{ form.uom_compra.label }} <span style="color:#dc2626;">*</span></label>
+                    {{ form.uom_compra }}
+                    {% if form.uom_compra.errors %}
+                        <span class="error-message">{{ form.uom_compra.errors.0 }}</span>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.uom_venta.id_for_label }}">{{ form.uom_venta.label }} <span style="color:#dc2626;">*</span></label>
+                    {{ form.uom_venta }}
+                    {% if form.uom_venta.errors %}
+                        <span class="error-message">{{ form.uom_venta.errors.0 }}</span>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.factor_conversion.id_for_label }}">{{ form.factor_conversion.label }} <span style="color:#dc2626;">*</span></label>
+                    {{ form.factor_conversion }}
+                    {% if form.factor_conversion.errors %}
+                        <span class="error-message">{{ form.factor_conversion.errors.0 }}</span>
+                    {% else %}
+                        <span class="label-hint">{{ form.factor_conversion.help_text }}</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="{{ form.costo_estandar.id_for_label }}">{{ form.costo_estandar.label }}</label>
+                    {{ form.costo_estandar }}
+                    {% if form.costo_estandar.errors %}
+                        <span class="error-message">{{ form.costo_estandar.errors.0 }}</span>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.costo_promedio.id_for_label }}">{{ form.costo_promedio.label }}</label>
+                    {{ form.costo_promedio }}
+                    <span class="label-hint">{{ form.costo_promedio.help_text }}</span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.precio_venta.id_for_label }}">{{ form.precio_venta.label }}</label>
+                    {{ form.precio_venta }}
+                    {% if form.precio_venta.errors %}
+                        <span class="error-message">{{ form.precio_venta.errors.0 }}</span>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.impuesto_iva.id_for_label }}">{{ form.impuesto_iva.label }} <span style="color:#dc2626;">*</span></label>
+                    {{ form.impuesto_iva }}
+                    {% if form.impuesto_iva.errors %}
+                        <span class="error-message">{{ form.impuesto_iva.errors.0 }}</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <a href="{% url 'core:lista_productos' %}" class="btn btn-secondary">
+                    ❌ Cancelar
+                </a>
+                <button type="button" class="btn btn-secondary" onclick="limpiarFormulario()">
+                    🔄 Limpiar
+                </button>
+                <button type="submit" class="btn btn-primary">
+                    💾 Guardar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+// ============================================
+// PRODUCTO PASO 1 - VALIDACIONES Y SWEETALERTS PRO
+// ============================================
+
+// Toast personalizado
+const Toast = Swal.mixin({
+    toast: true,
+    position: 'top-end',
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer)
+        toast.addEventListener('mouseleave', Swal.resumeTimer)
+    }
+});
+
+// Mensaje de bienvenida
+document.addEventListener('DOMContentLoaded', function() {
+    Swal.fire({
+        icon: 'info',
+        title: '📦 Nuevo Producto',
+        html: '<p>Complete la información básica del producto</p><small style="color: #6B7280;">Paso 1 de 3</small>',
+        timer: 3000,
+        showConfirmButton: false,
+        toast: true,
+        position: 'top-end',
+        background: '#EFF6FF',
+        iconColor: '#2563EB'
+    });
+});
+
+// ============================================
+// VALIDACIONES EN TIEMPO REAL
+// ============================================
+
+// SKU - Solo mayúsculas y alfanuméricos
+const skuInput = document.getElementById('{{ form.sku.id_for_label }}');
+skuInput.addEventListener('input', function(e) {
+    e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9\-_]/g, '');
+    if (e.target.value.length >= 3) {
+        e.target.style.borderColor = '#10B981';
+        e.target.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+    } else if (e.target.value.length > 0) {
+        e.target.style.borderColor = '#F59E0B';
+    } else {
+        e.target.style.borderColor = 'var(--border)';
+        e.target.style.boxShadow = '';
+    }
+});
+
+// EAN/UPC - Solo números, máximo 13
+const eanInput = document.getElementById('{{ form.ean_upc.id_for_label }}');
+if (eanInput) {
+    eanInput.addEventListener('input', function(e) {
+        e.target.value = e.target.value.replace(/\D/g, '').substring(0, 13);
+        if (e.target.value.length === 13 || e.target.value.length === 8) {
+            e.target.style.borderColor = '#10B981';
+            Toast.fire({
+                icon: 'success',
+                title: `✓ Código de barras válido (${e.target.value.length} dígitos)`,
+                background: '#D1FAE5'
+            });
+        }
+    });
+}
+
+// Nombre - Mínimo 3 caracteres
+const nombreInput = document.getElementById('{{ form.nombre.id_for_label }}');
+nombreInput.addEventListener('input', function(e) {
+    if (e.target.value.length >= 3) {
+        e.target.style.borderColor = '#10B981';
+        e.target.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+    } else if (e.target.value.length > 0) {
+        e.target.style.borderColor = '#F59E0B';
+    } else {
+        e.target.style.borderColor = 'var(--border)';
+        e.target.style.boxShadow = '';
+    }
+});
+
+// Categoría - Toast al seleccionar
+const categoriaInput = document.getElementById('{{ form.categoria.id_for_label }}');
+categoriaInput.addEventListener('change', function(e) {
+    if (e.target.value) {
+        const texto = e.target.options[e.target.selectedIndex].text;
+        Toast.fire({
+            icon: 'success',
+            title: `📁 ${texto}`,
+            text: 'Categoría seleccionada',
+            background: '#DBEAFE'
+        });
+    }
+});
+
+// Factor de conversión - No negativos
+const factorInput = document.getElementById('{{ form.factor_conversion.id_for_label }}');
+factorInput.addEventListener('input', function(e) {
+    if (parseFloat(e.target.value) < 0) {
+        e.target.value = '';
+    }
+    const valor = parseFloat(e.target.value);
+    if (valor > 0 && valor <= 1000) {
+        e.target.style.borderColor = '#10B981';
+    } else if (valor > 1000) {
+        e.target.style.borderColor = '#F59E0B';
+    }
+});
+
+// IVA - Límite 0-100
+const ivaInput = document.getElementById('{{ form.impuesto_iva.id_for_label }}');
+ivaInput.addEventListener('input', function(e) {
+    let valor = parseFloat(e.target.value);
+    if (valor > 100) e.target.value = 100;
+    if (valor < 0) e.target.value = 0;
+    if (valor >= 0 && valor <= 100) {
+        e.target.style.borderColor = '#10B981';
+    }
+});
+
+// ============================================
+// VALIDACIONES DE PRECIOS
+// ============================================
+function validarEnteroPrecios(input) {
+    input.addEventListener('input', function(e) {
+        e.target.value = e.target.value.replace(/[^\d]/g, '');
+        if (e.target.value.length > 1) {
+            e.target.value = e.target.value.replace(/^0+/, '');
+        }
+        e.target.classList.remove('error');
+        const valor = parseInt(e.target.value) || 0;
+        if (valor > 0) {
+            e.target.style.borderColor = '#10B981';
+        }
+    });
+    input.addEventListener('blur', function(e) {
+        const valor = parseInt(e.target.value.replace(/\D/g, '')) || 0;
+        if (e.target.id === 'id_costo_estandar' && valor > 10000000) {
+            e.target.classList.add('error');
+            Swal.fire({
+                icon: 'warning',
+                title: '💰 Costo muy alto',
+                text: 'El costo estándar no puede superar $10,000,000',
+                confirmButtonText: 'Corregir',
+                confirmButtonColor: '#2563EB'
+            });
+            e.target.value = '10000000';
+        }
+        if (e.target.id === 'id_precio_venta' && valor > 100000000) {
+            e.target.classList.add('error');
+            Swal.fire({
+                icon: 'warning',
+                title: '💵 Precio muy alto',
+                text: 'El precio de venta no puede superar $100,000,000',
+                confirmButtonText: 'Corregir',
+                confirmButtonColor: '#2563EB'
+            });
+            e.target.value = '100000000';
+        }
+    });
+}
+
+const costoEstandar = document.getElementById('id_costo_estandar');
+const precioVenta = document.getElementById('id_precio_venta');
+if (costoEstandar) validarEnteroPrecios(costoEstandar);
+if (precioVenta) validarEnteroPrecios(precioVenta);
+
+// Validar margen al perder foco
+if (precioVenta && costoEstandar) {
+    precioVenta.addEventListener('blur', function() {
+        const precio = parseInt(precioVenta.value.replace(/\D/g, '')) || 0;
+        const costo = parseInt(costoEstandar.value.replace(/\D/g, '')) || 0;
+        if (precio > 0 && costo > 0) {
+            const margen = ((precio - costo) / costo * 100);
+            if (precio < costo) {
+                precioVenta.style.borderColor = '#DC2626';
+                Toast.fire({
+                    icon: 'error',
+                    title: '⚠️ Precio menor al costo',
+                    text: 'Generará pérdidas en cada venta',
+                    background: '#FEE2E2'
+                });
+            } else if (margen < 10) {
+                precioVenta.style.borderColor = '#F59E0B';
+                Toast.fire({
+                    icon: 'warning',
+                    title: `📊 Margen bajo: ${margen.toFixed(1)}%`,
+                    text: 'Se recomienda al menos 10%',
+                    background: '#FEF3C7'
+                });
+            } else {
+                precioVenta.style.borderColor = '#10B981';
+                Toast.fire({
+                    icon: 'success',
+                    title: `✓ Margen: ${margen.toFixed(1)}%`,
+                    background: '#D1FAE5'
+                });
+            }
+        }
+    });
+}
+
+// ============================================
+// VALIDACIÓN PRINCIPAL DEL FORMULARIO
+// ============================================
+document.getElementById('productoForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const sku = skuInput.value.trim();
+    const nombre = nombreInput.value.trim();
+    const categoria = categoriaInput.value;
+    const uomCompra = document.getElementById('{{ form.uom_compra.id_for_label }}').value;
+    const uomVenta = document.getElementById('{{ form.uom_venta.id_for_label }}').value;
+    const factorConversion = factorInput.value.trim();
+    const impuestoIva = ivaInput.value.trim();
+    let camposFaltantes = [];
+    let primerCampoError = null;
+
+    // Validar SKU
+    if (!sku) {
+        camposFaltantes.push('📦 SKU (Código del producto)');
+        if (!primerCampoError) primerCampoError = skuInput;
+    } else if (sku.length < 3) {
+        Swal.fire({
+            icon: 'error',
+            title: '❌ SKU inválido',
+            html: '<p>El SKU debe tener <strong>al menos 3 caracteres</strong></p>',
+            confirmButtonText: 'Corregir',
+            confirmButtonColor: '#2563EB'
+        });
+        skuInput.focus();
+        return;
+    }
+
+    // Validar Nombre
+    if (!nombre) {
+        camposFaltantes.push('🏷️ Nombre del producto');
+        if (!primerCampoError) primerCampoError = nombreInput;
+    } else if (nombre.length < 3) {
+        Swal.fire({
+            icon: 'error',
+            title: '❌ Nombre inválido',
+            html: '<p>El nombre debe tener <strong>al menos 3 caracteres</strong></p>',
+            confirmButtonText: 'Corregir',
+            confirmButtonColor: '#2563EB'
+        });
+        nombreInput.focus();
+        return;
+    }
+
+    // Validar Categoría
+    if (!categoria) {
+        camposFaltantes.push('📁 Categoría');
+        if (!primerCampoError) primerCampoError = categoriaInput;
+    }
+
+    // Validar Unidades
+    if (!uomCompra) camposFaltantes.push('📥 Unidad de Compra');
+    if (!uomVenta) camposFaltantes.push('📤 Unidad de Venta');
+
+    // Validar Factor de Conversión
+    const factorNum = parseFloat(factorConversion);
+    if (!factorConversion || isNaN(factorNum) || factorNum <= 0) {
+        camposFaltantes.push('🔄 Factor de Conversión (debe ser mayor a 0)');
+        if (!primerCampoError) primerCampoError = factorInput;
+    } else if (factorNum > 10000) {
+        Swal.fire({
+            icon: 'error',
+            title: '🚨 Factor muy alto',
+            text: 'El factor de conversión no puede superar 10,000',
+            confirmButtonText: 'Corregir',
+            confirmButtonColor: '#2563EB'
+        });
+        factorInput.focus();
+        return;
+    }
+
+    // Validar IVA
+    const ivaNum = parseFloat(impuestoIva);
+    if (!impuestoIva || isNaN(ivaNum)) {
+        camposFaltantes.push('🧾 IVA (%)');
+        if (!primerCampoError) primerCampoError = ivaInput;
+    } else if (ivaNum < 0 || ivaNum > 100) {
+        Swal.fire({
+            icon: 'error',
+            title: '❌ IVA inválido',
+            text: 'El IVA debe estar entre 0% y 100%',
+            confirmButtonText: 'Corregir',
+            confirmButtonColor: '#2563EB'
+        });
+        ivaInput.focus();
+        return;
+    }
+
+    // Mostrar campos faltantes
+    if (camposFaltantes.length > 0) {
+        let listaCampos = '<ul style="text-align: left; margin: 1rem 0; padding-left: 1.5rem;">';
+        camposFaltantes.forEach(campo => {
+            listaCampos += `<li style="margin: 0.5rem 0;">${campo}</li>`;
+        });
+        listaCampos += '</ul>';
+
+        Swal.fire({
+            icon: 'error',
+            title: '❌ Campos obligatorios faltantes',
+            html: `
+                <p style="margin-bottom: 1rem;">Complete los siguientes campos:</p>
+                ${listaCampos}
+                <div style="background: #FEF2F2; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                    <strong style="color: #DC2626;">Total: ${camposFaltantes.length} campo${camposFaltantes.length !== 1 ? 's' : ''}</strong>
+                </div>
+            `,
+            confirmButtonText: 'Entendido',
+            confirmButtonColor: '#2563EB',
+            width: '600px',
+            willClose: () => {
+                if (primerCampoError) {
+                    primerCampoError.focus();
+                    primerCampoError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+        });
+        return;
+    }
+
+    // Validar precios
+    const costoEst = parseInt(costoEstandar.value.replace(/\D/g, '')) || 0;
+    const precioVta = parseInt(precioVenta.value.replace(/\D/g, '')) || 0;
+
+    if (precioVta > 0 && costoEst > 0 && precioVta < costoEst) {
+        Swal.fire({
+            icon: 'error',
+            title: '💸 Precio menor al costo',
+            html: `
+                <div style="text-align: center; margin: 1rem 0;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0;">
+                        <div style="background: #FEE2E2; padding: 1rem; border-radius: 8px;">
+                            <strong style="color: #DC2626;">Costo</strong>
+                            <div style="font-size: 1.5rem; font-weight: bold; color: #DC2626;">
+                                $${costoEst.toLocaleString('es-CL')}
+                            </div>
+                        </div>
+                        <div style="background: #FEF3C7; padding: 1rem; border-radius: 8px;">
+                            <strong style="color: #92400E;">Precio</strong>
+                            <div style="font-size: 1.5rem; font-weight: bold; color: #92400E;">
+                                $${precioVta.toLocaleString('es-CL')}
+                            </div>
+                        </div>
+                    </div>
+                    <p style="color: #DC2626; font-weight: bold;">⚠️ Esto generará pérdidas en cada venta</p>
+                </div>
+            `,
+            showCancelButton: true,
+            confirmButtonText: 'Corregir precio',
+            cancelButtonText: 'Continuar de todas formas',
+            confirmButtonColor: '#2563EB',
+            cancelButtonColor: '#6B7280'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                precioVenta.focus();
+            } else if (result.dismiss === Swal.DismissReason.cancel) {
+                mostrarConfirmacionFinal(sku, nombre, costoEst, precioVta, ivaNum);
+            }
+        });
+        return;
+    }
+
+    // Todo correcto
+    mostrarConfirmacionFinal(sku, nombre, costoEst, precioVta, ivaNum);
+});
+
+// ============================================
+// CONFIRMACIÓN FINAL
+// ============================================
+function mostrarConfirmacionFinal(sku, nombre, costoEst, precioVta, ivaNum) {
+    const margen = costoEst > 0 && precioVta > 0 ? ((precioVta - costoEst) / costoEst * 100) : 0;
+    let resumenHTML = `
+        <div style="text-align: left; margin: 1.5rem 0; font-size: 0.95rem;">
+            <div style="background: #F9FAFB; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                <p style="margin: 0.5rem 0;"><strong>📦 SKU:</strong> ${sku}</p>
+                <p style="margin: 0.5rem 0;"><strong>🏷️ Nombre:</strong> ${nombre}</p>
+            </div>
+    `;
+    if (costoEst > 0 || precioVta > 0) {
+        resumenHTML += '<div style="display: grid; gap: 0.75rem;">';
+        if (costoEst > 0) {
+            resumenHTML += `
+                <div style="background: #FEF2F2; padding: 0.75rem; border-radius: 6px; border-left: 3px solid #DC2626;">
+                    <strong style="color: #1F2937;">💰 Costo estándar:</strong>
+                    <span style="color: #DC2626; font-weight: bold;">$${costoEst.toLocaleString('es-CL')}</span>
+                </div>
+            `;
+        }
+        if (precioVta > 0) {
+            resumenHTML += `
+                <div style="background: #D1FAE5; padding: 0.75rem; border-radius: 6px; border-left: 3px solid #10B981;">
+                    <strong style="color: #1F2937;">💵 Precio de venta:</strong>
+                    <span style="color: #10B981; font-weight: bold;">$${precioVta.toLocaleString('es-CL')}</span>
+                </div>
+            `;
+        }
+        if (margen > 0) {
+            let colorMargen = margen < 10 ? '#F59E0B' : margen < 20 ? '#22c55e' : '#16a34a';
+            let bgMargen = margen < 10 ? '#FEF3C7' : '#D1FAE5';
+            resumenHTML += `
+                <div style="background: ${bgMargen}; padding: 0.75rem; border-radius: 6px; border-left: 3px solid ${colorMargen};">
+                    <strong style="color: #1F2937;">📈 Margen:</strong>
+                    <span style="color: ${colorMargen}; font-weight: bold;">${margen.toFixed(1)}%</span>
+                </div>
+            `;
+        }
+        resumenHTML += '</div>';
+    }
+    resumenHTML += `
+        <div style="background: #EFF6FF; padding: 0.75rem; border-radius: 6px; margin-top: 1rem;">
+            <strong style="color: #1F2937;">🧾 IVA:</strong>
+            <span style="color: #2563EB; font-weight: bold;">${ivaNum}%</span>
+        </div>
+    </div>`;
+
+    Swal.fire({
+        icon: 'question',
+        title: '¿Guardar y continuar al Paso 2?',
+        html: `
+            <p style="color: #6B7280; margin-bottom: 1rem;">
+                Se guardará la información básica y continuarás con el control de stock
+            </p>
+            ${resumenHTML}
+        `,
+        showCancelButton: true,
+        confirmButtonText: '✓ Continuar al Paso 2 →',
+        cancelButtonText: '← Revisar datos',
+        confirmButtonColor: '#2563EB',
+        cancelButtonColor: '#6B7280',
+        width: '600px',
+        backdrop: `rgba(37, 99, 235, 0.1)`
+    }).then((result) => {
+        if (result.isConfirmed) {
+            guardarPaso1();
+        }
+    });
+}
+
+function guardarPaso1() {
+    let progreso = 0;
+    Swal.fire({
+        title: '💾 Guardando Paso 1...',
+        html: `
+            <div style="margin: 1.5rem 0;">
+                <p style="color: #6B7280; margin-bottom: 1rem;">Procesando información básica</p>
+                <div style="background: #F3F4F6; height: 8px; border-radius: 4px; overflow: hidden;">
+                    <div id="progressBar" style="background: linear-gradient(90deg, #2563EB, #1E40AF); height: 100%; width: 0%; transition: width 0.3s ease;"></div>
+                </div>
+                <p id="progressText" style="color: #2563EB; margin-top: 0.5rem; font-weight: bold;">0%</p>
+            </div>
+        `,
+        showConfirmButton: false,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => {
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            const interval = setInterval(() => {
+                progreso += 10;
+                progressBar.style.width = progreso + '%';
+                progressText.textContent = progreso + '%';
+                if (progreso >= 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        document.getElementById('productoForm').submit();
+                    }, 500);
+                }
+            }, 100);
+        }
+    });
+}
+
+// ============================================
+// LIMPIAR FORMULARIO
+// ============================================
+function limpiarFormulario() {
+    Swal.fire({
+        icon: 'warning',
+        title: '🔄 ¿Limpiar formulario?',
+        text: 'Se perderán todos los datos ingresados en el Paso 1',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, limpiar',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#F59E0B',
+        cancelButtonColor: '#6B7280'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('productoForm').reset();
+            [skuInput, nombreInput, categoriaInput, factorInput, ivaInput].forEach(input => {
+                if (input) {
+                    input.style.borderColor = 'var(--border)';
+                    input.style.boxShadow = '';
+                }
+            });
+            Swal.fire({
+                icon: 'success',
+                title: '✓ Formulario limpiado',
+                text: 'Puedes comenzar de nuevo',
+                timer: 1500,
+                showConfirmButton: false,
+                toast: true,
+                position: 'top-end'
+            });
+        }
+    });
+}
+</script>
+
+<!-- ⚠️ AGREGAR ESTILOS ADICIONALES PARA POPUP GRANDE -->
+<style>
+.swal2-popup-large {
+    width: 600px !important;
+    max-width: 90% !important;
+}
+
+.swal2-popup-large .swal2-html-container {
+    max-height: 500px;
+    overflow-y: auto;
+}
+</style>
+{% endblock %}

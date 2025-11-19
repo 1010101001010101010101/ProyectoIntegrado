@@ -1,0 +1,564 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar Movimiento - Dulcería Lilis{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+    
+    .page-title {
+        font-size: 2rem;
+        color: var(--text-dark);
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    
+    .breadcrumb {
+        color: var(--text-gray);
+        font-size: 0.95rem;
+    }
+    
+    .breadcrumb a {
+        color: #dc2626;
+        text-decoration: none;
+    }
+    
+    .form-card {
+        background: white;
+        border-radius: 12px;
+        padding: 2.5rem;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    
+    .section-title {
+        font-size: 1.3rem;
+        color: var(--text-dark);
+        font-weight: 700;
+        margin: 2rem 0 1.5rem 0;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #e5e7eb;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .form-group label {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--text-dark);
+        font-size: 0.95rem;
+    }
+    
+    .label-required {
+        color: #dc2626;
+    }
+    
+    .label-optional {
+        font-weight: normal;
+        color: #6b7280;
+        font-size: 0.85rem;
+    }
+    
+    .form-control {
+        padding: 0.9rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: #dc2626;
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+    }
+    
+    textarea.form-control {
+        min-height: 100px;
+        resize: vertical;
+        font-family: inherit;
+    }
+    
+    .info-box {
+        background: #fef2f2;
+        border-left: 4px solid #dc2626;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+    }
+    
+    .info-box p {
+        margin: 0;
+        color: #991b1b;
+        font-size: 0.95rem;
+    }
+    
+    .warning-box {
+        background: #fffbeb;
+        border-left: 4px solid #f59e0b;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+    }
+    
+    .warning-box p {
+        margin: 0;
+        color: #92400e;
+        font-size: 0.95rem;
+    }
+    
+    .form-actions {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 2px solid #e5e7eb;
+        gap: 1rem;
+    }
+    
+    .btn {
+        padding: 0.9rem 1.8rem;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
+    }
+    
+    .btn-secondary {
+        background: #f5f5f5;
+        color: var(--text-dark);
+    }
+    
+    .btn-secondary:hover {
+        background: #e0e0e0;
+    }
+    
+    .btn-danger {
+        background: linear-gradient(135deg, #dc2626, #b91c1c);
+        color: white;
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+    }
+    
+    .btn-danger:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
+    }
+
+    @media (max-width: 768px) {
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+        
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+        }
+        
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">✏️ Editar Movimiento de Inventario</h1>
+        <div class="breadcrumb">
+            <a href="{% url 'core:dashboard' %}">Dashboard</a> / 
+            <a href="{% url 'core:lista_movimientos' %}">Movimientos</a> / 
+            Editar #{{ movimiento.id }}
+        </div>
+    </div>
+    <a href="{% url 'core:lista_movimientos' %}" class="btn btn-secondary">← Volver</a>
+</div>
+
+<div class="form-card">
+    <div class="warning-box">
+        <p><strong>⚠️ Advertencia:</strong> Al editar este movimiento, se ajustará automáticamente el stock del producto. Asegúrese de que los datos sean correctos.</p>
+    </div>
+
+    <form method="post" id="editarMovimientoForm">
+        {% csrf_token %}
+        
+        <h3 class="section-title">📋 Información del Movimiento</h3>
+        <!-- Solo los campos que se ven al registrar el movimiento -->
+        <div class="form-row">
+            <div class="form-group">
+                <label for="fecha">Fecha y Hora <span class="label-required">*</span></label>
+                <input type="datetime-local" id="fecha" name="fecha" class="form-control" 
+                       value="{{ movimiento.fecha|date:'Y-m-d\TH:i' }}" required>
+            </div>
+            <div class="form-group">
+                <label for="tipo_movimiento">Tipo de Movimiento <span class="label-required">*</span></label>
+                <select id="tipo_movimiento" name="tipo_movimiento" class="form-control" required>
+                    <option value="">Seleccione...</option>
+                    <option value="ingreso" {% if movimiento.tipo_movimiento == 'ingreso' %}selected{% endif %}>Ingreso</option>
+                    <option value="salida" {% if movimiento.tipo_movimiento == 'salida' %}selected{% endif %}>Salida</option>
+                    <option value="ajuste" {% if movimiento.tipo_movimiento == 'ajuste' %}selected{% endif %}>Ajuste</option>
+                    <option value="transferencia" {% if movimiento.tipo_movimiento == 'transferencia' %}selected{% endif %}>Transferencia</option>
+                    <option value="devolucion" {% if movimiento.tipo_movimiento == 'devolucion' %}selected{% endif %}>Devolución</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="cantidad">Cantidad <span class="label-required">*</span></label>
+                <input type="number" id="cantidad" name="cantidad" class="form-control" 
+                       value="{{ movimiento.cantidad }}" step="0.01" min="0.01" required>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="producto">Producto (SKU) <span class="label-required">*</span></label>
+                <select id="producto" name="producto" class="form-control" required>
+                    <option value="">Seleccione...</option>
+                    {% for prod in productos %}
+                        <option value="{{ prod.sku }}" {% if movimiento.producto.sku == prod.sku %}selected{% endif %}>
+                            {{ prod.sku }} - {{ prod.nombre }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="proveedor">Proveedor <span class="label-optional">(opcional)</span></label>
+                <select id="proveedor" name="proveedor" class="form-control">
+                    <option value="">Sin proveedor</option>
+                    {% for prov in proveedores %}
+                        <option value="{{ prov.rut }}" 
+                                {% if movimiento.proveedor and movimiento.proveedor.rut == prov.rut %}selected{% endif %}>
+                            {{ prov.rut }} - {{ prov.razon_social }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="bodega">Bodega <span class="label-required">*</span></label>
+                <select id="bodega" name="bodega" class="form-control" required>
+                    <option value="">Seleccione...</option>
+                    {% for bod in bodegas %}
+                        <option value="{{ bod.codigo }}" {% if movimiento.bodega.codigo == bod.codigo %}selected{% endif %}>
+                            {{ bod.codigo }} - {{ bod.nombre }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="lote">Número de Lote (opcional)</label>
+                <input type="text" id="lote" name="lote" class="form-control"
+                       value="{{ movimiento.lote|default:'' }}" placeholder="Ej: L-2025-001">
+            </div>
+            <div class="form-group">
+                <label for="numero_serie">Número de Serie</label>
+                <input type="text" id="numero_serie" name="numero_serie" class="form-control"
+                       value="{{ movimiento.numero_serie|default:'' }}" placeholder="Ej: SN123456789">
+            </div>
+            <div class="form-group">
+                <label for="fecha_vencimiento">Fecha de Vencimiento (opcional)</label>
+                <input type="date" id="fecha_vencimiento" name="fecha_vencimiento" class="form-control"
+                       value="{% if movimiento.fecha_vencimiento %}{{ movimiento.fecha_vencimiento|date:'Y-m-d' }}{% endif %}">
+            </div>
+        </div>
+
+        <div class="form-row">
+           
+            <div class="form-group">
+                <label for="documento_numero">Número de Documento (opcional)</label>
+                <input type="text" id="documento_numero" name="documento_numero" class="form-control"
+                       value="{{ movimiento.documento_numero|default:'' }}" placeholder="Ej: F-001-00123">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="motivo">Motivo (opcional)</label>
+                <textarea id="motivo" name="motivo" class="form-control"
+                          placeholder="Describa el motivo del movimiento">{{ movimiento.motivo|default:'' }}</textarea>
+            </div>
+            <div class="form-group">
+                <label for="observaciones">Observaciones (opcional)</label>
+                <textarea id="observaciones" name="observaciones" class="form-control"
+                          placeholder="Observaciones adicionales">{{ movimiento.observaciones|default:'' }}</textarea>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a class="btn btn-secondary" href="{% url 'core:lista_movimientos' %}">✕ Cancelar</a>
+            <div style="display: flex; gap: 1rem;">
+             
+                <button type="submit" class="btn btn-primary">
+                    ✓ Guardar Cambios
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+// Inicializar fecha y hora actual de Chile en el campo si está vacío
+(function(){
+    const fechaInput = document.getElementById('fecha');
+    if (!fechaInput) return;
+    if (!fechaInput.value) {
+        try {
+            const nowChile = new Date(
+                new Date().toLocaleString('en-US', { timeZone: 'America/Santiago' })
+            );
+            const yyyy = nowChile.getFullYear();
+            const mm = String(nowChile.getMonth() + 1).padStart(2, '0');
+            const dd = String(nowChile.getDate()).padStart(2, '0');
+            const hh = String(nowChile.getHours()).padStart(2, '0');
+            const min = String(nowChile.getMinutes()).padStart(2, '0');
+            const chileDatetime = `${yyyy}-${mm}-${dd}T${hh}:${min}`;
+            fechaInput.value = chileDatetime;
+        } catch (e) {
+            fechaInput.value = new Date().toISOString().slice(0,16);
+        }
+    }
+})();
+
+// Validación en tiempo real para fecha de vencimiento
+document.getElementById('fecha_vencimiento').addEventListener('change', function(e) {
+    if (!e.target.value) return;
+    const fechaVenc = new Date(e.target.value);
+    const fechaActual = new Date();
+    fechaActual.setHours(0, 0, 0, 0);
+
+    const diasRestantes = Math.ceil((fechaVenc - fechaActual) / (1000 * 60 * 60 * 24));
+
+    if (diasRestantes < 0) {
+        e.target.style.borderColor = '#DC2626';
+        e.target.style.boxShadow = '0 0 0 3px rgba(220, 38, 38, 0.1)';
+        Swal.fire({
+            icon: 'error',
+            title: '🚫 Fecha inválida',
+            html: '<p>La fecha de vencimiento no puede ser <strong>anterior a hoy</strong></p>',
+            confirmButtonText: 'Corregir',
+            confirmButtonColor: '#DC2626',
+            backdrop: `rgba(220, 38, 38, 0.1)`
+        });
+        e.target.focus();
+        return;
+    } else if (diasRestantes <= 7) {
+        e.target.style.borderColor = '#DC2626';
+        e.target.style.boxShadow = '0 0 0 3px rgba(220, 38, 38, 0.1)';
+        Swal.fire({
+            icon: 'error',
+            title: `🚨 Vence en ${diasRestantes} días`,
+            html: '<strong style="color: #991B1B;">⚠️ Este producto está por vencer</strong><br><span style="color: #6B7280;">No se recomienda ingresar productos próximos a vencer</span>',
+            confirmButtonText: 'Entendido',
+            confirmButtonColor: '#DC2626',
+            backdrop: `rgba(220, 38, 38, 0.15)`
+        });
+    } else if (diasRestantes <= 30) {
+        e.target.style.borderColor = '#F59E0B';
+        e.target.style.boxShadow = '0 0 0 3px rgba(245, 158, 11, 0.1)';
+        Swal.fire({
+            icon: 'warning',
+            title: `⚠️ Vence en ${diasRestantes} días`,
+            text: 'El producto está próximo a vencer.',
+            confirmButtonText: 'Entendido',
+            confirmButtonColor: '#F59E0B',
+            backdrop: `rgba(245, 158, 11, 0.1)`
+        });
+    } else {
+        e.target.style.borderColor = '#10B981';
+        e.target.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+    }
+});
+
+// Validación principal del formulario
+document.getElementById('editarMovimientoForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    // Captura los campos obligatorios
+    const fecha = document.getElementById('fecha').value.trim();
+    const tipo = document.getElementById('tipo_movimiento').value.trim();
+    const cantidad = document.getElementById('cantidad').value.trim();
+    const producto = document.getElementById('producto').value.trim();
+    const bodega = document.getElementById('bodega').value.trim();
+    const documento = document.getElementById('documento_numero').value.trim();
+
+    // Validación de campos obligatorios
+    if (!fecha || !tipo || !cantidad || !producto || !bodega) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Campos obligatorios faltantes',
+            text: 'Por favor completa todos los campos marcados como obligatorios (*)',
+            confirmButtonText: 'Entendido',
+            confirmButtonColor: '#DC2626'
+        });
+        return;
+    }
+
+    // Validación de cantidad (solo enteros positivos)
+    if (!/^\d+$/.test(cantidad) || parseInt(cantidad) <= 0) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Cantidad inválida',
+            text: 'Solo se permiten números enteros positivos en la cantidad.',
+            confirmButtonText: 'Corregir',
+            confirmButtonColor: '#DC2626'
+        });
+        document.getElementById('cantidad').focus();
+        return;
+    }
+
+    // Validación de formato de documento_numero (igual que en agregar)
+    if (documento) {
+        const docRegex = /^((OC|FAC|GUIA|GD|NC)-\d+)(\s*([\/,])\s*(OC|FAC|GUIA|GD|NC)-\d+)*$/i;
+        if (!docRegex.test(documento)) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Formato de documento inválido',
+                html: `
+                    <p>El campo <strong>Documento de Referencia</strong> debe tener el formato:</p>
+                    <ul style="text-align:left;">
+                        <li>OC-123</li>
+                        <li>FAC-456</li>
+                        <li>GUIA-789</li>
+                        <li>GD-10</li>
+                        <li>NC-25</li>
+                        <li>O varios separados por <strong>/</strong> o <strong>,</strong> (ej: OC-123 / FAC-456)</li>
+                    </ul>
+                    <p style="color:#991b1b;">Prefijos permitidos: OC, FAC, GUIA, GD, NC</p>
+                `,
+                confirmButtonText: 'Corregir',
+                confirmButtonColor: '#DC2626'
+            });
+            document.getElementById('documento_numero').focus();
+            return;
+        }
+    }
+
+    Swal.fire({
+        icon: 'question',
+        title: '¿Confirmar cambios?',
+        text: 'Se actualizará el movimiento y se ajustará el stock del producto',
+        showCancelButton: true,
+        confirmButtonText: '✓ Sí, guardar',
+        cancelButtonText: 'Revisar',
+        customClass: {
+            confirmButton: 'swal2-confirm',
+            cancelButton: 'swal2-cancel'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            this.submit();
+        }
+    });
+});
+
+// Validación en tiempo real para cantidad (solo enteros positivos)
+document.getElementById('cantidad').addEventListener('input', function(e) {
+    const valor = e.target.value;
+    if (valor && (!/^\d+$/.test(valor) || parseInt(valor) <= 0)) {
+        e.target.value = valor.replace(/\D/g, '');
+        Swal.fire({
+            icon: 'warning',
+            title: 'Cantidad inválida',
+            text: 'Solo se permiten números enteros positivos en la cantidad.',
+            timer: 2200,
+            showConfirmButton: false
+        });
+        e.target.style.borderColor = '#DC2626';
+        return;
+    }
+    if (valor > 10000) {
+        e.target.style.borderColor = '#DC2626';
+    } else if (valor > 0) {
+        e.target.style.borderColor = '#10B981';
+    } else {
+        e.target.style.borderColor = '#e5e7eb';
+    }
+});
+
+// Formatear campos en tiempo real
+document.getElementById('lote').addEventListener('input', function(e) {
+    e.target.value = e.target.value.toUpperCase().replace(/\s+/g, '-');
+});
+document.getElementById('numero_serie').addEventListener('input', function(e) {
+    e.target.value = e.target.value.toUpperCase().replace(/\s+/g, '');
+});
+
+// Mostrar proveedores asociados al seleccionar un producto
+document.getElementById('producto').addEventListener('change', function(e) {
+    const sku = e.target.value;
+    const proveedorSelect = document.getElementById('proveedor');
+    proveedorSelect.innerHTML = '<option value="">Cargando...</option>';
+    if (!sku) {
+        proveedorSelect.innerHTML = '<option value="">Sin proveedor</option>';
+        return;
+    }
+    fetch(`/ajax/proveedores_por_producto/?producto=${encodeURIComponent(sku)}`)
+        .then(res => res.json())
+        .then(data => {
+            proveedorSelect.innerHTML = '';
+            if (data.proveedores.length > 0) {
+                proveedorSelect.innerHTML = '<option value="">Seleccione proveedor...</option>';
+                data.proveedores.forEach(function(prov) {
+                    const option = document.createElement('option');
+                    option.value = prov.rut;
+                    option.textContent = `${prov.rut} - ${prov.razon_social}`;
+                    proveedorSelect.appendChild(option);
+                });
+            } else {
+                proveedorSelect.innerHTML = '<option value="">Sin proveedores asociados</option>';
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Sin proveedores',
+                    text: 'El producto seleccionado no tiene proveedores asociados.',
+                    timer: 2200,
+                    showConfirmButton: false
+                });
+            }
+        });
+});
+</script>
+{% endblock %}

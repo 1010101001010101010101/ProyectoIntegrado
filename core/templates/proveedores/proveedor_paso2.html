@@ -1,0 +1,910 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Paso 2: Dirección y Comercial - Dulcería Lilis
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .page-title {
+        font-size: 2rem;
+        color: var(--text-dark);
+        font-weight: 700;
+    }
+
+    .steps-progress {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 12px var(--shadow);
+        margin-bottom: 2rem;
+    }
+
+    .steps-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+    }
+
+    .step-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        flex: 1;
+        position: relative;
+        z-index: 2;
+    }
+
+    .step-number {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        background: var(--border);
+        color: var(--text-gray);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.2rem;
+        transition: all 0.3s ease;
+    }
+
+    .step-item.active .step-number {
+        background: linear-gradient(135deg, #ff0000 0%, #ff0000 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(135, 206, 235, 0.4);
+    }
+
+    .step-item.completed .step-number {
+        background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+        color: white;
+    }
+
+    .step-label {
+        font-size: 0.85rem;
+        color: var(--text-gray);
+        font-weight: 600;
+        text-align: center;
+    }
+
+    .step-item.active .step-label {
+        color: #4682B4;
+        font-weight: 700;
+    }
+
+    .progress-line {
+        position: absolute;
+        top: 22px;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--border);
+        z-index: 1;
+    }
+
+    .progress-line-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #ff00009a 0%, #ff0000 100%);
+        width: 50%;
+        transition: width 0.5s ease;
+    }
+
+    .form-container {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 2px 12px var(--shadow);
+    }
+
+    .form-section {
+        margin-bottom: 2rem;
+    }
+
+    .section-title {
+        font-size: 1.3rem;
+        color: var(--text-dark);
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .form-group.full-width {
+        grid-column: 1 / -1;
+    }
+
+    label {
+        font-weight: 600;
+        color: var(--text-dark);
+        font-size: 0.95rem;
+    }
+
+    .required {
+        color: #C62828;
+        margin-left: 0.2rem;
+    }
+
+    .optional {
+        color: var(--text-gray);
+        font-weight: 400;
+        font-size: 0.85rem;
+        margin-left: 0.3rem;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="url"],
+    input[type="number"],
+    select,
+    textarea {
+        padding: 0.9rem;
+        border: 2px solid var(--border);
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+        outline: none;
+        border-color: #ff0000;
+        box-shadow: 0 0 0 3px rgba(135, 206, 235, 0.1);
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 2px solid var(--border);
+    }
+
+    .btn-secondary {
+        background: #f5f5f5;
+        color: var(--text-dark);
+        padding: 0.9rem 1.8rem;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-secondary:hover {
+        background: #e0e0e0;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #ff0000 0%, #ff0000 100%);
+        color: white;
+        padding: 0.9rem 1.8rem;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgb(255, 0, 0);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(135, 206, 235, 0.4);
+    }
+
+    /* Estilos personalizados para SweetAlert2 */
+    .swal2-popup {
+        border-radius: 16px;
+        font-family: inherit;
+    }
+
+    .swal2-title {
+        color: var(--text-dark);
+        font-size: 1.5rem;
+    }
+
+    .swal2-html-container {
+        color: var(--text-gray);
+    }
+
+    .swal2-confirm {
+        background: linear-gradient(135deg, #ff0000 0%, #ff0000 100%) !important;
+        border-radius: 8px;
+        padding: 0.6rem 2rem;
+        font-weight: 600;
+    }
+
+    .swal2-cancel {
+        background: #f5f5f5 !important;
+        color: var(--text-dark) !important;
+        border-radius: 8px;
+        padding: 0.6rem 2rem;
+        font-weight: 600;
+    }
+
+    @media (max-width: 768px) {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Crear Proveedor - Paso 2</h1>
+    <a href="{% url 'core:lista_proveedores' %}" class="btn-secondary">← Volver</a>
+</div>
+
+<div class="steps-progress">
+    <div class="steps-header">
+        <div class="progress-line">
+            <div class="progress-line-fill"></div>
+        </div>
+        <div class="step-item completed">
+            <div class="step-number">✓</div>
+            <div class="step-label">Identificación</div>
+        </div>
+        <div class="step-item active">
+            <div class="step-number">2</div>
+            <div class="step-label">Dirección</div>
+        </div>
+        <div class="step-item">
+            <div class="step-number">3</div>
+            <div class="step-label">Relaciones</div>
+        </div>
+    </div>
+</div>
+
+<form method="POST" class="form-container" id="proveedorForm" novalidate>
+    {% csrf_token %}
+    
+    <div class="form-section">
+        <h2 class="section-title">Dirección</h2>
+    
+        <div class="form-row">
+            <div class="form-group full-width">
+                <label for="direccion">Dirección (opcional)</label>
+                <input type="text" id="direccion" name="direccion" placeholder="Av. Principal 123" value="{{ data.direccion }}">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="ciudad">Ciudad (opcional)</label>
+                <input type="text" id="ciudad" name="ciudad" placeholder="Santiago" value="{{ data.ciudad }}">
+            </div>
+            
+            <div class="form-group">
+                <label for="region">Región/Estado (opcional)</label>
+                <input type="text" id="region" name="region" placeholder="Región Metropolitana" value="{{ data.region }}">
+            </div>
+            
+            <div class="form-group">
+                <label for="codigo_postal">Código Postal (opcional)</label>
+                <input type="text" id="codigo_postal" name="codigo_postal" placeholder="8320000" value="{{ data.codigo_postal }}">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="pais">País (requerido)</label>
+                <select id="pais" name="pais">
+                    <option value="">Seleccione un país</option>
+                    <option value="chile" {% if data.pais == 'chile' %}selected{% endif %}>Chile</option>
+                    <option value="argentina" {% if data.pais == 'argentina' %}selected{% endif %}>Argentina</option>
+                    <option value="brasil" {% if data.pais == 'brasil' %}selected{% endif %}>Brasil</option>
+                    <option value="peru" {% if data.pais == 'peru' %}selected{% endif %}>Perú</option>
+                    <option value="colombia" {% if data.pais == 'colombia' %}selected{% endif %}>Colombia</option>
+                    <option value="mexico" {% if data.pais == 'mexico' %}selected{% endif %}>México</option>
+                    <option value="otro" {% if data.pais == 'otro' %}selected{% endif %}>Otro</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h2 class="section-title">Condiciones comerciales</h2>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label for="plazo_pago">Plazo de Pago (días) (opcional)</label>
+                <input type="number" id="plazo_pago" name="plazo_pago" placeholder="30" min="0" value="{{ data.plazo_pago }}">
+            </div>
+            
+            <div class="form-group">
+                <label for="moneda">Moneda (opcional)</label>
+                <select id="moneda" name="moneda">
+                    <option value="">Seleccione moneda</option>
+                    <option value="CLP" {% if data.moneda == 'CLP' %}selected{% endif %}>CLP - Peso Chileno</option>
+                    <option value="USD" {% if data.moneda == 'USD' %}selected{% endif %}>USD - Dólar</option>
+                    <option value="EUR" {% if data.moneda == 'EUR' %}selected{% endif %}>EUR - Euro</option>
+                    <option value="ARS" {% if data.moneda == 'ARS' %}selected{% endif %}>ARS - Peso Argentino</option>
+                    <option value="BRL" {% if data.moneda == 'BRL' %}selected{% endif %}>BRL - Real</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="descuento">Descuento (%) (opcional)</label>
+                <input type="number" id="descuento" name="descuento" placeholder="5" min="0" max="100" step="0.01" value="{{ data.descuento }}">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group full-width">
+                <label for="notas_comerciales">Notas Comerciales (opcional)</label>
+                <textarea id="notas_comerciales" name="notas_comerciales" rows="4" placeholder="Condiciones especiales, acuerdos, etc.">{{ data.notas_comerciales }}</textarea>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-actions">
+        <a href="{% url 'core:proveedor_paso1' %}" class="btn-secondary">← Anterior</a>
+        <button type="submit" class="btn-primary">Siguiente: Relaciones →</button>
+    </div>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+// ============================================
+// PROVEEDOR PASO 2 - VALIDACIONES Y SWEETALERTS PRO
+// ============================================
+
+// Toast personalizado
+const Toast = Swal.mixin({
+    toast: true,
+    position: 'top-end',
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer)
+        toast.addEventListener('mouseleave', Swal.resumeTimer)
+    }
+});
+
+// Mensaje de bienvenida
+document.addEventListener('DOMContentLoaded', function() {
+    Swal.fire({
+        icon: 'info',
+        title: '📍 Dirección y Comercial',
+        html: '<p>Configure la ubicación y condiciones de negocio</p><small style="color: #6B7280;">Paso 2 de 3</small>',
+        timer: 3000,
+        showConfirmButton: false,
+        toast: true,
+        position: 'top-end',
+        background: '#DBEAFE',
+        iconColor: '#ff0000'
+    });
+});
+
+// Referencias a los campos
+const paisInput = document.getElementById('pais');
+const direccionInput = document.getElementById('direccion');
+const ciudadInput = document.getElementById('ciudad');
+const regionInput = document.getElementById('region');
+const codigoPostalInput = document.getElementById('codigo_postal');
+const plazoPagoInput = document.getElementById('plazo_pago');
+const monedaInput = document.getElementById('moneda');
+const descuentoInput = document.getElementById('descuento');
+const notasInput = document.getElementById('notas_comerciales');
+
+// Validación de código postal (flexible)
+function validarCodigoPostal(valor, pais) {
+    if (!valor) return true;
+    if (pais === 'chile') {
+        return /^\d{7}$/.test(valor);
+    }
+    return /^[A-Z0-9\s-]{3,10}$/i.test(valor);
+}
+
+// VALIDACIÓN DE PAÍS
+if (paisInput) {
+    paisInput.addEventListener('change', function(e) {
+        const pais = e.target.value;
+        if (pais) {
+            e.target.style.borderColor = '#10B981';
+            e.target.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+            const paisTexto = e.target.options[e.target.selectedIndex].text;
+            Toast.fire({
+                icon: 'success',
+                title: `🌍 ${paisTexto}`,
+                text: 'País seleccionado',
+                background: '#D1FAE5'
+            });
+            // Sugerir moneda según país
+            if (monedaInput && !monedaInput.value) {
+                const monedas = {
+                    'chile': 'CLP',
+                    'argentina': 'ARS',
+                    'brasil': 'BRL',
+                    'peru': 'PEN',
+                    'colombia': 'COP',
+                    'mexico': 'MXN'
+                };
+                if (monedas[pais]) {
+                    monedaInput.value = monedas[pais];
+                    monedaInput.style.borderColor = '#2563EB';
+                    Toast.fire({
+                        icon: 'info',
+                        title: '💱 Moneda sugerida',
+                        text: `Se seleccionó ${monedas[pais]}`,
+                        background: '#DBEAFE'
+                    });
+                }
+            }
+        } else {
+            e.target.style.borderColor = 'var(--border)';
+            e.target.style.boxShadow = '';
+        }
+    });
+}
+
+// VALIDACIÓN DE CÓDIGO POSTAL
+if (codigoPostalInput) {
+    codigoPostalInput.addEventListener('input', function(e) {
+        const pais = paisInput ? paisInput.value : '';
+        const valor = e.target.value.trim();
+        if (validarCodigoPostal(valor, pais)) {
+            e.target.style.borderColor = '#10B981';
+            e.target.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+        } else if (valor.length > 0) {
+            e.target.style.borderColor = '#F59E0B';
+        } else {
+            e.target.style.borderColor = 'var(--border)';
+            e.target.style.boxShadow = '';
+        }
+    });
+    codigoPostalInput.addEventListener('blur', function(e) {
+        const pais = paisInput ? paisInput.value : '';
+        const valor = e.target.value.trim();
+        if (valor && pais === 'chile' && !/^\d{7}$/.test(valor)) {
+            Toast.fire({
+                icon: 'info',
+                title: '📮 Código postal chileno',
+                text: 'Debe tener 7 dígitos. Ejemplo: 8320000',
+                background: '#FEF3C7'
+            });
+        }
+    });
+}
+
+// VALIDACIÓN DE PLAZO DE PAGO
+if (plazoPagoInput) {
+    plazoPagoInput.addEventListener('input', function(e) {
+        e.target.value = e.target.value.replace(/[^\d]/g, '');
+        const valor = parseInt(e.target.value) || 0;
+        if (valor > 0 && valor <= 30) {
+            e.target.style.borderColor = '#10B981';
+            e.target.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+        } else if (valor > 30 && valor <= 90) {
+            e.target.style.borderColor = '#F59E0B';
+        } else if (valor > 90) {
+            e.target.style.borderColor = '#DC2626';
+        } else {
+            e.target.style.borderColor = 'var(--border)';
+            e.target.style.boxShadow = '';
+        }
+    });
+    plazoPagoInput.addEventListener('blur', function(e) {
+        const valor = parseInt(e.target.value) || 0;
+        if (valor > 90) {
+            Toast.fire({
+                icon: 'warning',
+                title: '⚠️ Plazo de pago largo',
+                text: 'Un plazo mayor a 90 días puede afectar el flujo de caja',
+                background: '#FEF3C7'
+            });
+        } else if (valor > 0 && valor <= 30) {
+            Toast.fire({
+                icon: 'success',
+                title: '✓ Plazo estándar',
+                text: `${valor} días es un plazo común`,
+                background: '#D1FAE5'
+            });
+        }
+    });
+}
+
+// VALIDACIÓN DE DESCUENTO
+if (descuentoInput) {
+    descuentoInput.addEventListener('input', function(e) {
+        let valor = e.target.value.replace(/[^\d.]/g, '');
+        const partes = valor.split('.');
+        if (partes.length > 2) {
+            valor = partes[0] + '.' + partes.slice(1).join('');
+        }
+        if (partes[1] && partes[1].length > 2) {
+            valor = partes[0] + '.' + partes[1].substring(0, 2);
+        }
+        e.target.value = valor;
+        const valorNum = parseFloat(valor);
+        if (valorNum >= 0 && valorNum <= 5) {
+            e.target.style.borderColor = '#10B981';
+            e.target.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+        } else if (valorNum > 5 && valorNum <= 15) {
+            e.target.style.borderColor = '#F59E0B';
+        } else if (valorNum > 15) {
+            e.target.style.borderColor = '#DC2626';
+        } else {
+            e.target.style.borderColor = 'var(--border)';
+            e.target.style.boxShadow = '';
+        }
+    });
+    descuentoInput.addEventListener('blur', function(e) {
+        const valor = parseFloat(e.target.value) || 0;
+        if (valor < 0) {
+            Swal.fire({
+                icon: 'error',
+                title: '❌ Descuento negativo',
+                text: 'El descuento no puede ser negativo',
+                confirmButtonText: 'Corregir',
+                confirmButtonColor: '#ff0000'
+            });
+            e.target.value = '0';
+            e.target.focus();
+            return;
+        }
+        if (valor > 100) {
+            Swal.fire({
+                icon: 'error',
+                title: '❌ Descuento inválido',
+                text: 'El descuento no puede ser mayor a 100%',
+                confirmButtonText: 'Corregir',
+                confirmButtonColor: '#ff0000'
+            });
+            e.target.value = '100';
+            e.target.focus();
+            return;
+        }
+        if (valor > 20) {
+            Toast.fire({
+                icon: 'warning',
+                title: '⚠️ Descuento alto',
+                text: `${valor}% es un descuento considerable`,
+                background: '#FEF3C7'
+            });
+        } else if (valor > 0) {
+            Toast.fire({
+                icon: 'success',
+                title: `✓ ${valor}% de descuento`,
+                background: '#D1FAE5'
+            });
+        }
+    });
+}
+
+// VALIDACIÓN DE MONEDA
+if (monedaInput) {
+    monedaInput.addEventListener('change', function(e) {
+        if (e.target.value) {
+            const monedaTexto = e.target.options[e.target.selectedIndex].text;
+            Toast.fire({
+                icon: 'success',
+                title: `💱 ${monedaTexto}`,
+                text: 'Moneda seleccionada',
+                background: '#D1FAE5'
+            });
+        }
+    });
+}
+
+// CONTADOR DE CARACTERES PARA NOTAS
+if (notasInput) {
+    notasInput.addEventListener('input', function(e) {
+        const longitud = e.target.value.length;
+        if (longitud > 500) {
+            Toast.fire({
+                icon: 'info',
+                title: '📝 Texto largo',
+                text: `${longitud} caracteres. Considere resumir`,
+                background: '#DBEAFE'
+            });
+        }
+    });
+}
+
+// VALIDACIÓN PRINCIPAL DEL FORMULARIO
+const form = document.getElementById('proveedorForm');
+if (form) {
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const pais = paisInput.value.trim();
+        const direccion = direccionInput.value.trim();
+        const ciudad = ciudadInput.value.trim();
+        const region = regionInput.value.trim();
+        const codigoPostal = codigoPostalInput.value.trim();
+        const plazoPago = plazoPagoInput.value.trim();
+        const moneda = monedaInput.value;
+        const descuento = descuentoInput.value.trim();
+        const notas = notasInput.value.trim();
+
+        // Validar país (obligatorio)
+        if (!pais) {
+            Swal.fire({
+                icon: 'error',
+                title: '❌ País requerido',
+                html: '<p>Debe seleccionar el <strong>país</strong> del proveedor</p>',
+                confirmButtonText: 'Entendido',
+                confirmButtonColor: '#ff0000'
+            });
+            paisInput.focus();
+            return;
+        }
+
+        // Validar descuento
+        const descuentoNum = parseFloat(descuento);
+        if (descuento && (descuentoNum < 0 || descuentoNum > 100)) {
+            Swal.fire({
+                icon: 'error',
+                title: '❌ Descuento inválido',
+                html: `
+                    <div style="text-align: center; margin: 1rem 0;">
+                        <p>El descuento debe estar entre <strong>0%</strong> y <strong>100%</strong></p>
+                        <div style="background: #FEE2E2; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                            <strong style="color: #DC2626;">Valor actual: ${descuento}%</strong>
+                        </div>
+                    </div>
+                `,
+                confirmButtonText: 'Corregir',
+                confirmButtonColor: '#ff0000'
+            });
+            descuentoInput.focus();
+            return;
+        }
+
+        // Validar plazo de pago
+        const plazoPagoNum = parseInt(plazoPago);
+        if (plazoPago && plazoPagoNum < 0) {
+            Swal.fire({
+                icon: 'error',
+                title: '❌ Plazo inválido',
+                text: 'El plazo de pago no puede ser negativo',
+                confirmButtonText: 'Corregir',
+                confirmButtonColor: '#ff0000'
+            });
+            plazoPagoInput.focus();
+            return;
+        }
+
+        // Advertencia si no se completó dirección
+        if (!direccion && !ciudad && !region) {
+            Swal.fire({
+                icon: 'question',
+                title: '📍 Sin dirección completa',
+                html: '<p>No has ingresado la dirección del proveedor</p><p style="color: #6B7280; margin-top: 0.5rem;">¿Deseas continuar sin esta información?</p>',
+                showCancelButton: true,
+                confirmButtonText: '✓ Sí, continuar',
+                cancelButtonText: '← Agregar dirección',
+                confirmButtonColor: '#ff0000',
+                cancelButtonColor: '#6B7280',
+                backdrop: `rgba(255, 0, 0, 0.1)`
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    mostrarConfirmacionFinal(pais, direccion, ciudad, region, codigoPostal, plazoPago, moneda, descuento, notas);
+                } else {
+                    direccionInput.focus();
+                }
+            });
+            return;
+        }
+
+        // Advertencia si plazo de pago es muy largo
+        if (plazoPagoNum > 120) {
+            Swal.fire({
+                icon: 'warning',
+                title: '⚠️ Plazo de pago muy largo',
+                html: `
+                    <div style="text-align: center; margin: 1rem 0;">
+                        <div style="background: #FEF3C7; padding: 1rem; border-radius: 8px;">
+                            <strong style="color: #92400E;">Plazo: ${plazoPagoNum} días (${Math.round(plazoPagoNum/30)} meses)</strong>
+                            <p style="margin-top: 0.5rem; color: #6B7280;">
+                                Un plazo tan largo puede afectar significativamente el flujo de caja
+                            </p>
+                        </div>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Continuar de todas formas',
+                cancelButtonText: 'Ajustar plazo',
+                confirmButtonColor: '#ff0000',
+                cancelButtonColor: '#6B7280'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    mostrarConfirmacionFinal(pais, direccion, ciudad, region, codigoPostal, plazoPago, moneda, descuento, notas);
+                } else {
+                    plazoPagoInput.focus();
+                }
+            });
+            return;
+        }
+
+        // Todo correcto
+        mostrarConfirmacionFinal(pais, direccion, ciudad, region, codigoPostal, plazoPago, moneda, descuento, notas);
+    });
+}
+
+// CONFIRMACIÓN FINAL
+function mostrarConfirmacionFinal(pais, direccion, ciudad, region, codigoPostal, plazoPago, moneda, descuento, notas) {
+    const paisTexto = paisInput.options[paisInput.selectedIndex].text;
+    const monedaTexto = moneda ? monedaInput.options[monedaInput.selectedIndex].text : '';
+    let resumenHTML = `
+        <div style="text-align: left; margin: 1.5rem 0; font-size: 0.95rem;">
+            <h4 style="margin-bottom: 1rem; color: #1F2937;">📍 Ubicación</h4>
+            <div style="display: grid; gap: 0.75rem; margin-bottom: 1.5rem;">
+                <div style="background: #F9FAFB; padding: 0.75rem; border-radius: 6px;">
+                    <strong>🌍 País:</strong> <span style="color: #ff0000; font-weight: bold;">${paisTexto}</span>
+                </div>
+    `;
+    if (direccion) {
+        resumenHTML += `
+                <div style="background: #F9FAFB; padding: 0.75rem; border-radius: 6px;">
+                    <strong>📮 Dirección:</strong> ${direccion}
+                </div>
+        `;
+    }
+    if (ciudad || region) {
+        resumenHTML += `
+                <div style="background: #F9FAFB; padding: 0.75rem; border-radius: 6px;">
+                    <strong>🏙️ Ubicación:</strong> ${ciudad}${ciudad && region ? ', ' : ''}${region}
+                </div>
+        `;
+    }
+    if (codigoPostal) {
+        resumenHTML += `
+                <div style="background: #F9FAFB; padding: 0.75rem; border-radius: 6px;">
+                    <strong>📬 Código Postal:</strong> ${codigoPostal}
+                </div>
+        `;
+    }
+    resumenHTML += '</div>';
+    if (plazoPago || moneda || descuento || notas) {
+        resumenHTML += `
+            <h4 style="margin-bottom: 1rem; color: #1F2937;">💼 Condiciones Comerciales</h4>
+            <div style="display: grid; gap: 0.75rem;">
+        `;
+        if (plazoPago) {
+            const plazoNum = parseInt(plazoPago);
+            const colorPlazo = plazoNum <= 30 ? '#10B981' : plazoNum <= 90 ? '#F59E0B' : '#DC2626';
+            const bgPlazo = plazoNum <= 30 ? '#D1FAE5' : plazoNum <= 90 ? '#FEF3C7' : '#FEE2E2';
+            resumenHTML += `
+                <div style="background: ${bgPlazo}; padding: 0.75rem; border-radius: 6px; border-left: 3px solid ${colorPlazo};">
+                    <strong>📅 Plazo de Pago:</strong> <span style="color: ${colorPlazo}; font-weight: bold;">${plazoPago} días</span>
+                </div>
+            `;
+        }
+        if (moneda) {
+            resumenHTML += `
+                <div style="background: #DBEAFE; padding: 0.75rem; border-radius: 6px; border-left: 3px solid #2563EB;">
+                    <strong>💱 Moneda:</strong> <span style="color: #2563EB; font-weight: bold;">${monedaTexto}</span>
+                </div>
+            `;
+        }
+        if (descuento) {
+            const descuentoNum = parseFloat(descuento);
+            const colorDesc = descuentoNum <= 5 ? '#10B981' : descuentoNum <= 15 ? '#F59E0B' : '#DC2626';
+            const bgDesc = descuentoNum <= 5 ? '#D1FAE5' : descuentoNum <= 15 ? '#FEF3C7' : '#FEE2E2';
+            resumenHTML += `
+                <div style="background: ${bgDesc}; padding: 0.75rem; border-radius: 6px; border-left: 3px solid ${colorDesc};">
+                    <strong>🏷️ Descuento:</strong> <span style="color: ${colorDesc}; font-weight: bold;">${descuento}%</span>
+                </div>
+            `;
+        }
+        if (notas) {
+            const notasCortas = notas.length > 100 ? notas.substring(0, 100) + '...' : notas;
+            resumenHTML += `
+                <div style="background: #F9FAFB; padding: 0.75rem; border-radius: 6px;">
+                    <strong>📝 Notas:</strong> ${notasCortas}
+                </div>
+            `;
+        }
+        resumenHTML += '</div>';
+    }
+    resumenHTML += '</div>';
+    Swal.fire({
+        icon: 'question',
+        title: '¿Guardar y continuar al Paso 3?',
+        html: `
+            <p style="color: #6B7280; margin-bottom: 1rem;">
+                Se guardará la información de dirección y condiciones comerciales
+            </p>
+            ${resumenHTML}
+        `,
+        showCancelButton: true,
+        confirmButtonText: '✓ Continuar al Paso 3 →',
+        cancelButtonText: '← Revisar datos',
+        confirmButtonColor: '#ff0000',
+        cancelButtonColor: '#6B7280',
+        width: '650px',
+        backdrop: `rgba(255, 0, 0, 0.1)`
+    }).then((result) => {
+        if (result.isConfirmed) {
+            guardarPaso2();
+        }
+    });
+}
+
+function guardarPaso2() {
+    let progreso = 0;
+    const etapas = [
+        { texto: 'Validando ubicación...', icon: '📍' },
+        { texto: 'Guardando condiciones comerciales...', icon: '💼' },
+        { texto: 'Preparando Paso 3...', icon: '🚀' }
+    ];
+    let etapaActual = 0;
+    Swal.fire({
+        title: etapas[0].texto,
+        html: `
+            <div style="margin: 1.5rem 0;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">${etapas[0].icon}</div>
+                <div style="background: #F3F4F6; height: 8px; border-radius: 4px; overflow: hidden;">
+                    <div id="progressBar" style="background: linear-gradient(90deg, #ff0000, #cc0000); height: 100%; width: 0%; transition: width 0.3s ease;"></div>
+                </div>
+                <p id="progressText" style="color: #ff0000; margin-top: 0.5rem; font-weight: bold;">0%</p>
+            </div>
+        `,
+        showConfirmButton: false,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => {
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            const interval = setInterval(() => {
+                progreso += 5;
+                progressBar.style.width = progreso + '%';
+                progressText.textContent = progreso + '%';
+                if (progreso === 33 || progreso === 66) {
+                    etapaActual++;
+                    Swal.update({
+                        title: etapas[etapaActual].texto,
+                        html: `
+                            <div style="margin: 1.5rem 0;">
+                                <div style="font-size: 3rem; margin-bottom: 1rem;">${etapas[etapaActual].icon}</div>
+                                <div style="background: #F3F4F6; height: 8px; border-radius: 4px; overflow: hidden;">
+                                    <div style="background: linear-gradient(90deg, #ff0000, #cc0000); height: 100%; width: ${progreso}%; transition: width 0.3s ease;"></div>
+                                </div>
+                                <p style="color: #ff0000; margin-top: 0.5rem; font-weight: bold;">${progreso}%</p>
+                            </div>
+                        `
+                    });
+                }
+                if (progreso >= 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        form.submit();
+                    }, 500);
+                }
+            }, 50);
+        }
+    });
+}
+</script>
+{% endblock %}

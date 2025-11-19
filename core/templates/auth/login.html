@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión - Dulcería Lilis</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root {
+            --primary: #ffd900d3;
+            --primary-dark: #d3272781;
+            --text-dark: #2c3e50;
+            --text-gray: #6c757d;
+            --border: #e0e6ed;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #f1bf1dd0 0%, #c44e31b8 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 480px;
+        }
+
+        .login-card {
+            background: white;
+            border-radius: 20px;
+            padding: 3rem 2.5rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .login-logo {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .login-title {
+            font-size: 1.8rem;
+            color: var(--text-dark);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .login-subtitle {
+            color: var(--text-gray);
+            font-size: 0.95rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.9rem 1rem;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            color: var(--text-dark);
+        }
+
+        .form-control::placeholder {
+            color: #adb5bd;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(135, 206, 235, 0.1);
+        }
+
+        .form-control.is-invalid {
+            border-color: #dc3545;
+        }
+
+        .form-control.is-invalid:focus {
+            box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+        }
+
+        .remember-forgot {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .remember-me input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: var(--primary-dark);
+        }
+
+        .remember-me label {
+            color: var(--text-gray);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .forgot-link {
+            color: var(--primary-dark);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s ease;
+        }
+
+        .forgot-link:hover {
+            color: var(--primary);
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgb(243, 4, 4);
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(207, 4, 4, 0.622);
+        }
+
+        .btn-login:active {
+            transform: translateY(0);
+        }
+
+        .btn-login:disabled {
+            background: #ca0909d6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        @media (max-width: 576px) {
+            .login-card {
+                padding: 2rem 1.5rem;
+            }
+
+            .login-logo {
+                width: 120px;
+                height: 120px;
+            }
+        }
+
+        /* Estilos personalizados para SweetAlert2 */
+        .swal2-popup {
+            border-radius: 16px;
+        }
+
+        .swal2-confirm {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%) !important;
+            border-radius: 8px;
+            padding: 0.6rem 2rem;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <div class="login-logo">
+                    <img src="https://www.lilis.cl/wp-content/uploads/2022/06/Logo-lilis-dorado-03.png" alt="Dulcería Lilis">
+                </div>
+                <h1 class="login-title">Dulcería Lilis</h1>
+                <p class="login-subtitle">Bienvenido de nuevo</p>
+            </div>
+
+            <form method="POST" id="loginForm">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label for="username" class="form-label">Correo electrónico</label>
+                    <input 
+                        type="text" 
+                        id="username" 
+                        name="username" 
+                        class="form-control" 
+                        placeholder="Ingresa tu username"
+                        value="{{ username|default:'' }}"
+                        autofocus
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="password" class="form-label">Contraseña</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        class="form-control" 
+                        placeholder="••••••••"
+                    >
+                </div>
+
+                <div class="remember-forgot">
+                    <div class="remember-me">
+                        <input type="checkbox" id="remember" name="remember">
+                        <label for="remember">Recordarme</label>
+                    </div>
+                    <a href="{% url 'core:recuperar_password' %}" class="forgot-link">¿Olvidaste tu contraseña?</a>
+                </div>
+
+                <button type="submit" class="btn-login">
+                    Iniciar Sesión
+                </button>
+            </form>
+        </div>
+    </div>
+
+    {% if messages %}
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        {% for message in messages %}
+        Swal.fire({
+            icon: '{{ message.tags|default:"info" }}',
+            title: '{{ message.tags|capfirst }}',
+            text: '{{ message|escapejs }}',
+            confirmButtonText: 'Aceptar'
+        });
+        {% endfor %}
+    });
+    </script>
+    {% endif %}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('loginForm');
+            const emailInput = document.getElementById('username');
+            const passwordInput = document.getElementById('password');
+            const btnLogin = document.querySelector('.btn-login');
+
+            
+            {% if error %}
+            Swal.fire({
+                icon: 'error',
+                title: 'Error de autenticación',
+                text: 'Usuario o contraseña incorrectos',
+                confirmButtonText: 'Intentar de nuevo',
+                confirmButtonColor: '#4682B4'
+            });
+            {% endif %}
+
+            // Validación del formulario
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Remover clases de error previas
+                emailInput.classList.remove('is-invalid');
+                passwordInput.classList.remove('is-invalid');
+
+                const email = emailInput.value.trim();
+                const password = passwordInput.value.trim();
+
+                // Validar que los campos no estén vacíos
+                if (!email && !password) {
+                    emailInput.classList.add('is-invalid');
+                    passwordInput.classList.add('is-invalid');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Campos vacíos',
+                        text: 'Por favor, ingresa tu correo electrónico y contraseña',
+                        confirmButtonText: 'Entendido',
+                        confirmButtonColor: '#4682B4'
+                    });
+                    return;
+                }
+
+                if (!email) {
+                    emailInput.classList.add('is-invalid');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Correo requerido',
+                        text: 'Por favor, ingresa tu correo electrónico',
+                        confirmButtonText: 'Entendido',
+                        confirmButtonColor: '#4682B4'
+                    });
+                    emailInput.focus();
+                    return;
+                }
+
+                // Validar formato de email
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(email)) {
+                    emailInput.classList.add('is-invalid');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Formato inválido',
+                        text: 'Por favor, ingresa un correo electrónico válido',
+                        confirmButtonText: 'Corregir',
+                        confirmButtonColor: '#4682B4'
+                    });
+                    emailInput.focus();
+                    return;
+                }
+
+                if (!password) {
+                    passwordInput.classList.add('is-invalid');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Contraseña requerida',
+                        text: 'Por favor, ingresa tu contraseña',
+                        confirmButtonText: 'Entendido',
+                        confirmButtonColor: '#4682B4'
+                    });
+                    passwordInput.focus();
+                    return;
+                }
+
+                // Si todo está correcto, mostrar loading y enviar
+                btnLogin.disabled = true;
+                btnLogin.textContent = 'Iniciando sesión...';
+
+                Swal.fire({
+                    title: 'Iniciando sesión...',
+                    text: 'Por favor espera',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                // Enviar el formulario
+                form.submit();
+            });
+
+            // Remover clase de error al escribir
+            emailInput.addEventListener('input', function() {
+                this.classList.remove('is-invalid');
+            });
+
+            passwordInput.addEventListener('input', function() {
+                this.classList.remove('is-invalid');
+            });
+        });
+    </script>
+</body>
+</html>
